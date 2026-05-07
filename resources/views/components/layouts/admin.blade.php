@@ -31,8 +31,16 @@
         <header class="bg-white shadow-sm border-b border-gray-200">
             <div class="px-8 py-4 flex items-center justify-between">
                 <h2 class="text-xl font-heading text-primary-dark">{{ $title ?? 'Dashboard' }}</h2>
-                <div class="text-sm font-medium text-gray-600">
-                    Admin User
+                <div class="flex items-center gap-4">
+                    <div class="text-sm font-medium text-gray-600">
+                        {{ auth('admin')->user()->name }}
+                    </div>
+                    <form action="{{ route('admin.logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="text-sm font-medium text-red-600 hover:text-red-700 transition-colors">
+                            Logout
+                        </button>
+                    </form>
                 </div>
             </div>
         </header>
