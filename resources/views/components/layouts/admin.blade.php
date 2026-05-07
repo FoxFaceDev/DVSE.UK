@@ -18,7 +18,6 @@
         </div>
         <nav class="flex-1 px-4 py-4 space-y-2">
             <a href="{{ route('admin.home') }}" class="block px-4 py-3 bg-primary rounded-md shadow-sm font-medium">Dashboard</a>
-            <a href="{{ route('admin.categories.index') }}" class="block px-4 py-3 hover:bg-primary rounded-md transition-colors font-medium">Categories</a>
             <a href="{{ route('admin.questions.index') }}" class="block px-4 py-3 hover:bg-primary rounded-md transition-colors font-medium">Questions</a>
         </nav>
         <div class="p-4 border-t border-primary/30 text-center text-sm text-gray-300">

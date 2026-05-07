@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-    protected $fillable = ['name_en', 'name_ku'];
+    protected $fillable = ['sub_section_id', 'name_en', 'name_ku'];
+
+    public function subSection()
+    {
+        return $this->belongsTo(SubSection::class);
+    }
 
     public function questions()
     {

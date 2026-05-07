@@ -9,12 +9,16 @@ use App\Http\Controllers\Admin\QuestionController;
 
 use App\Http\Controllers\Admin\LoginController as AdminLoginController;
 
+use App\Http\Controllers\FrontendController;
+
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// Dynamic Sections
+Route::get('/section/{section}', [FrontendController::class, 'showSection'])->name('frontend.section');
+Route::get('/sub-section/{subSection}', [FrontendController::class, 'showSubSection'])->name('frontend.sub_section');
+
 Route::prefix('theory-test-practice')->name('theory.')->group(function () {
-    Route::get('/', [TheoryTestController::class, 'index'])->name('index');
-    Route::get('/categories', [TheoryTestController::class, 'categories'])->name('categories');
     Route::get('/category/{category}', [TheoryTestController::class, 'practice'])->name('practice');
     Route::get('/result', [TheoryTestController::class, 'result'])->name('result');
 });
@@ -31,7 +35,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('auth:admin')->group(function () {
         Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
         Route::get('/', [AdminController::class, 'index'])->name('home');
-        Route::resource('categories', CategoryController::class);
+        
+        // Sections
+        Route::resource('sections', App\Http\Controllers\Admin\SectionController::class);
+        
+        // SubSections
+        Route::resource('sections.sub_sections', App\Http\Controllers\Admin\SubSectionController::class);
+        
+        // Categories (nested under sub_sections)
+        Route::resource('sections.sub_sections.categories', CategoryController::class)->except(['index']);
+        
+        // We will keep a generic categories fallback if needed, but preferably they should go through the tree.
         Route::resource('questions', QuestionController::class);
     });
 });

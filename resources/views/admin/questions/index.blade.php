@@ -28,8 +28,14 @@
                     <td class="px-6 py-4">
                         <div class="font-medium text-gray-900 line-clamp-2">{{ $question->text_en }}</div>
                     </td>
-                    <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
-                        <a href="#" class="text-sm text-primary hover:underline">Edit</a>
+                    <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap flex justify-end items-center gap-2">
+                        <a href="{{ route('admin.questions.edit', $question) }}" class="text-sm text-primary hover:underline font-medium">Edit</a>
+                        <span class="text-gray-300">|</span>
+                        <form action="{{ route('admin.questions.destroy', $question) }}" method="POST" onsubmit="return confirm('Delete this question?');" class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-sm text-gray-500 hover:text-red-600 transition-colors">Delete</button>
+                        </form>
                     </td>
                 </tr>
                 @empty
