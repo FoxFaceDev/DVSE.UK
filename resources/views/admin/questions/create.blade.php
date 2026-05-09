@@ -28,10 +28,54 @@
                         <textarea name="text_ku" dir="rtl" rows="3" class="w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"></textarea>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Image Upload</label>
-                        <input type="file" name="image" accept="image/*" class="w-full border border-gray-300 rounded-md p-2 text-sm">
-                        <p class="text-xs text-gray-500 mt-1">Optional. Will be displayed above the question.</p>
+                    <!-- Media Section -->
+                    <div x-data="{ mediaType: '', mediaSource: 'upload' }" class="space-y-4">
+                        <h4 class="font-bold text-gray-900 border-b pb-2">Media Attachment</h4>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Media Type</label>
+                            <select name="media_type" x-model="mediaType" class="w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                                <option value="">No Media</option>
+                                <option value="image">Image</option>
+                                <option value="video">Video</option>
+                                <option value="gif">GIF</option>
+                            </select>
+                        </div>
+
+                        <template x-if="mediaType">
+                            <div class="space-y-4">
+                                <!-- Source toggle -->
+                                <div class="flex gap-4">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" x-model="mediaSource" value="upload" class="text-primary focus:ring-primary">
+                                        <span class="text-sm font-medium text-gray-700">Upload File</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" x-model="mediaSource" value="url" class="text-primary focus:ring-primary">
+                                        <span class="text-sm font-medium text-gray-700">External URL</span>
+                                    </label>
+                                </div>
+
+                                <!-- File Upload -->
+                                <div x-show="mediaSource === 'upload'" x-transition>
+                                    <input type="file" name="media" 
+                                        :accept="mediaType === 'video' ? 'video/mp4,video/webm,video/ogg' : (mediaType === 'gif' ? 'image/gif' : 'image/*')"
+                                        class="w-full border border-gray-300 rounded-md p-2 text-sm">
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <span x-show="mediaType === 'image'">Accepts: JPG, PNG, WebP. Max 100MB.</span>
+                                        <span x-show="mediaType === 'video'">Accepts: MP4, WebM, OGG. Max 100MB.</span>
+                                        <span x-show="mediaType === 'gif'">Accepts: GIF files. Max 100MB.</span>
+                                    </p>
+                                </div>
+
+                                <!-- URL Input -->
+                                <div x-show="mediaSource === 'url'" x-transition>
+                                    <input type="url" name="media_url" placeholder="https://www.youtube.com/watch?v=..." 
+                                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm">
+                                    <p class="text-xs text-gray-500 mt-1">Enter a direct link or a YouTube video URL.</p>
+                                </div>
+                            </div>
+                        </template>
                     </div>
 
                     <div class="pt-4">

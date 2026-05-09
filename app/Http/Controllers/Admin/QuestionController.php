@@ -10,10 +10,17 @@ use App\Models\Category;
 
 class QuestionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $questions = Question::with('category')->get();
-        return view('admin.questions.index', compact('questions'));
+        $categories = Category::all();
+        $questions = Question::with('category')
+            ->when($request->category_id, function ($query, $categoryId) {
+                $query->where('category_id', $categoryId);
+            })
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return view('admin.questions.index', compact('questions', 'categories'));
     }
 
     public function create(\Illuminate\Http\Request $request)
@@ -29,18 +36,38 @@ class QuestionController extends Controller
             'category_id' => 'required|exists:categories,id',
             'text_en' => 'required|string',
             'text_ku' => 'nullable|string',
-            'image' => 'nullable|image',
+            'media_type' => 'nullable|in:image,video,gif',
+            'media' => 'nullable|file|max:102400', // 100MB max
+            'media_url' => 'nullable|url',
             'explanation_en' => 'nullable|string',
             'explanation_ku' => 'nullable|string',
             'choices' => 'required|array|min:4',
             'correct_choice' => 'required|numeric'
         ]);
 
-        $data = $request->except('image', 'choices', 'correct_choice');
+        $data = $request->except('media', 'media_url', 'choices', 'correct_choice');
 
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('questions', 'public');
-            $data['image_path'] = '/storage/' . $path;
+        // Handle media upload
+        if ($request->hasFile('media')) {
+            $path = $request->file('media')->store('questions', 'public');
+            $data['media_path'] = '/storage/' . $path;
+            // Auto-detect media_type if not set
+            if (!$request->media_type) {
+                $mime = $request->file('media')->getMimeType();
+                if (str_starts_with($mime, 'video/')) {
+                    $data['media_type'] = 'video';
+                } elseif ($mime === 'image/gif') {
+                    $data['media_type'] = 'gif';
+                } else {
+                    $data['media_type'] = 'image';
+                }
+            }
+        } elseif ($request->media_url) {
+            $data['media_url'] = $request->media_url;
+            // Ensure media_type is set when using URL
+            if (!$request->media_type) {
+                $data['media_type'] = 'video'; // default for URLs
+            }
         }
 
         $question = Question::create($data);
@@ -69,27 +96,51 @@ class QuestionController extends Controller
             'category_id' => 'required|exists:categories,id',
             'text_en' => 'required|string',
             'text_ku' => 'nullable|string',
-            'image' => 'nullable|image',
+            'media_type' => 'nullable|in:image,video,gif',
+            'media' => 'nullable|file|max:102400', // 100MB max
+            'media_url' => 'nullable|url',
             'explanation_en' => 'nullable|string',
             'explanation_ku' => 'nullable|string',
             'choices' => 'required|array|min:4',
             'correct_choice' => 'required|numeric'
         ]);
 
-        $data = $request->except('image', 'choices', 'correct_choice', 'remove_image');
+        $data = $request->except('media', 'media_url', 'choices', 'correct_choice', 'remove_media');
 
-        if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($question->image_path) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete(str_replace('/storage/', '', $question->image_path));
+        if ($request->hasFile('media')) {
+            // Delete old media if exists
+            if ($question->getRawOriginal('media_path')) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete(str_replace('/storage/', '', $question->getRawOriginal('media_path')));
             }
-            $path = $request->file('image')->store('questions', 'public');
-            $data['image_path'] = '/storage/' . $path;
-        } elseif ($request->boolean('remove_image')) {
-            if ($question->image_path) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete(str_replace('/storage/', '', $question->image_path));
+            $path = $request->file('media')->store('questions', 'public');
+            $data['media_path'] = '/storage/' . $path;
+            $data['media_url'] = null; // Clear URL when uploading file
+
+            // Auto-detect media_type if not set
+            if (!$request->media_type) {
+                $mime = $request->file('media')->getMimeType();
+                if (str_starts_with($mime, 'video/')) {
+                    $data['media_type'] = 'video';
+                } elseif ($mime === 'image/gif') {
+                    $data['media_type'] = 'gif';
+                } else {
+                    $data['media_type'] = 'image';
+                }
             }
-            $data['image_path'] = null;
+        } elseif ($request->media_url) {
+            // Using URL - clear uploaded file
+            if ($question->getRawOriginal('media_path')) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete(str_replace('/storage/', '', $question->getRawOriginal('media_path')));
+            }
+            $data['media_path'] = null;
+            $data['media_url'] = $request->media_url;
+        } elseif ($request->boolean('remove_media')) {
+            if ($question->getRawOriginal('media_path')) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete(str_replace('/storage/', '', $question->getRawOriginal('media_path')));
+            }
+            $data['media_path'] = null;
+            $data['media_url'] = null;
+            $data['media_type'] = null;
         }
 
         $question->update($data);
@@ -111,8 +162,8 @@ class QuestionController extends Controller
 
     public function destroy(Question $question)
     {
-        if ($question->image_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete(str_replace('/storage/', '', $question->image_path));
+        if ($question->getRawOriginal('media_path')) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete(str_replace('/storage/', '', $question->getRawOriginal('media_path')));
         }
         $question->delete();
         return redirect()->route('admin.questions.index')->with('success', 'Question deleted successfully');

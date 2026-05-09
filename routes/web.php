@@ -6,6 +6,7 @@ use App\Http\Controllers\TheoryTestController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\QuestionController;
+use App\Http\Controllers\Admin\AdController;
 
 use App\Http\Controllers\Admin\LoginController as AdminLoginController;
 
@@ -47,5 +48,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         
         // We will keep a generic categories fallback if needed, but preferably they should go through the tree.
         Route::resource('questions', QuestionController::class);
+
+        // Advertisements
+        Route::resource('ads', AdController::class);
+        Route::patch('ads/{ad}/toggle-status', [AdController::class, 'toggleStatus'])->name('ads.toggle-status');
     });
 });

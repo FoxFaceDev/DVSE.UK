@@ -29,20 +29,72 @@
                         <textarea name="text_ku" dir="rtl" rows="3" class="w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">{{ $question->text_ku }}</textarea>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Image Upload</label>
-                        @if($question->image_path)
-                            <div class="mb-4 p-3 border border-gray-200 rounded-lg bg-gray-50 inline-block">
-                                <p class="text-xs text-gray-500 mb-2 font-medium">Current Image:</p>
-                                <img src="{{ $question->image_path }}" alt="Question Image" class="h-32 rounded border border-white shadow-sm mb-3">
+                    <!-- Media Section -->
+                    <div x-data="{ mediaType: '{{ $question->media_type ?? '' }}', mediaSource: '{{ $question->getRawOriginal('media_path') ? 'upload' : ($question->media_url ? 'url' : 'upload') }}' }" class="space-y-4">
+                        <h4 class="font-bold text-gray-900 border-b pb-2">Media Attachment</h4>
+                        
+                        <!-- Current Media Preview -->
+                        @if($question->media_source)
+                            <div class="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                                <p class="text-xs text-gray-500 mb-2 font-medium">Current Media ({{ ucfirst($question->media_type ?? 'image') }}):</p>
+                                @if($question->media_type === 'video')
+                                    @if($question->is_youtube)
+                                        <div class="aspect-video mb-3">
+                                            <iframe class="w-full h-full rounded border border-white shadow-sm" src="https://www.youtube.com/embed/{{ $question->youtube_id }}" frameborder="0" allowfullscreen></iframe>
+                                        </div>
+                                    @else
+                                        <video src="{{ $question->media_source }}" controls playsinline preload="metadata" class="max-h-40 rounded border border-white shadow-sm mb-3 w-full"></video>
+                                    @endif
+                                @else
+                                    <img src="{{ $question->media_source }}" alt="Question Media" class="max-h-40 rounded border border-white shadow-sm mb-3">
+                                @endif
                                 <label class="flex items-center gap-2 text-xs text-red-600 font-medium cursor-pointer hover:text-red-700">
-                                    <input type="checkbox" name="remove_image" value="1" class="rounded text-red-600 focus:ring-red-500">
-                                    Remove current image
+                                    <input type="checkbox" name="remove_media" value="1" class="rounded text-red-600 focus:ring-red-500">
+                                    Remove current media
                                 </label>
                             </div>
                         @endif
-                        <input type="file" name="image" accept="image/*" class="w-full border border-gray-300 rounded-md p-2 text-sm bg-white">
-                        <p class="text-xs text-gray-500 mt-1">Optional. Uploading a new one will replace the old one.</p>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Media Type</label>
+                            <select name="media_type" x-model="mediaType" class="w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                                <option value="">No Media</option>
+                                <option value="image">Image</option>
+                                <option value="video">Video</option>
+                                <option value="gif">GIF</option>
+                            </select>
+                        </div>
+
+                        <template x-if="mediaType">
+                            <div class="space-y-4">
+                                <!-- Source toggle -->
+                                <div class="flex gap-4">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" x-model="mediaSource" value="upload" class="text-primary focus:ring-primary">
+                                        <span class="text-sm font-medium text-gray-700">Upload File</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" x-model="mediaSource" value="url" class="text-primary focus:ring-primary">
+                                        <span class="text-sm font-medium text-gray-700">External URL</span>
+                                    </label>
+                                </div>
+
+                                <!-- File Upload -->
+                                <div x-show="mediaSource === 'upload'" x-transition>
+                                    <input type="file" name="media" 
+                                        :accept="mediaType === 'video' ? 'video/mp4,video/webm,video/ogg' : (mediaType === 'gif' ? 'image/gif' : 'image/*')"
+                                        class="w-full border border-gray-300 rounded-md p-2 text-sm bg-white">
+                                    <p class="text-xs text-gray-500 mt-1">Uploading a new file will replace the existing one.</p>
+                                </div>
+
+                                <!-- URL Input -->
+                                <div x-show="mediaSource === 'url'" x-transition>
+                                    <input type="url" name="media_url" value="{{ $question->media_url }}" placeholder="https://example.com/media-file.mp4" 
+                                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm">
+                                    <p class="text-xs text-gray-500 mt-1">Enter the full URL to the media file.</p>
+                                </div>
+                            </div>
+                        </template>
                     </div>
 
                     <div class="pt-4">

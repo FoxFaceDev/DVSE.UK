@@ -4,12 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Question extends Model
+class Ad extends Model
 {
     protected $fillable = [
-        'category_id', 'text_en', 'text_ku', 'media_path',
-        'media_type', 'media_url',
-        'explanation_en', 'explanation_ku'
+        'title', 'media_type', 'media_path', 'media_url',
+        'link_url', 'category_id', 'is_active'
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     protected $appends = ['media_source'];
@@ -23,8 +26,7 @@ class Question extends Model
     {
         if (!$value) return null;
         if (str_starts_with($value, 'http')) return $value;
-        
-        // Ensure the path starts with /storage/ for the browser to find it from the root
+
         $path = str_replace('/storage/', '', $value);
         return '/storage/' . ltrim($path, '/');
     }
@@ -47,10 +49,5 @@ class Question extends Model
         if (!$this->is_youtube) return null;
         preg_match('/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/', $this->media_url, $match);
         return (isset($match[2]) && strlen($match[2]) === 11) ? $match[2] : null;
-    }
-
-    public function choices()
-    {
-        return $this->hasMany(Choice::class);
     }
 }
