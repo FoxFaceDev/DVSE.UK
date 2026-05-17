@@ -1,4 +1,4 @@
-<x-layouts.app :showBack="true" title="{{ $subSection->name }}">
+<x-layouts.app :showBack="true" :backUrl="route('frontend.section', $subSection->section_id)" title="{{ $subSection->name }}">
     <div class="space-y-4">
         <h2 class="font-heading font-bold text-xl mb-4" style="color: {{ $subSection->color ?? '#1e293b' }}">{{ $subSection->name }} Categories</h2>
         <div class="grid grid-cols-1 gap-3">

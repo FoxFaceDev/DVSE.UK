@@ -53,7 +53,7 @@ class DemoContentSeeder extends Seeder
             'text_en' => 'Watch this video carefully. What should the driver do at the intersection?',
             'text_ku' => 'بە وریاییەوە سەیری ئەم ڤیدیۆیە بکە. شۆفێرەکە دەبێت لە یەکتربڕەکەدا چی بکات؟',
             'media_type' => 'video',
-            'media_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            'media_url' => 'https://www.youtube.com/watch?v=OCafg91DBgY',
             'explanation_en' => 'The video demonstrates the importance of yielding to traffic on the right.',
             'explanation_ku' => 'ڤیدیۆکە گرنگی پێدانی ئەولەویەت بە هاتووچۆی لای ڕاست نیشان دەدات.'
         ]);

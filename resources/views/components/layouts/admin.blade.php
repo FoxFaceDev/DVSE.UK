@@ -12,9 +12,10 @@
 
     <!-- Sidebar -->
     <aside class="w-64 flex-shrink-0 bg-primary-dark text-white flex flex-col">
-        <div class="p-6">
-            <h1 class="text-2xl font-heading font-bold">Control Panel</h1>
-            <p class="text-primary-100 text-sm mt-1">DVSE.UK Administration</p>
+        <div class="p-6 flex flex-col items-center border-b border-primary/20">
+            <img src="{{ asset('images/logo.png') }}" alt="DVSE.UK Logo" style="height: 64px; max-height: 64px; width: auto; object-fit: contain;" class="mb-3 bg-white/10 p-2 rounded-lg">
+            <h1 class="text-xl font-heading font-bold text-center">Control Panel</h1>
+            <p class="text-primary-100 text-xs mt-1 text-center">DVSE.UK Administration</p>
         </div>
         <nav class="flex-1 px-4 py-4 space-y-2">
             <a href="{{ route('admin.home') }}" class="block px-4 py-3 bg-primary rounded-md shadow-sm font-medium">Dashboard</a>

@@ -11,9 +11,22 @@ use App\Http\Controllers\Admin\AdController;
 use App\Http\Controllers\Admin\LoginController as AdminLoginController;
 
 use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\AuthController;
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// User Authentication Routes
+Route::middleware('guest:web')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
+});
+
+Route::middleware('auth:web')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
 
 // Dynamic Sections
 Route::get('/section/{section}', [FrontendController::class, 'showSection'])->name('frontend.section');
@@ -22,6 +35,15 @@ Route::get('/sub-section/{subSection}', [FrontendController::class, 'showSubSect
 Route::prefix('theory-test-practice')->name('theory.')->group(function () {
     Route::get('/category/{category}', [TheoryTestController::class, 'practice'])->name('practice');
     Route::get('/result', [TheoryTestController::class, 'result'])->name('result');
+
+    // Mock Test Routes
+    Route::get('/mock-test/result', [TheoryTestController::class, 'mockTestResult'])->name('mock_test_result');
+    Route::get('/mock-test/{subSection}', [TheoryTestController::class, 'mockTestInfo'])->name('mock_test_info');
+    Route::get('/mock-test/{subSection}/start', [TheoryTestController::class, 'mockTestStart'])->name('mock_test_start');
+});
+
+Route::middleware('auth:web')->group(function () {
+    Route::get('/my-history', [TheoryTestController::class, 'history'])->name('history');
 });
 
 // Admin Authentication Routes
