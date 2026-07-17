@@ -237,16 +237,29 @@
 
                 finishTest() {
                     if(this.timerInterval) clearInterval(this.timerInterval);
-                    
-                    // Calculate final score purely based on stored answers
-                    this.correctCount = 0;
+
+                    const answers = {};
                     for (const idx in this.answers) {
-                        if (this.answers[idx].is_correct) {
-                            this.correctCount++;
-                        }
+                        const question = this.questions[idx];
+                        if (question) answers[question.id] = this.answers[idx].choice_id;
                     }
-                    
-                    window.location.href = `{{ route('theory.mock_test_result') }}?correct=${this.correctCount}&total=${this.questions.length}`;
+
+                    fetch('{{ route('theory.mock_test_submit') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            question_ids: this.questions.map(question => question.id),
+                            answers: answers
+                        })
+                    }).then(response => response.json()).then(data => {
+                        window.location.href = data.redirect;
+                    }).catch(() => {
+                        window.location.href = '{{ route('theory.mock_test_result') }}?correct=0&total=' + this.questions.length;
+                    });
                 },
 
                 getYoutubeId(url) {

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
+use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
@@ -29,6 +31,10 @@ class AuthController extends Controller
 
         if (Auth::guard('web')->attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
+
+            if (! $request->user('web')->hasVerifiedEmail()) {
+                return redirect()->route('verification.notice');
+            }
 
             return redirect()->intended(route('home'));
         }
@@ -54,7 +60,7 @@ class AuthController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
         ]);
 
         $user = User::create([
@@ -65,7 +71,9 @@ class AuthController extends Controller
 
         Auth::guard('web')->login($user);
 
-        return redirect()->route('home');
+        event(new Registered($user));
+
+        return redirect()->route('verification.notice');
     }
 
     /**
