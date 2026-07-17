@@ -53,11 +53,11 @@
                             <div class="w-full mb-4">
                                 <template x-if="getYoutubeId(currentQuestion.media_source)">
                                     <div class="aspect-video">
-                                        <iframe class="w-full h-full rounded-lg" :src="'https://www.youtube.com/embed/' + getYoutubeId(currentQuestion.media_source)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                        <iframe :key="'yt-' + realQuestionIndex" class="w-full h-full rounded-lg" :src="'https://www.youtube.com/embed/' + getYoutubeId(currentQuestion.media_source) + '?autoplay=1&mute=1'" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                                     </div>
                                 </template>
                                 <template x-if="!getYoutubeId(currentQuestion.media_source)">
-                                    <video :src="currentQuestion.media_source" controls playsinline preload="metadata"
+                                    <video :key="'vid-' + realQuestionIndex" :src="currentQuestion.media_source" autoplay muted controls playsinline preload="auto"
                                         class="w-full max-h-64 rounded-lg bg-gray-100 object-contain"></video>
                                 </template>
                             </div>
