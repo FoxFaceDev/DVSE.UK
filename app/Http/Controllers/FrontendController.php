@@ -17,7 +17,7 @@ class FrontendController extends Controller
     public function showSubSection(SubSection $subSection)
     {
         $subSection->load(['categories' => function($query) {
-            $query->withCount('questions');
+            $query->withCount(['questions', 'contentPages']);
         }]);
         return view('frontend.subsection', compact('subSection'));
     }

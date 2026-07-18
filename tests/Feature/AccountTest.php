@@ -1,8 +1,9 @@
 <?php
 
-use App\Models\MockTestHistory;
-use App\Models\Choice;
+use App\Models\Admin;
 use App\Models\Category;
+use App\Models\Choice;
+use App\Models\MockTestHistory;
 use App\Models\Question;
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -15,6 +16,7 @@ test('a new account requires email verification', function () {
     $response = $this->post(route('register'), [
         'name' => 'Test Driver',
         'email' => 'driver@example.com',
+        'is_instructor' => 'no',
         'password' => 'safe-password1',
         'password_confirmation' => 'safe-password1',
     ]);
@@ -24,7 +26,58 @@ test('a new account requires email verification', function () {
     $response->assertRedirect(route('verification.notice'));
     $this->assertAuthenticatedAs($user, 'web');
     expect($user->email_verified_at)->toBeNull();
+    expect($user->account_type)->toBe(User::ACCOUNT_TYPE_USER);
     Notification::assertSentTo($user, VerifyEmail::class);
+});
+
+test('a new account can register as an instructor', function () {
+    Notification::fake();
+
+    $this->post(route('register'), [
+        'name' => 'Driving Instructor',
+        'email' => 'instructor@example.com',
+        'is_instructor' => 'yes',
+        'password' => 'safe-password1',
+        'password_confirmation' => 'safe-password1',
+    ])->assertRedirect(route('verification.notice'));
+
+    $instructor = User::where('email', 'instructor@example.com')->firstOrFail();
+    expect($instructor->account_type)->toBe(User::ACCOUNT_TYPE_INSTRUCTOR)
+        ->and($instructor->isInstructor())->toBeTrue();
+});
+
+test('registration requires an instructor choice', function () {
+    $this->post(route('register'), [
+        'name' => 'Test Driver',
+        'email' => 'missing-choice@example.com',
+        'password' => 'safe-password1',
+        'password_confirmation' => 'safe-password1',
+    ])->assertSessionHasErrors('is_instructor');
+
+    $this->assertDatabaseMissing('users', ['email' => 'missing-choice@example.com']);
+});
+
+test('the admin dashboard reports user and instructor statistics', function () {
+    User::factory()->create();
+    User::factory()->instructor()->unverified()->create();
+    $admin = Admin::create([
+        'name' => 'Statistics Admin',
+        'email' => 'statistics-admin@example.com',
+        'password' => bcrypt('password'),
+    ]);
+
+    $this->actingAs($admin, 'admin')->get(route('admin.home'))
+        ->assertOk()
+        ->assertViewHas('userStats', function (array $stats) {
+            return $stats['total'] === 2
+                && $stats['users'] === 1
+                && $stats['instructors'] === 1
+                && $stats['verified'] === 1
+                && $stats['unverified'] === 1
+                && $stats['new_this_month'] === 2;
+        })
+        ->assertSee('User statistics')
+        ->assertSee('Instructor');
 });
 
 test('a signed verification link verifies the account', function () {

@@ -7,6 +7,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
@@ -60,12 +61,16 @@ class AuthController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'is_instructor' => ['required', Rule::in(['yes', 'no'])],
             'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'account_type' => $request->input('is_instructor') === 'yes'
+                ? User::ACCOUNT_TYPE_INSTRUCTOR
+                : User::ACCOUNT_TYPE_USER,
             'password' => Hash::make($request->password),
         ]);
 

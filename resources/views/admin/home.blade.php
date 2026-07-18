@@ -1,4 +1,90 @@
 <x-layouts.admin title="Dashboard">
+    <section class="mb-10">
+        <div class="mb-5">
+            <h2 class="text-xl font-heading font-bold text-slate-900">User statistics</h2>
+            <p class="mt-1 text-sm text-slate-600">Account types and email verification across DVSE.UK.</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
+            <div class="admin-card rounded-xl border bg-white p-5">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Total accounts</p>
+                <p class="mt-2 text-3xl font-heading font-bold text-primary-dark">{{ number_format($userStats['total']) }}</p>
+                <p class="mt-1 text-xs text-slate-500">All registered accounts</p>
+            </div>
+            <div class="admin-card rounded-xl border bg-white p-5">
+                <p class="text-xs font-bold uppercase tracking-wider text-blue-700">Users</p>
+                <p class="mt-2 text-3xl font-heading font-bold text-blue-700">{{ number_format($userStats['users']) }}</p>
+                <p class="mt-1 text-xs text-slate-500">Standard accounts</p>
+            </div>
+            <div class="admin-card rounded-xl border bg-white p-5">
+                <p class="text-xs font-bold uppercase tracking-wider text-purple-700">Instructors</p>
+                <p class="mt-2 text-3xl font-heading font-bold text-purple-700">{{ number_format($userStats['instructors']) }}</p>
+                <p class="mt-1 text-xs text-slate-500">Teaching accounts</p>
+            </div>
+            <div class="admin-card rounded-xl border bg-white p-5">
+                <p class="text-xs font-bold uppercase tracking-wider text-green-700">Verified</p>
+                <p class="mt-2 text-3xl font-heading font-bold text-green-700">{{ number_format($userStats['verified']) }}</p>
+                <p class="mt-1 text-xs text-slate-500">{{ $userStats['total'] ? round(($userStats['verified'] / $userStats['total']) * 100) : 0 }}% of accounts</p>
+            </div>
+            <div class="admin-card rounded-xl border bg-white p-5">
+                <p class="text-xs font-bold uppercase tracking-wider text-amber-700">Unverified</p>
+                <p class="mt-2 text-3xl font-heading font-bold text-amber-700">{{ number_format($userStats['unverified']) }}</p>
+                <p class="mt-1 text-xs text-slate-500">Awaiting verification</p>
+            </div>
+            <div class="admin-card rounded-xl border bg-white p-5">
+                <p class="text-xs font-bold uppercase tracking-wider text-teal-700">New this month</p>
+                <p class="mt-2 text-3xl font-heading font-bold text-teal-700">{{ number_format($userStats['new_this_month']) }}</p>
+                <p class="mt-1 text-xs text-slate-500">Since {{ now()->startOfMonth()->format('M j') }}</p>
+            </div>
+        </div>
+
+        <div class="admin-card mt-5 overflow-hidden rounded-xl border bg-white">
+            <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+                <div>
+                    <h3 class="font-heading font-bold text-slate-900">Recent accounts</h3>
+                    <p class="mt-1 text-xs text-slate-500">The latest registered users and instructors.</p>
+                </div>
+                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">Latest {{ $recentUsers->count() }}</span>
+            </div>
+
+            <table class="w-full text-left text-sm">
+                <thead class="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-600">
+                    <tr>
+                        <th class="px-6 py-3">Account</th>
+                        <th class="px-6 py-3">Type</th>
+                        <th class="px-6 py-3">Email status</th>
+                        <th class="px-6 py-3 text-right">Registered</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse($recentUsers as $recentUser)
+                        <tr class="hover:bg-slate-50/80">
+                            <td class="px-6 py-4">
+                                <p class="font-semibold text-slate-900">{{ $recentUser->name }}</p>
+                                <p class="mt-0.5 text-xs text-slate-500">{{ $recentUser->email }}</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="rounded-full px-2.5 py-1 text-xs font-bold {{ $recentUser->isInstructor() ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
+                                    {{ $recentUser->isInstructor() ? 'Instructor' : 'User' }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                @if($recentUser->hasVerifiedEmail())
+                                    <span class="inline-flex items-center gap-1.5 font-semibold text-green-700"><span class="h-2 w-2 rounded-full bg-green-500"></span>Verified</span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 font-semibold text-amber-700"><span class="h-2 w-2 rounded-full bg-amber-500"></span>Unverified</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 text-right text-slate-600">{{ $recentUser->created_at->format('M j, Y') }}</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="4" class="px-6 py-10 text-center text-slate-500">No accounts have registered yet.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
+
     <div class="mb-6 flex justify-between items-center">
         <h2 class="text-xl font-heading font-bold text-gray-800">Main Sections</h2>
         <button onclick="document.getElementById('createSectionModal').classList.remove('hidden')" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">

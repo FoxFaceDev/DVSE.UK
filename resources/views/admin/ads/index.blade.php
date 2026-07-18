@@ -20,7 +20,7 @@
                     <th class="px-6 py-3">ID</th>
                     <th class="px-6 py-3">Title</th>
                     <th class="px-6 py-3">Media</th>
-                    <th class="px-6 py-3">Target Category</th>
+                    <th class="px-6 py-3">Target Categories</th>
                     <th class="px-6 py-3">Status</th>
                     <th class="px-6 py-3 text-right">Actions</th>
                 </tr>
@@ -43,11 +43,17 @@
                             {{ ucfirst($ad->media_type) }}
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        @if($ad->category)
-                            <span class="bg-surface-container text-primary px-2 py-1 rounded text-xs">{{ $ad->category->name_en }}</span>
+                    <td class="max-w-sm px-6 py-4">
+                        @if($ad->targets_all_categories)
+                            <span class="inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">All Categories</span>
                         @else
-                            <span class="text-xs text-gray-400 italic">All Categories</span>
+                            <div class="flex flex-wrap gap-1.5">
+                                @forelse($ad->categories as $category)
+                                    <span class="rounded bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">{{ $category->name_en }}</span>
+                                @empty
+                                    <span class="text-xs font-medium text-red-600">No categories selected</span>
+                                @endforelse
+                            </div>
                         @endif
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">

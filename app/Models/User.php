@@ -11,6 +11,10 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
+    public const ACCOUNT_TYPE_USER = 'user';
+
+    public const ACCOUNT_TYPE_INSTRUCTOR = 'instructor';
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
@@ -22,6 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name',
         'email',
+        'account_type',
         'password',
     ];
 
@@ -51,5 +56,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function mockTestHistories(): HasMany
     {
         return $this->hasMany(MockTestHistory::class);
+    }
+
+    public function isInstructor(): bool
+    {
+        return $this->account_type === self::ACCOUNT_TYPE_INSTRUCTOR;
     }
 }

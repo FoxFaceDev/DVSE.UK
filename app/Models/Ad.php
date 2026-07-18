@@ -8,27 +8,33 @@ class Ad extends Model
 {
     protected $fillable = [
         'title', 'media_type', 'media_path', 'media_url',
-        'link_url', 'category_id', 'is_active'
+        'link_url', 'targets_all_categories', 'is_active',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'targets_all_categories' => 'boolean',
     ];
 
     protected $appends = ['media_source'];
 
-    public function category()
+    public function categories()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsToMany(Category::class)->withTimestamps();
     }
 
     public function getMediaPathAttribute($value)
     {
-        if (!$value) return null;
-        if (str_starts_with($value, 'http')) return $value;
+        if (! $value) {
+            return null;
+        }
+        if (str_starts_with($value, 'http')) {
+            return $value;
+        }
 
         $path = str_replace('/storage/', '', $value);
-        return '/storage/' . ltrim($path, '/');
+
+        return '/storage/'.ltrim($path, '/');
     }
 
     /**
@@ -46,8 +52,11 @@ class Ad extends Model
 
     public function getYoutubeIdAttribute()
     {
-        if (!$this->is_youtube) return null;
+        if (! $this->is_youtube) {
+            return null;
+        }
         preg_match('/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/', $this->media_url, $match);
+
         return (isset($match[2]) && strlen($match[2]) === 11) ? $match[2] : null;
     }
 }

@@ -8,6 +8,9 @@
                 <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">My account</p>
                 <h1 class="text-2xl font-heading font-bold text-primary-dark truncate">{{ $user->name }}</h1>
                 <p class="text-sm text-gray-500 truncate">{{ $user->email }}</p>
+                <span class="mt-1.5 inline-flex rounded-full px-2.5 py-1 text-xs font-bold {{ $user->isInstructor() ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-primary' }}">
+                    {{ $user->isInstructor() ? 'Instructor' : 'User' }}
+                </span>
             </div>
         </div>
 

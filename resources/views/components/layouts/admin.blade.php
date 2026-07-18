@@ -7,8 +7,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>[x-cloak] { display: none !important; }</style>
 </head>
-<body class="bg-gray-50 text-on-surface antialiased font-body flex min-h-screen">
+<body class="admin-shell flex min-h-screen font-body text-slate-950 antialiased">
 
     <!-- Sidebar -->
     <aside class="w-64 flex-shrink-0 bg-primary-dark text-white flex flex-col">
@@ -18,9 +19,10 @@
             <p class="text-primary-100 text-xs mt-1 text-center">DVSE.UK Administration</p>
         </div>
         <nav class="flex-1 px-4 py-4 space-y-2">
-            <a href="{{ route('admin.home') }}" class="block px-4 py-3 bg-primary rounded-md shadow-sm font-medium">Dashboard</a>
-            <a href="{{ route('admin.questions.index') }}" class="block px-4 py-3 hover:bg-primary rounded-md transition-colors font-medium">Questions</a>
-            <a href="{{ route('admin.ads.index') }}" class="block px-4 py-3 hover:bg-primary rounded-md transition-colors font-medium">Advertisements</a>
+            <a href="{{ route('admin.home') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.home', 'admin.sections.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Dashboard</a>
+            <a href="{{ route('admin.questions.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.questions.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Questions</a>
+            <a href="{{ route('admin.content-pages.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.content-pages.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Learning Pages</a>
+            <a href="{{ route('admin.ads.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.ads.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Advertisements</a>
         </nav>
         <div class="p-4 border-t border-primary/30 text-center text-sm text-gray-300">
             &copy; DVSE.UK
@@ -29,7 +31,7 @@
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col">
-        <header class="bg-white shadow-sm border-b border-gray-200">
+        <header class="border-b border-slate-300 bg-white shadow-sm">
             <div class="px-8 py-4 flex items-center justify-between">
                 <h2 class="text-xl font-heading text-primary-dark">{{ $title ?? 'Dashboard' }}</h2>
                 <div class="flex items-center gap-4">

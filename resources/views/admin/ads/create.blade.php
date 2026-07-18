@@ -1,5 +1,5 @@
 <x-layouts.admin title="Create Advertisement">
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 max-w-3xl">
+    <div class="admin-card max-w-4xl rounded-lg border bg-white p-8">
         <form action="{{ route('admin.ads.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
@@ -19,27 +19,16 @@
                 <p class="text-xs text-gray-500 mt-1">Where users go when they click the ad.</p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Target Category</label>
-                    <select name="category_id" class="w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                        <option value="">All Categories (Global)</option>
-                        @foreach($categories as $cat)
-                            <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name_en }}</option>
-                        @endforeach
-                    </select>
-                    <p class="text-xs text-gray-500 mt-1">Leave empty to show in all categories.</p>
-                </div>
+            @include('admin.ads._category_targets', ['ad' => null])
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <label class="flex items-center gap-3 mt-2 cursor-pointer">
-                        <input type="hidden" name="is_active" value="0">
-                        <input type="checkbox" name="is_active" value="1" checked 
-                            class="w-5 h-5 text-success rounded border-gray-300 focus:ring-success cursor-pointer">
-                        <span class="text-sm font-medium text-gray-700">Active</span>
-                    </label>
-                </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label class="flex items-center gap-3 mt-2 cursor-pointer">
+                    <input type="hidden" name="is_active" value="0">
+                    <input type="checkbox" name="is_active" value="1" @checked(old('is_active', '1') === '1')
+                        class="w-5 h-5 text-success rounded border-gray-300 focus:ring-success cursor-pointer">
+                    <span class="text-sm font-medium text-gray-700">Active</span>
+                </label>
             </div>
 
             <!-- Media Section -->

@@ -1,10 +1,10 @@
 <x-layouts.app :showBack="false" title="Test Result">
     <div x-data="{
-        correct: new URLSearchParams(window.location.search).get('correct') || 0,
-        total: new URLSearchParams(window.location.search).get('total') || 0,
+        correct: Number(new URLSearchParams(window.location.search).get('correct') || 0),
+        total: Number(new URLSearchParams(window.location.search).get('total') || 0),
         category: new URLSearchParams(window.location.search).get('category') || 'Category',
         get percentage() {
-            return this.total > 0 ? Math.round((this.correct / this.total) * 100) : 0;
+            return this.total > 0 ? Math.round((this.correct / this.total) * 100) : 100;
         },
         get circumference() {
             return 2 * Math.PI * 45;
@@ -21,22 +21,25 @@
                 <circle cx="50" cy="50" r="45" fill="none" :stroke="percentage >= 80 ? '#16a34a' : (percentage >= 50 ? '#ca8a04' : '#ba1a1a')" stroke-width="8" stroke-linecap="round" :stroke-dasharray="circumference" :stroke-dashoffset="strokeDashoffset" class="transition-all duration-1000 ease-out"></circle>
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center">
-                <span class="text-4xl font-heading font-bold" x-text="percentage + '%'"></span>
+                <template x-if="total > 0"><span class="text-4xl font-heading font-bold" x-text="percentage + '%'"></span></template>
+                <template x-if="total === 0">
+                    <svg class="h-16 w-16 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                </template>
             </div>
         </div>
 
         <div>
             <h2 class="text-lg font-body text-gray-500 mb-1" x-text="category"></h2>
-            <div class="text-sm font-medium text-gray-400 bg-gray-100 px-3 py-1 rounded-full inline-block mb-4">
+            <div x-cloak x-show="total > 0" class="text-sm font-medium text-gray-400 bg-gray-100 px-3 py-1 rounded-full inline-block mb-4">
                 <span x-text="correct"></span> / <span x-text="total"></span>
             </div>
             
-            <h1 class="text-3xl font-heading font-bold mb-2 text-gray-800" x-text="percentage >= 80 ? 'Well done!' : 'Keep practicing!'"></h1>
+            <h1 class="text-3xl font-heading font-bold mb-2 text-gray-800" x-text="total === 0 ? 'Lesson complete!' : (percentage >= 80 ? 'Well done!' : 'Keep practicing!')"></h1>
             <p class="text-gray-500">You're done with this lesson.</p>
         </div>
 
-        <div class="flex justify-center gap-6 mt-8">
-            <div class="flex flex-col items-center p-4 bg-green-50 rounded-lg min-w[100px] border border-green-100">
+        <div x-cloak x-show="total > 0" class="flex justify-center gap-6 mt-8">
+            <div class="flex min-w-[100px] flex-col items-center rounded-lg border border-green-100 bg-green-50 p-4">
                 <span class="text-xs uppercase tracking-wider text-green-700 font-bold mb-1">Correct</span>
                 <span class="text-2xl font-bold text-green-700" x-text="correct"></span>
             </div>

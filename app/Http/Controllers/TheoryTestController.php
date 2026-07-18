@@ -2,29 +2,40 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
-use App\Models\Category;
 use App\Models\Ad;
+use App\Models\Category;
+use App\Models\MockTestHistory;
 use App\Models\Question;
 use App\Models\SubSection;
+use Illuminate\Http\Request;
 
 class TheoryTestController extends Controller
 {
     public function practice(Category $category)
     {
         $questions = $category->questions()->with('choices')->get();
+        $contentPages = $category->contentPages()->with('clips')->get();
+
+        $practiceItems = $questions
+            ->map(fn ($question) => array_merge($question->toArray(), [
+                'item_type' => 'question',
+            ]))
+            ->concat($contentPages->map(fn ($contentPage) => array_merge($contentPage->toArray(), [
+                'item_type' => $contentPage->type,
+            ])))
+            ->sortBy(fn ($item) => ($item['created_at'] ?? '').'|'.$item['item_type'].'|'.str_pad((string) $item['id'], 10, '0', STR_PAD_LEFT))
+            ->values();
 
         // Fetch an active ad for this category (or global ad)
         $ad = Ad::where('is_active', true)
             ->where(function ($query) use ($category) {
-                $query->where('category_id', $category->id)
-                      ->orWhereNull('category_id');
+                $query->where('targets_all_categories', true)
+                    ->orWhereHas('categories', fn ($categoryQuery) => $categoryQuery->where('categories.id', $category->id));
             })
             ->inRandomOrder()
             ->first();
 
-        return view('theory.practice', compact('category', 'questions', 'ad'));
+        return view('theory.practice', compact('category', 'practiceItems', 'ad'));
     }
 
     public function result()
@@ -83,7 +94,7 @@ class TheoryTestController extends Controller
         $passed = $correct >= 43;
 
         if (auth('web')->check() && auth('web')->user()->hasVerifiedEmail()) {
-            \App\Models\MockTestHistory::create([
+            MockTestHistory::create([
                 'user_id' => auth('web')->id(),
                 'score' => $correct,
                 'total_questions' => $total,
@@ -103,9 +114,9 @@ class TheoryTestController extends Controller
 
     public function history()
     {
-        $histories = \App\Models\MockTestHistory::where('user_id', auth('web')->id())
-                        ->orderBy('created_at', 'desc')
-                        ->get();
+        $histories = MockTestHistory::where('user_id', auth('web')->id())
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('theory.history', compact('histories'));
     }

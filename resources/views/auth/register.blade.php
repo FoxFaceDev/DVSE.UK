@@ -34,6 +34,22 @@
                     <p class="mt-1.5 text-xs text-gray-500">We’ll send a verification link to this address.</p>
                 </div>
 
+                <fieldset class="mb-5">
+                    <legend class="block text-sm font-semibold text-gray-700">Are you an instructor?</legend>
+                    <p class="mb-2.5 mt-1 text-xs text-gray-500">Choose Yes if you teach or train other drivers.</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="is_instructor" value="yes" required class="peer sr-only" @checked(old('is_instructor') === 'yes')>
+                            <span class="flex min-h-12 items-center justify-center rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 font-semibold text-gray-700 transition-all peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:text-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary/30">Yes</span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="is_instructor" value="no" required class="peer sr-only" @checked(old('is_instructor') === 'no')>
+                            <span class="flex min-h-12 items-center justify-center rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 font-semibold text-gray-700 transition-all peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:text-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary/30">No</span>
+                        </label>
+                    </div>
+                    @error('is_instructor') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
+                </fieldset>
+
                 <div class="mb-4">
                     <label for="password" class="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
                     <div class="relative">
