@@ -7,7 +7,7 @@ deployment:
     - export PATH=/opt/cpanel/ea-php82/root/usr/bin:$PATH 
 
     # 2. Install Composer dependencies (optimized for production)
-    - /opt/cpanel/ea-php82/root/usr/bin/php /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader
+    - /opt/cpanel/ea-php82/root/usr/bin/php -d allow_url_fopen=On composer.phar install --no-dev --optimize-autoloader
 
     # 3. Run Laravel Migrations
     - /opt/cpanel/ea-php82/root/usr/bin/php artisan migrate --force
