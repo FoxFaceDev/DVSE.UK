@@ -1,0 +1,21 @@
+---
+deployment:
+  tasks:
+    # 1. We must define the path to the correct PHP version. 
+    # Check your cPanel for your exact PHP version. 
+    # ea-php82 is PHP 8.2, ea-php81 is PHP 8.1. Adjust if necessary!
+    - export PATH=/opt/cpanel/ea-php82/root/usr/bin:$PATH 
+
+    # 2. Install Composer dependencies (optimized for production)
+    - /opt/cpanel/ea-php82/root/usr/bin/php /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader
+
+    # 3. Run Laravel Migrations
+    - /opt/cpanel/ea-php82/root/usr/bin/php artisan migrate --force
+
+    # 4. Clear and rebuild all caches (config, routes, views)
+    - /opt/cpanel/ea-php82/root/usr/bin/php artisan optimize:clear
+    - /opt/cpanel/ea-php82/root/usr/bin/php artisan optimize
+
+    # 5. (Optional) Run NPM build if you are compiling assets on the server
+    # Note: On shared hosting, it's often better to run 'npm run build' locally 
+    # and commit the /public/build folder to GitHub instead of building on the server.
