@@ -16,6 +16,9 @@ deployment:
     - /opt/cpanel/ea-php82/root/usr/bin/php artisan optimize:clear
     - /opt/cpanel/ea-php82/root/usr/bin/php artisan optimize
 
+    # 5. Ensure the public storage link exists
+    - /opt/cpanel/ea-php82/root/usr/bin/php artisan storage:link --force
+
     # 5. (Optional) Run NPM build if you are compiling assets on the server
     # Note: On shared hosting, it's often better to run 'npm run build' locally 
     # and commit the /public/build folder to GitHub instead of building on the server.
