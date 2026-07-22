@@ -41,7 +41,7 @@
     <section x-cloak x-show="type === 'cgi_clips'" class="admin-card rounded-lg border bg-white p-8">
         <div class="mb-6">
             <h3 class="text-lg font-bold text-gray-900">CGI clips</h3>
-            <p class="mt-1 text-sm text-gray-500">Add one to four clips. Each slot can use an uploaded video/GIF or an external URL.</p>
+            <p class="mt-1 text-sm text-gray-500">Upload the hazard video first, followed by the video explaining the hazard.</p>
         </div>
 
         @error('clips')
@@ -49,11 +49,11 @@
         @enderror
 
         <div class="grid grid-cols-1 gap-5 xl:grid-cols-2">
-            @for($slot = 0; $slot < 4; $slot++)
+            @for($slot = 0; $slot < 2; $slot++)
                 @php($currentClip = $isEditing ? $contentPage->clips->firstWhere('slot', $slot) : null)
                 <div class="admin-subcard rounded-lg border p-5">
                     <div class="mb-4 flex items-center justify-between">
-                        <h4 class="font-bold text-gray-800">Clip {{ $slot + 1 }}</h4>
+                        <h4 class="font-bold text-gray-800">{{ $slot === 0 ? '1. Hazard video' : '2. Explanation video' }}</h4>
                         @if($currentClip)
                             <a href="{{ $currentClip->source }}" target="_blank" rel="noopener noreferrer" class="text-xs font-medium text-primary hover:underline">View current clip</a>
                         @else
@@ -63,15 +63,10 @@
 
                     <div class="space-y-4">
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-gray-600">Upload a clip</label>
-                            <input type="file" name="clips[{{ $slot }}][media]" accept="video/mp4,video/webm,video/ogg,video/quicktime,image/gif" class="w-full rounded-md border border-gray-300 bg-white p-2 text-sm">
+                            <label class="mb-1 block text-xs font-medium text-gray-600">Upload video *</label>
+                            <input type="file" name="clips[{{ $slot }}][media]" accept="video/mp4,video/webm,video/ogg,video/quicktime" data-max-bytes="1073741824" @if(!$currentClip) required @endif class="w-full rounded-md border border-gray-300 bg-white p-2 text-sm">
+                            <p class="mt-1 text-xs text-gray-500">MP4, WebM, OGG or MOV; maximum 1 GB. {{ $currentClip ? 'Leave empty to keep the current video.' : '' }}</p>
                             @error("clips.$slot.media")<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-                        </div>
-
-                        <div>
-                            <label class="mb-1 block text-xs font-medium text-gray-600">Or replace with a URL</label>
-                            <input type="url" name="clips[{{ $slot }}][media_url]" value="{{ old("clips.$slot.media_url") }}" placeholder="https://..." class="w-full rounded-md border-gray-300 bg-white text-sm focus:border-primary focus:ring-primary">
-                            @error("clips.$slot.media_url")<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                         </div>
 
                         @if($currentClip)
@@ -136,4 +131,80 @@
         <a href="{{ route('admin.content-pages.index') }}" class="rounded-md border border-gray-300 bg-white px-5 py-2.5 font-medium text-gray-700 hover:bg-gray-50">Cancel</a>
         <button type="submit" class="rounded-md bg-primary px-5 py-2.5 font-medium text-white hover:bg-primary-dark">{{ $isEditing ? 'Save Changes' : 'Create Learning Page' }}</button>
     </div>
+
+    <div data-upload-progress class="hidden rounded-lg border border-blue-200 bg-blue-50 p-4" aria-live="polite">
+        <div class="mb-2 flex items-center justify-between text-sm font-medium text-blue-900">
+            <span data-upload-status>Uploading CGI clip…</span>
+            <span data-upload-percent>0%</span>
+        </div>
+        <div class="h-2.5 w-full overflow-hidden rounded-full bg-blue-100">
+            <div data-upload-bar class="h-full rounded-full bg-primary transition-[width] duration-150" style="width: 0%"></div>
+        </div>
+        <p class="mt-2 text-xs text-blue-800">Please keep this page open until the upload finishes.</p>
+    </div>
 </div>
+
+@once
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('form[action*="content-pages"]');
+            if (!form || form.dataset.uploadProgressReady) return;
+            form.dataset.uploadProgressReady = 'true';
+
+            const progress = form.querySelector('[data-upload-progress]');
+            const bar = form.querySelector('[data-upload-bar]');
+            const percent = form.querySelector('[data-upload-percent]');
+            const status = form.querySelector('[data-upload-status]');
+            const submit = form.querySelector('button[type="submit"]');
+
+            form.addEventListener('submit', (event) => {
+                const files = [...form.querySelectorAll('input[type="file"]')]
+                    .map((input) => input.files[0])
+                    .filter(Boolean);
+
+                const tooLarge = files.find((file) => file.size > 1073741824);
+                if (tooLarge) {
+                    event.preventDefault();
+                    window.alert(`${tooLarge.name} is larger than the 1 GB limit.`);
+                    return;
+                }
+
+                // Let the browser submit normally when this is a URL-only update.
+                if (!files.length) return;
+
+                event.preventDefault();
+                progress.classList.remove('hidden');
+                submit.disabled = true;
+                submit.classList.add('cursor-not-allowed', 'opacity-60');
+
+                const request = new XMLHttpRequest();
+                request.open(form.method || 'POST', form.action, true);
+                request.upload.addEventListener('progress', (uploadEvent) => {
+                    if (!uploadEvent.lengthComputable) return;
+                    const value = Math.round((uploadEvent.loaded / uploadEvent.total) * 100);
+                    bar.style.width = `${value}%`;
+                    percent.textContent = `${value}%`;
+                });
+                request.addEventListener('load', () => {
+                    if (request.status >= 200 && request.status < 400) {
+                        status.textContent = 'Upload complete. Saving CGI clip…';
+                        bar.style.width = '100%';
+                        percent.textContent = '100%';
+                        window.location.href = request.responseURL || form.action;
+                        return;
+                    }
+
+                    status.textContent = 'Upload failed. Please try again.';
+                    submit.disabled = false;
+                    submit.classList.remove('cursor-not-allowed', 'opacity-60');
+                });
+                request.addEventListener('error', () => {
+                    status.textContent = 'Upload failed. Check your connection and try again.';
+                    submit.disabled = false;
+                    submit.classList.remove('cursor-not-allowed', 'opacity-60');
+                });
+                request.send(new FormData(form));
+            });
+        });
+    </script>
+@endonce

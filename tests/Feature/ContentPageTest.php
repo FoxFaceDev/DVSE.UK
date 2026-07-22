@@ -33,7 +33,8 @@ function learningPageCategory(): Category
     ]);
 }
 
-test('an admin can create a CGI page with one clip and optional text', function () {
+test('an admin can create a CGI page with hazard and explanation videos', function () {
+    Storage::fake('public');
     $category = learningPageCategory();
 
     $response = $this->actingAs(learningPageAdmin(), 'admin')->post(route('admin.content-pages.store'), [
@@ -41,7 +42,8 @@ test('an admin can create a CGI page with one clip and optional text', function 
         'type' => ContentPage::TYPE_CGI_CLIPS,
         'text_en' => 'Compare how the vehicles move through the bend.',
         'clips' => [
-            0 => ['media_url' => 'https://example.com/cgi-clip.mp4'],
+            0 => ['media' => UploadedFile::fake()->create('hazard.mp4', 100, 'video/mp4')],
+            1 => ['media' => UploadedFile::fake()->create('explanation.mp4', 100, 'video/mp4')],
         ],
     ]);
 
@@ -53,8 +55,9 @@ test('an admin can create a CGI page with one clip and optional text', function 
     ]);
     $this->assertDatabaseHas('cgi_clips', [
         'slot' => 0,
-        'media_url' => 'https://example.com/cgi-clip.mp4',
+        'media_url' => null,
     ]);
+    $this->assertDatabaseHas('cgi_clips', ['slot' => 1, 'media_url' => null]);
     $this->get(route('admin.content-pages.index'))->assertOk()->assertSee('CGI clips');
 });
 

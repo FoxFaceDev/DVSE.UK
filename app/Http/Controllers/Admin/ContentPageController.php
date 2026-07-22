@@ -113,10 +113,9 @@ class ContentPageController extends Controller
     {
         $existingClips = $contentPage->clips()->get()->keyBy('slot');
 
-        foreach (range(0, 3) as $slot) {
+        foreach (range(0, 1) as $slot) {
             $existingClip = $existingClips->get($slot);
             $uploadedClip = $request->file("clips.$slot.media");
-            $clipUrl = trim((string) $request->input("clips.$slot.media_url", ''));
             $removeClip = $request->boolean("clips.$slot.remove");
 
             if ($uploadedClip) {
@@ -133,24 +132,19 @@ class ContentPageController extends Controller
                 continue;
             }
 
-            if ($clipUrl !== '') {
-                if ($existingClip) {
-                    $this->deleteStoredFile($existingClip->getRawOriginal('media_path'));
-                }
-
-                $contentPage->clips()->updateOrCreate(
-                    ['slot' => $slot],
-                    ['media_path' => null, 'media_url' => $clipUrl]
-                );
-
-                continue;
-            }
-
             if ($removeClip && $existingClip) {
                 $this->deleteStoredFile($existingClip->getRawOriginal('media_path'));
                 $existingClip->delete();
             }
         }
+
+        $contentPage->clips()
+            ->whereNotIn('slot', [0, 1])
+            ->get()
+            ->each(function ($clip) {
+                $this->deleteStoredFile($clip->getRawOriginal('media_path'));
+                $clip->delete();
+            });
     }
 
     private function storeSignImage(ContentPageRequest $request, ContentPage $contentPage): void

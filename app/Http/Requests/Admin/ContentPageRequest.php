@@ -26,14 +26,15 @@ class ContentPageRequest extends FormRequest
             ])],
             'text_en' => ['nullable', 'string', 'max:10000'],
             'text_ku' => ['nullable', 'string', 'max:10000'],
-            'clips' => ['nullable', 'array', 'max:4'],
+            'clips' => ['nullable', 'array', 'size:2'],
             'clips.*.media' => [
                 'nullable',
                 'file',
-                'mimetypes:video/mp4,video/webm,video/ogg,video/quicktime,image/gif',
-                'max:102400',
+                'mimetypes:video/mp4,video/webm,video/ogg,video/quicktime',
+                // Laravel file sizes are measured in kilobytes. 1 GiB = 1,048,576 KB.
+                'max:1048576',
             ],
-            'clips.*.media_url' => ['nullable', 'url:http,https', 'max:2048'],
+            'clips.*.media_url' => ['prohibited'],
             'clips.*.remove' => ['nullable', 'boolean'],
             'sign_image' => [
                 $isMotorwaySign && $this->signImageIsRequired() ? 'required' : 'nullable',
@@ -61,19 +62,11 @@ class ContentPageRequest extends FormRequest
                 : collect();
             $hasClip = false;
 
-            foreach (range(0, 3) as $slot) {
+            foreach (range(0, 1) as $slot) {
                 $uploadedClip = $this->file("clips.$slot.media");
-                $clipUrl = trim((string) $this->input("clips.$slot.media_url", ''));
                 $removeClip = $this->boolean("clips.$slot.remove");
 
-                if ($uploadedClip && $clipUrl !== '') {
-                    $validator->errors()->add(
-                        "clips.$slot.media",
-                        'Choose either an uploaded clip or a URL for this slot, not both.'
-                    );
-                }
-
-                if ($uploadedClip || $clipUrl !== '') {
+                if ($uploadedClip) {
                     $hasClip = true;
 
                     continue;
@@ -81,11 +74,16 @@ class ContentPageRequest extends FormRequest
 
                 if (! $removeClip && $existingClips->has($slot)) {
                     $hasClip = true;
+                } elseif (! $uploadedClip) {
+                    $validator->errors()->add(
+                        "clips.$slot.media",
+                        $slot === 0 ? 'Upload the hazard video.' : 'Upload the explanation video.'
+                    );
                 }
             }
 
             if (! $hasClip) {
-                $validator->errors()->add('clips', 'Add at least one CGI clip. You can add up to four.');
+                $validator->errors()->add('clips', 'Upload both the hazard video and the explanation video.');
             }
         });
     }

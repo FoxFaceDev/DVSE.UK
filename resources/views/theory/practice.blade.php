@@ -159,29 +159,26 @@
                         <template x-if="currentItem.item_type === 'cgi_clips'">
                             <article class="mb-6 overflow-hidden rounded-xl border border-purple-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]">
                                 <div class="flex items-center justify-between border-b border-purple-100 bg-purple-50 px-5 py-3">
-                                    <h2 class="font-heading font-bold text-purple-900">CGI clips</h2>
-                                    <span class="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-purple-700" x-text="currentItem.clips.length + (currentItem.clips.length === 1 ? ' clip' : ' clips')"></span>
+                                    <h2 class="font-heading font-bold text-purple-900">CGI hazard</h2>
+                                    <span class="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-purple-700" x-text="cgiVideoIndex === 0 ? 'Hazard video' : 'Explanation video'"></span>
                                 </div>
 
                                 <div class="p-4">
-                                    <div class="grid grid-cols-2 gap-2.5">
-                                        <template x-for="clip in currentItem.clips" :key="clip.id">
-                                            <div class="aspect-video overflow-hidden rounded-lg bg-gray-950 shadow-sm">
-                                                <template x-if="getYoutubeId(clip.source)">
-                                                    <iframe class="h-full w-full" :src="youtubeEmbedUrl(clip.source, true)" title="CGI clip" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                                                </template>
-                                                <template x-if="!getYoutubeId(clip.source) && isGif(clip.source)">
-                                                    <img :src="clip.source" alt="CGI clip" class="h-full w-full object-contain">
-                                                </template>
-                                                <template x-if="!getYoutubeId(clip.source) && !isGif(clip.source)">
-                                                    <video :src="clip.source" autoplay muted loop controls playsinline preload="metadata" class="h-full w-full object-contain"></video>
-                                                </template>
-                                            </div>
+                                    <div class="mx-auto aspect-video w-full max-w-3xl overflow-hidden rounded-lg bg-gray-950 shadow-sm">
+                                        <template x-if="currentItem.clips && currentItem.clips[cgiVideoIndex]">
+                                            <video
+                                                :key="'cgi-video-' + currentIndex + '-' + cgiVideoIndex"
+                                                :src="currentItem.clips[cgiVideoIndex].source"
+                                                autoplay muted controls playsinline preload="auto"
+                                                @ended="cgiFirstVideoEnded()"
+                                                class="h-full w-full object-contain"
+                                            ></video>
                                         </template>
                                     </div>
 
-                                    <template x-if="currentItem.text_en || (showKurdish && currentItem.text_ku)">
-                                        <div class="mt-5 border-t border-gray-100 pt-5">
+                                    <template x-if="cgiExplanationVisible && (currentItem.text_en || (showKurdish && currentItem.text_ku))">
+                                        <div class="mx-auto mt-5 max-w-3xl border-t border-gray-100 pt-5">
+                                            <h3 class="mb-2 font-heading font-bold text-purple-900">Explanation</h3>
                                             <p x-show="currentItem.text_en" class="leading-relaxed text-gray-800" x-text="currentItem.text_en"></p>
                                             <template x-if="showKurdish && currentItem.text_ku">
                                                 <p class="mt-3 text-right leading-relaxed text-gray-700" dir="rtl" x-text="currentItem.text_ku"></p>
@@ -253,6 +250,8 @@
                 selectedChoiceId: null,
                 showQuestionExplanation: false,
                 signExplanationVisible: false,
+                cgiVideoIndex: 0,
+                cgiExplanationVisible: false,
                 showKurdish: false,
                 adData: null,
                 adPosition: -1,
@@ -295,6 +294,12 @@
 
                 get canContinue() {
                     return this.currentItem.item_type !== 'question' || this.hasAnswered;
+                },
+
+                cgiFirstVideoEnded() {
+                    if (this.cgiVideoIndex !== 0) return;
+                    this.cgiExplanationVisible = true;
+                    this.cgiVideoIndex = 1;
                 },
 
                 get totalQuestions() {
@@ -358,6 +363,8 @@
                     this.selectedChoiceId = answer ? answer.choiceId : null;
                     this.showQuestionExplanation = false;
                     this.signExplanationVisible = false;
+                    this.cgiVideoIndex = 0;
+                    this.cgiExplanationVisible = false;
                 },
 
                 triggerAd() {
