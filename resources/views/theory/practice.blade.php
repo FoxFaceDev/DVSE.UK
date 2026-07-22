@@ -148,9 +148,13 @@
                                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                         Explanation
                                     </h4>
+                                    <p class="mb-1 text-xs font-bold uppercase tracking-wide text-primary">English explanation</p>
                                     <p class="text-sm text-gray-800" x-text="currentItem.explanation_en || 'No explanation provided.'"></p>
                                     <template x-if="showKurdish && currentItem.explanation_ku">
-                                        <p class="mt-2 text-right text-sm text-gray-800" dir="rtl" x-text="currentItem.explanation_ku"></p>
+                                        <div class="mt-4 border-t border-blue-200 pt-3">
+                                            <p class="mb-1 text-right text-xs font-bold uppercase tracking-wide text-primary" dir="rtl">ڕوونکردنەوەی کوردی</p>
+                                            <p class="text-right text-sm text-gray-800" dir="rtl" x-text="currentItem.explanation_ku"></p>
+                                        </div>
                                     </template>
                                 </div>
                             </div>

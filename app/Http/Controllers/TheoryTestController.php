@@ -23,7 +23,7 @@ class TheoryTestController extends Controller
             ->concat($contentPages->map(fn ($contentPage) => array_merge($contentPage->toArray(), [
                 'item_type' => $contentPage->type,
             ])))
-            ->sortBy(fn ($item) => ($item['created_at'] ?? '').'|'.$item['item_type'].'|'.str_pad((string) $item['id'], 10, '0', STR_PAD_LEFT))
+            ->shuffle()
             ->values();
 
         // Fetch an active ad for this category (or global ad)
