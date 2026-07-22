@@ -169,24 +169,76 @@
                         <template x-if="currentItem.item_type === 'cgi_clips'">
                             <article class="mb-6 overflow-hidden rounded-xl border border-purple-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]">
                                 <div class="flex items-center justify-between border-b border-purple-100 bg-purple-50 px-5 py-3">
-                                    <h2 class="font-heading font-bold text-purple-900">CGI hazard</h2>
-                                    <span class="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-purple-700" x-text="cgiVideoIndex === 0 ? 'Hazard video' : 'Explanation video'"></span>
+                                    <h2 class="font-heading font-bold text-purple-900">Hazard perception</h2>
+                                    <span class="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-purple-700" x-text="cgiStageLabel"></span>
                                 </div>
 
                                 <div class="p-4">
-                                    <div class="mx-auto aspect-video w-full max-w-3xl overflow-hidden rounded-lg bg-gray-950 shadow-sm">
-                                        <template x-if="currentItem.clips && currentItem.clips[cgiVideoIndex]">
+                                    <template x-if="cgiStage === 'hazard'">
+                                        <div>
+                                            <p class="mx-auto mb-3 max-w-3xl text-center text-sm font-medium text-gray-700">Tap the video whenever you see a developing hazard.</p>
+                                            <div x-ref="cgiHazardPlayer" class="cgi-hazard-shell mx-auto w-full max-w-3xl overflow-hidden rounded-lg bg-white shadow-sm" :class="{ 'cgi-landscape-fallback': cgiFullscreenFallback }">
+                                                <div class="cgi-video-frame relative aspect-video overflow-hidden bg-gray-950">
+                                                    <video
+                                                        x-ref="cgiHazardVideo"
+                                                        :key="'cgi-hazard-' + currentIndex"
+                                                        :src="currentItem.clips[0].source"
+                                                        playsinline preload="auto"
+                                                        @ended="finishCgiHazard()"
+                                                        class="h-full w-full object-contain"
+                                                    ></video>
+
+                                                    <button x-show="cgiHazardStarted" type="button" @click="placeCgiFlag($event)" class="absolute inset-0 z-10 cursor-crosshair touch-manipulation" aria-label="Flag a developing hazard"></button>
+
+                                                    <div x-show="!cgiHazardStarted" class="absolute inset-0 z-30 flex items-center justify-center bg-black/55 px-5 text-center">
+                                                        <button type="button" @click="startCgiHazard()" class="min-h-14 rounded-full bg-white px-7 py-3 font-bold text-purple-900 shadow-lg transition-transform hover:scale-105">
+                                                            Start hazard clip with sound
+                                                        </button>
+                                                    </div>
+
+                                                    <button type="button" @click.stop="toggleCgiFullscreen()" class="absolute bottom-2 right-2 z-40 flex h-10 w-10 items-center justify-center rounded-md bg-black/70 text-white hover:bg-black" title="Landscape fullscreen" aria-label="Open landscape fullscreen">
+                                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4h4m8 0h4v4m0 8v4h-4M8 20H4v-4"/></svg>
+                                                    </button>
+                                                </div>
+
+                                                <div class="cgi-flag-strip flex min-h-16 items-center gap-1 overflow-x-auto border-t border-gray-200 bg-white px-3 py-2" aria-live="polite">
+                                                    <template x-if="cgiFlags.length === 0">
+                                                        <span class="text-sm text-gray-400">Your flags will appear here</span>
+                                                    </template>
+                                                    <template x-for="flag in cgiFlags" :key="flag.id">
+                                                        <svg class="h-11 w-11 flex-none text-red-600 drop-shadow-sm" viewBox="0 0 24 24" fill="currentColor" aria-label="Hazard flag">
+                                                            <path d="M5 2.5a1 1 0 0 1 2 0V4h11.2a1 1 0 0 1 .9 1.43L17.4 9l1.7 3.57a1 1 0 0 1-.9 1.43H7v7.5a1 1 0 0 1-2 0v-19Z"/>
+                                                        </svg>
+                                                    </template>
+                                                    <span class="ml-auto flex-none rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-700"><span x-text="cgiFlags.length"></span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="cgiStage === 'result'">
+                                        <div class="mx-auto flex aspect-video w-full max-w-3xl flex-col items-center justify-center rounded-lg bg-purple-950 px-6 text-center text-white shadow-sm">
+                                            <p class="text-sm font-bold uppercase tracking-widest text-purple-200">Hazard score</p>
+                                            <p class="mt-3 font-heading text-6xl font-bold"><span x-text="cgiScore"></span><span class="text-3xl text-purple-300">/<span x-text="cgiMaxScore"></span></span></p>
+                                            <p class="mt-3 text-sm text-purple-100" x-text="cgiResultMessage"></p>
+                                            <p class="mt-1 text-xs text-purple-300"><span x-text="cgiFlags.length"></span> flags placed</p>
+                                            <button type="button" @click="startCgiExplanation()" class="mt-6 min-h-12 rounded-lg bg-white px-6 py-3 font-bold text-purple-900 shadow-sm transition-colors hover:bg-purple-50">See explanation video</button>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="cgiStage === 'explanation'">
+                                        <div class="mx-auto aspect-video w-full max-w-3xl overflow-hidden rounded-lg bg-gray-950 shadow-sm">
                                             <video
-                                                :key="'cgi-video-' + currentIndex + '-' + cgiVideoIndex"
-                                                :src="currentItem.clips[cgiVideoIndex].source"
-                                                autoplay muted controls playsinline preload="auto"
-                                                @ended="cgiFirstVideoEnded()"
+                                                x-ref="cgiExplanationVideo"
+                                                :key="'cgi-explanation-' + currentIndex"
+                                                :src="currentItem.clips[1].source"
+                                                controls playsinline preload="auto"
                                                 class="h-full w-full object-contain"
                                             ></video>
-                                        </template>
-                                    </div>
+                                        </div>
+                                    </template>
 
-                                    <template x-if="cgiExplanationVisible && (currentItem.text_en || (showKurdish && currentItem.text_ku))">
+                                    <template x-if="cgiStage === 'explanation' && (currentItem.text_en || (showKurdish && currentItem.text_ku))">
                                         <div class="mx-auto mt-5 max-w-3xl border-t border-gray-100 pt-5">
                                             <h3 class="mb-2 font-heading font-bold text-purple-900">Explanation</h3>
                                             <p x-show="currentItem.text_en" class="leading-relaxed text-gray-800" x-text="currentItem.text_en"></p>
@@ -248,6 +300,38 @@
         </template>
     </div>
 
+    <style>
+        .cgi-hazard-shell:fullscreen,
+        .cgi-hazard-shell:-webkit-full-screen,
+        .cgi-hazard-shell.cgi-landscape-fallback {
+            display: flex;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            flex-direction: column;
+            border-radius: 0;
+            background: #000;
+        }
+
+        .cgi-hazard-shell:fullscreen .cgi-video-frame,
+        .cgi-hazard-shell:-webkit-full-screen .cgi-video-frame,
+        .cgi-hazard-shell.cgi-landscape-fallback .cgi-video-frame {
+            min-height: 0;
+            flex: 1 1 auto;
+            aspect-ratio: auto;
+        }
+
+        .cgi-hazard-shell:fullscreen .cgi-flag-strip,
+        .cgi-hazard-shell:-webkit-full-screen .cgi-flag-strip,
+        .cgi-hazard-shell.cgi-landscape-fallback .cgi-flag-strip {
+            min-height: 4.75rem;
+            flex: 0 0 auto;
+        }
+    </style>
+
     <script>
         function practiceRunner() {
             return {
@@ -260,8 +344,13 @@
                 selectedChoiceId: null,
                 showQuestionExplanation: false,
                 signExplanationVisible: false,
-                cgiVideoIndex: 0,
-                cgiExplanationVisible: false,
+                cgiStage: 'hazard',
+                cgiFlags: [],
+                cgiFlagSequence: 0,
+                cgiScore: 0,
+                cgiRangeScores: [],
+                cgiHazardStarted: false,
+                cgiFullscreenFallback: false,
                 languagePreference: 'en',
                 showKurdish: false,
                 adData: null,
@@ -305,13 +394,147 @@
                 },
 
                 get canContinue() {
-                    return this.currentItem.item_type !== 'question' || this.hasAnswered;
+                    if (this.currentItem.item_type === 'question') return this.hasAnswered;
+                    if (this.currentItem.item_type === 'cgi_clips') return this.cgiStage === 'explanation';
+                    return true;
                 },
 
-                cgiFirstVideoEnded() {
-                    if (this.cgiVideoIndex !== 0) return;
-                    this.cgiExplanationVisible = true;
-                    this.cgiVideoIndex = 1;
+                get cgiStageLabel() {
+                    if (this.cgiStage === 'result') return 'Your score';
+                    if (this.cgiStage === 'explanation') return 'Explanation video';
+                    return 'Hazard video';
+                },
+
+                get cgiResultMessage() {
+                    const ratio = this.cgiMaxScore > 0 ? this.cgiScore / this.cgiMaxScore : 0;
+                    if (ratio === 1) return 'Excellent — you identified every hazard very early.';
+                    if (ratio >= 0.6) return 'Good — you identified the developing hazards.';
+                    if (this.cgiScore > 0) return 'You identified the hazard, but a little late.';
+                    return 'No hazard was identified inside a scoring window.';
+                },
+
+                get cgiHazardRanges() {
+                    const ranges = Array.isArray(this.currentItem.hazard_windows)
+                        ? this.currentItem.hazard_windows.filter(range => Number(range.end) > Number(range.start))
+                        : [];
+
+                    if (ranges.length) return ranges;
+
+                    const legacyStart = Number(this.currentItem.hazard_window_start);
+                    const legacyEnd = Number(this.currentItem.hazard_window_end);
+                    return legacyEnd > legacyStart ? [{ start: legacyStart, end: legacyEnd, points: 5 }] : [];
+                },
+
+                get cgiMaxScore() {
+                    return this.cgiHazardRanges.reduce(
+                        (total, range) => total + Math.max(1, Number.parseInt(range.points, 10) || 5),
+                        0
+                    ) || 5;
+                },
+
+                startCgiHazard() {
+                    const video = this.$refs.cgiHazardVideo;
+                    if (!video) return;
+
+                    video.muted = false;
+                    video.volume = 1;
+                    const playback = video.play();
+                    if (playback) {
+                        playback.then(() => {
+                            this.cgiHazardStarted = true;
+                        }).catch(() => {
+                            this.cgiHazardStarted = false;
+                        });
+                    } else {
+                        this.cgiHazardStarted = true;
+                    }
+                },
+
+                placeCgiFlag(event) {
+                    if (this.cgiStage !== 'hazard') return;
+
+                    const video = this.$refs.cgiHazardVideo;
+                    if (!video) return;
+
+                    const time = Number(video.currentTime || 0);
+                    const clickScores = this.cgiHazardRanges.map(range => this.cgiScoreForRange(time, range));
+                    const score = clickScores.length ? Math.max(...clickScores) : 0;
+
+                    this.cgiRangeScores = clickScores.map((rangeScore, index) =>
+                        Math.max(this.cgiRangeScores[index] || 0, rangeScore)
+                    );
+
+                    this.cgiFlags.push({
+                        id: ++this.cgiFlagSequence,
+                        time,
+                        score,
+                    });
+                    this.cgiScore = this.cgiRangeScores.reduce((total, rangeScore) => total + rangeScore, 0);
+                },
+
+                cgiScoreForRange(time, range) {
+                    const start = Number(range.start);
+                    const end = Number(range.end);
+                    const maxPoints = Math.max(1, Number.parseInt(range.points, 10) || 5);
+
+                    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start || time < start || time > end) {
+                        return 0;
+                    }
+
+                    const zone = Math.min(maxPoints - 1, Math.floor(((time - start) / (end - start)) * maxPoints));
+                    return maxPoints - zone;
+                },
+
+                finishCgiHazard() {
+                    this.exitCgiFullscreen();
+                    if (this.cgiStage === 'hazard') this.cgiStage = 'result';
+                },
+
+                startCgiExplanation() {
+                    this.cgiStage = 'explanation';
+                    this.$nextTick(() => {
+                        const video = this.$refs.cgiExplanationVideo;
+                        if (!video) return;
+                        video.muted = false;
+                        video.volume = 1;
+                        video.play().catch(() => {});
+                    });
+                },
+
+                async toggleCgiFullscreen() {
+                    if (document.fullscreenElement || this.cgiFullscreenFallback) {
+                        this.exitCgiFullscreen();
+                        return;
+                    }
+
+                    const player = this.$refs.cgiHazardPlayer;
+                    if (!player) return;
+
+                    if (player.requestFullscreen) {
+                        try {
+                            await player.requestFullscreen();
+                            if (screen.orientation && screen.orientation.lock) {
+                                screen.orientation.lock('landscape').catch(() => {});
+                            }
+                            return;
+                        } catch (error) {
+                            // Use the full-viewport fallback below.
+                        }
+                    }
+
+                    this.cgiFullscreenFallback = true;
+                    document.body.style.overflow = 'hidden';
+                },
+
+                exitCgiFullscreen() {
+                    if (document.fullscreenElement && document.exitFullscreen) {
+                        document.exitFullscreen().catch(() => {});
+                    }
+                    if (screen.orientation && screen.orientation.unlock) {
+                        try { screen.orientation.unlock(); } catch (error) {}
+                    }
+                    this.cgiFullscreenFallback = false;
+                    document.body.style.removeProperty('overflow');
                 },
 
                 get totalQuestions() {
@@ -333,7 +556,7 @@
                     }
 
                     if (this.currentItem.item_type === 'cgi_clips') {
-                        return this.currentItem.text_en || '';
+                        return this.cgiStage === 'explanation' ? (this.currentItem.text_en || '') : '';
                     }
 
                     return this.signExplanationVisible ? (this.currentItem.explanation_en || '') : '';
@@ -375,8 +598,13 @@
                     this.selectedChoiceId = answer ? answer.choiceId : null;
                     this.showQuestionExplanation = false;
                     this.signExplanationVisible = false;
-                    this.cgiVideoIndex = 0;
-                    this.cgiExplanationVisible = false;
+                    this.cgiStage = 'hazard';
+                    this.cgiFlags = [];
+                    this.cgiFlagSequence = 0;
+                    this.cgiScore = 0;
+                    this.cgiRangeScores = [];
+                    this.cgiHazardStarted = false;
+                    this.exitCgiFullscreen();
                 },
 
                 triggerAd() {

@@ -91,6 +91,19 @@ class ContentPageController extends Controller
 
     private function pageData(ContentPageRequest $request): array
     {
+        $isCgiClips = $request->input('type') === ContentPage::TYPE_CGI_CLIPS;
+        $hazardWindows = $isCgiClips
+            ? collect($request->input('hazard_windows', []))
+                ->map(fn ($window) => [
+                    'start' => (float) $window['start'],
+                    'end' => (float) $window['end'],
+                    'points' => (int) $window['points'],
+                ])
+                ->values()
+                ->all()
+            : null;
+        $firstHazardWindow = $hazardWindows[0] ?? null;
+
         return [
             'category_id' => $request->integer('category_id'),
             'type' => $request->input('type'),
@@ -100,6 +113,10 @@ class ContentPageController extends Controller
             'text_ku' => $request->input('type') === ContentPage::TYPE_CGI_CLIPS
                 ? $request->input('text_ku')
                 : null,
+            // Keep the original columns synchronized for backward compatibility.
+            'hazard_window_start' => $firstHazardWindow['start'] ?? null,
+            'hazard_window_end' => $firstHazardWindow['end'] ?? null,
+            'hazard_windows' => $hazardWindows,
             'explanation_en' => $request->input('type') === ContentPage::TYPE_MOTORWAY_SIGN
                 ? $request->input('explanation_en')
                 : null,

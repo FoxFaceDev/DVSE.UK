@@ -50,8 +50,25 @@ class TheoryTestController extends Controller
 
     public function mockTestStart(SubSection $subSection)
     {
-        // Get 50 random questions from the database for the official mock test
-        $questions = Question::with('choices')->inRandomOrder()->limit(50)->get();
+        $videoQuestions = Question::with('choices')
+            ->where('media_type', 'video')
+            ->inRandomOrder()
+            ->limit(3)
+            ->get();
+
+        $nonVideoQuestions = Question::with('choices')
+            ->where(function ($query) {
+                $query->whereNull('media_type')
+                    ->orWhere('media_type', '!=', 'video');
+            })
+            ->inRandomOrder()
+            ->limit(50 - $videoQuestions->count())
+            ->get();
+
+        // Video questions are deliberately appended so they are always the final three.
+        $questions = $nonVideoQuestions
+            ->concat($videoQuestions)
+            ->values();
 
         return view('theory.mock_test', compact('subSection', 'questions'));
     }

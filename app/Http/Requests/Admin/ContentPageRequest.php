@@ -17,6 +17,7 @@ class ContentPageRequest extends FormRequest
     public function rules(): array
     {
         $isMotorwaySign = $this->input('type') === ContentPage::TYPE_MOTORWAY_SIGN;
+        $isCgiClips = $this->input('type') === ContentPage::TYPE_CGI_CLIPS;
 
         return [
             'category_id' => ['required', 'integer', 'exists:categories,id'],
@@ -26,6 +27,10 @@ class ContentPageRequest extends FormRequest
             ])],
             'text_en' => ['nullable', 'string', 'max:10000'],
             'text_ku' => ['nullable', 'string', 'max:10000'],
+            'hazard_windows' => [$isCgiClips ? 'required' : 'nullable', 'array', 'min:1', 'max:20'],
+            'hazard_windows.*.start' => ['required', 'numeric', 'min:0'],
+            'hazard_windows.*.end' => ['required', 'numeric', 'min:0.01'],
+            'hazard_windows.*.points' => ['required', 'integer', 'min:1', 'max:100'],
             'clips' => ['nullable', 'array', 'size:2'],
             'clips.*.media' => [
                 'nullable',
@@ -54,6 +59,18 @@ class ContentPageRequest extends FormRequest
         $validator->after(function (Validator $validator) {
             if ($this->input('type') !== ContentPage::TYPE_CGI_CLIPS) {
                 return;
+            }
+
+            foreach ($this->input('hazard_windows', []) as $index => $window) {
+                $start = isset($window['start']) && is_numeric($window['start']) ? (float) $window['start'] : null;
+                $end = isset($window['end']) && is_numeric($window['end']) ? (float) $window['end'] : null;
+
+                if ($start !== null && $end !== null && $end <= $start) {
+                    $validator->errors()->add(
+                        "hazard_windows.$index.end",
+                        'The hazard end time must be after its start time.'
+                    );
+                }
             }
 
             $contentPage = $this->route('content_page');
@@ -94,6 +111,10 @@ class ContentPageRequest extends FormRequest
             'category_id' => 'category',
             'text_en' => 'English text',
             'text_ku' => 'Kurdish text',
+            'hazard_windows' => 'hazard scoring ranges',
+            'hazard_windows.*.start' => 'hazard start time',
+            'hazard_windows.*.end' => 'hazard end time',
+            'hazard_windows.*.points' => 'hazard points',
             'sign_image' => 'motorway sign image',
             'explanation_en' => 'English explanation',
             'explanation_ku' => 'Kurdish explanation',

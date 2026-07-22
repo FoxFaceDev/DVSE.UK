@@ -2,9 +2,32 @@
     $isEditing = isset($contentPage) && $contentPage;
     $currentType = old('type', $isEditing ? $contentPage->type : ($selectedType ?? 'cgi_clips'));
     $currentCategoryId = old('category_id', $isEditing ? $contentPage->category_id : ($selectedCategoryId ?? null));
+    $hazardWindows = old('hazard_windows');
+
+    if ($hazardWindows === null) {
+        $hazardWindows = $isEditing ? $contentPage->hazard_windows : null;
+    }
+
+    if (! $hazardWindows && $isEditing && $contentPage->hazard_window_start !== null && $contentPage->hazard_window_end !== null) {
+        $hazardWindows = [[
+            'start' => $contentPage->hazard_window_start,
+            'end' => $contentPage->hazard_window_end,
+            'points' => 5,
+        ]];
+    }
+
+    $hazardWindows = collect($hazardWindows ?: [['start' => '', 'end' => '', 'points' => 5]])
+        ->values()
+        ->map(fn ($window, $index) => [
+            'key' => $index + 1,
+            'start' => $window['start'] ?? '',
+            'end' => $window['end'] ?? '',
+            'points' => $window['points'] ?? 5,
+        ])
+        ->all();
 @endphp
 
-<div x-data="{ type: @js($currentType) }" class="space-y-6">
+<div x-data="{ type: @js($currentType), hazardWindows: @js($hazardWindows), nextHazardRangeId: {{ count($hazardWindows) + 1 }} }" class="space-y-6">
     @if($errors->any())
         <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
             <p class="font-bold">Please correct the following:</p>
@@ -64,7 +87,7 @@
                     <div class="space-y-4">
                         <div>
                             <label class="mb-1 block text-xs font-medium text-gray-600">Upload video *</label>
-                            <input type="file" name="clips[{{ $slot }}][media]" accept="video/mp4,video/webm,video/ogg,video/quicktime" data-max-bytes="1073741824" @if(!$currentClip) required @endif class="w-full rounded-md border border-gray-300 bg-white p-2 text-sm">
+                            <input type="file" name="clips[{{ $slot }}][media]" accept="video/mp4,video/webm,video/ogg,video/quicktime" data-max-bytes="1073741824" :required="type === 'cgi_clips' && {{ $currentClip ? 'false' : 'true' }}" class="w-full rounded-md border border-gray-300 bg-white p-2 text-sm">
                             <p class="mt-1 text-xs text-gray-500">MP4, WebM, OGG or MOV; maximum 1 GB. {{ $currentClip ? 'Leave empty to keep the current video.' : '' }}</p>
                             @error("clips.$slot.media")<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                         </div>
@@ -80,14 +103,50 @@
             @endfor
         </div>
 
+        <div class="mt-7 rounded-lg border border-amber-200 bg-amber-50 p-5">
+            <h4 class="font-bold text-amber-900">Hazard scoring windows</h4>
+            <p class="mt-1 text-sm text-amber-800">Add one range for every developing hazard, then choose the maximum points available for that range.</p>
+
+            @error('hazard_windows')<p class="mt-3 text-sm text-red-600">{{ $message }}</p>@enderror
+
+            <div class="mt-4 space-y-4">
+                <template x-for="(window, index) in hazardWindows" :key="window.key">
+                    <div class="rounded-lg border border-amber-200 bg-white/80 p-4">
+                        <div class="mb-3 flex items-center justify-between">
+                            <h5 class="font-bold text-gray-800">Hazard range <span x-text="index + 1"></span></h5>
+                            <button x-show="hazardWindows.length > 1" type="button" @click="hazardWindows.splice(index, 1)" class="text-sm font-medium text-red-600 hover:text-red-700">Remove</button>
+                        </div>
+                        <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                            <div>
+                                <label class="mb-1 block text-sm font-medium text-gray-700">Starts at (seconds) *</label>
+                                <input type="number" :name="`hazard_windows[${index}][start]`" x-model="window.start" min="0" step="0.01" :required="type === 'cgi_clips'" placeholder="Example: 8.50" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-sm font-medium text-gray-700">Ends at (seconds) *</label>
+                                <input type="number" :name="`hazard_windows[${index}][end]`" x-model="window.end" min="0.01" step="0.01" :required="type === 'cgi_clips'" placeholder="Example: 13.50" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-sm font-medium text-gray-700">Maximum points *</label>
+                                <input type="number" :name="`hazard_windows[${index}][points]`" x-model="window.points" min="1" max="100" step="1" :required="type === 'cgi_clips'" placeholder="Example: 5" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <button type="button" @click="hazardWindows.push({ key: nextHazardRangeId++, start: '', end: '', points: 5 })" class="mt-4 inline-flex min-h-11 items-center gap-2 rounded-md border border-amber-400 bg-white px-4 py-2 text-sm font-bold text-amber-900 hover:bg-amber-100">
+                <span class="text-lg leading-none">+</span> Add another hazard range
+            </button>
+        </div>
+
         <div class="mt-7 grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Text under clips (English)</label>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Explanation text (English)</label>
                 <textarea name="text_en" rows="4" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">{{ old('text_en', $isEditing ? $contentPage->text_en : '') }}</textarea>
                 <p class="mt-1 text-xs text-gray-500">Optional.</p>
             </div>
             <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Text under clips (Kurdish)</label>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Explanation text (Kurdish)</label>
                 <textarea name="text_ku" dir="rtl" rows="4" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">{{ old('text_ku', $isEditing ? $contentPage->text_ku : '') }}</textarea>
                 <p class="mt-1 text-xs text-gray-500">Optional.</p>
             </div>

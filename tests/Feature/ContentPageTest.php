@@ -41,6 +41,10 @@ test('an admin can create a CGI page with hazard and explanation videos', functi
         'category_id' => $category->id,
         'type' => ContentPage::TYPE_CGI_CLIPS,
         'text_en' => 'Compare how the vehicles move through the bend.',
+        'hazard_windows' => [
+            ['start' => 8.5, 'end' => 13.5, 'points' => 5],
+            ['start' => 22, 'end' => 27, 'points' => 8],
+        ],
         'clips' => [
             0 => ['media' => UploadedFile::fake()->create('hazard.mp4', 100, 'video/mp4')],
             1 => ['media' => UploadedFile::fake()->create('explanation.mp4', 100, 'video/mp4')],
@@ -52,6 +56,13 @@ test('an admin can create a CGI page with hazard and explanation videos', functi
         'category_id' => $category->id,
         'type' => ContentPage::TYPE_CGI_CLIPS,
         'text_en' => 'Compare how the vehicles move through the bend.',
+        'hazard_window_start' => 8.5,
+        'hazard_window_end' => 13.5,
+    ]);
+    $page = ContentPage::where('type', ContentPage::TYPE_CGI_CLIPS)->firstOrFail();
+    expect($page->hazard_windows)->toBe([
+        ['start' => 8.5, 'end' => 13.5, 'points' => 5],
+        ['start' => 22, 'end' => 27, 'points' => 8],
     ]);
     $this->assertDatabaseHas('cgi_clips', [
         'slot' => 0,
@@ -59,6 +70,10 @@ test('an admin can create a CGI page with hazard and explanation videos', functi
     ]);
     $this->assertDatabaseHas('cgi_clips', ['slot' => 1, 'media_url' => null]);
     $this->get(route('admin.content-pages.index'))->assertOk()->assertSee('CGI clips');
+    $this->get(route('admin.content-pages.create'))
+        ->assertOk()
+        ->assertSee('Add another hazard range')
+        ->assertSee('Maximum points');
 });
 
 test('a CGI page requires at least one remaining clip', function () {
@@ -75,6 +90,9 @@ test('a CGI page requires at least one remaining clip', function () {
     $response = $this->actingAs(learningPageAdmin(), 'admin')->put(route('admin.content-pages.update', $page), [
         'category_id' => $category->id,
         'type' => ContentPage::TYPE_CGI_CLIPS,
+        'hazard_windows' => [
+            ['start' => 8.5, 'end' => 13.5, 'points' => 5],
+        ],
         'clips' => [
             0 => ['remove' => '1'],
         ],
@@ -82,6 +100,44 @@ test('a CGI page requires at least one remaining clip', function () {
 
     $response->assertSessionHasErrors('clips');
     expect($clip->fresh())->not->toBeNull();
+});
+
+test('a CGI page requires a valid hazard scoring window', function () {
+    Storage::fake('public');
+    $category = learningPageCategory();
+
+    $response = $this->actingAs(learningPageAdmin(), 'admin')->post(route('admin.content-pages.store'), [
+        'category_id' => $category->id,
+        'type' => ContentPage::TYPE_CGI_CLIPS,
+        'hazard_windows' => [
+            ['start' => 12, 'end' => 8, 'points' => 5],
+        ],
+        'clips' => [
+            0 => ['media' => UploadedFile::fake()->create('hazard.mp4', 100, 'video/mp4')],
+            1 => ['media' => UploadedFile::fake()->create('explanation.mp4', 100, 'video/mp4')],
+        ],
+    ]);
+
+    $response->assertSessionHasErrors('hazard_windows.0.end');
+});
+
+test('each CGI hazard range requires a positive point value', function () {
+    Storage::fake('public');
+    $category = learningPageCategory();
+
+    $response = $this->actingAs(learningPageAdmin(), 'admin')->post(route('admin.content-pages.store'), [
+        'category_id' => $category->id,
+        'type' => ContentPage::TYPE_CGI_CLIPS,
+        'hazard_windows' => [
+            ['start' => 8, 'end' => 12, 'points' => 0],
+        ],
+        'clips' => [
+            0 => ['media' => UploadedFile::fake()->create('hazard.mp4', 100, 'video/mp4')],
+            1 => ['media' => UploadedFile::fake()->create('explanation.mp4', 100, 'video/mp4')],
+        ],
+    ]);
+
+    $response->assertSessionHasErrors('hazard_windows.0.points');
 });
 
 test('an admin can create a motorway sign page with an explanation', function () {
@@ -143,11 +199,16 @@ test('practice contains questions CGI pages and motorway sign pages', function (
 
     $response = $this->get(route('theory.practice', $category));
 
-    $response->assertOk()->assertViewHas('practiceItems', function ($items) {
+    $response
+        ->assertOk()
+        ->assertSee('Start hazard clip with sound')
+        ->assertSee('cgi-flag-strip', false)
+        ->assertSee('toggleCgiFullscreen()', false)
+        ->assertViewHas('practiceItems', function ($items) {
         return $items->pluck('item_type')->sort()->values()->all() === [
             ContentPage::TYPE_CGI_CLIPS,
             ContentPage::TYPE_MOTORWAY_SIGN,
             'question',
         ];
-    });
+        });
 });
