@@ -101,9 +101,15 @@
                                         </div>
                                     </template>
 
-                                    <h2 class="font-heading text-lg font-medium leading-snug text-gray-900" x-text="currentItem.text_en"></h2>
+                                    <div>
+                                        <p x-show="showKurdish" class="mb-1 text-xs font-bold uppercase tracking-wide text-primary">English</p>
+                                        <h2 class="font-heading text-lg font-medium leading-snug text-gray-900" x-text="currentItem.text_en || 'English question not provided.'"></h2>
+                                    </div>
                                     <template x-if="showKurdish && currentItem.text_ku">
-                                        <h2 class="mt-2 text-right font-body text-base text-gray-600" dir="rtl" x-text="currentItem.text_ku"></h2>
+                                        <div class="mt-4 border-t border-gray-100 pt-3">
+                                            <p class="mb-1 text-right text-xs font-bold text-primary" dir="rtl">کوردی</p>
+                                            <h2 class="text-right font-body text-base text-gray-700" dir="rtl" x-text="currentItem.text_ku"></h2>
+                                        </div>
                                     </template>
                                 </div>
 
@@ -149,7 +155,7 @@
                                         Explanation
                                     </h4>
                                     <p class="mb-1 text-xs font-bold uppercase tracking-wide text-primary">English explanation</p>
-                                    <p class="text-sm text-gray-800" x-text="currentItem.explanation_en || 'No explanation provided.'"></p>
+                                    <p class="text-sm text-gray-800" x-text="currentItem.explanation_en || 'No English explanation provided.'"></p>
                                     <template x-if="showKurdish && currentItem.explanation_ku">
                                         <div class="mt-4 border-t border-blue-200 pt-3">
                                             <p class="mb-1 text-right text-xs font-bold uppercase tracking-wide text-primary" dir="rtl">ڕوونکردنەوەی کوردی</p>
@@ -256,6 +262,7 @@
                 signExplanationVisible: false,
                 cgiVideoIndex: 0,
                 cgiExplanationVisible: false,
+                languagePreference: 'en',
                 showKurdish: false,
                 adData: null,
                 adPosition: -1,
@@ -267,7 +274,8 @@
                 initData(category, items, ad) {
                     this.category = category;
                     this.items = items;
-                    this.showKurdish = localStorage.getItem('languagePreference') === 'en-ku';
+                    this.languagePreference = localStorage.getItem('languagePreference') || 'en';
+                    this.showKurdish = this.languagePreference === 'en-ku';
 
                     this.items.forEach(item => {
                         if (item.item_type === 'question') {

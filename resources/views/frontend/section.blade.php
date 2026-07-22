@@ -1,5 +1,9 @@
 <x-layouts.app :showBack="true" :backUrl="route('home')" title="{{ $section->name }}">
-    <div class="space-y-6">
+    <div
+        class="space-y-6"
+        x-data="{ languagePreference: localStorage.getItem('languagePreference') || 'en' }"
+        x-init="localStorage.setItem('languagePreference', languagePreference)"
+    >
         <div class="text-center">
             <h1 class="font-heading font-bold text-2xl mb-2" style="color: {{ $section->color ?? '#3b82f6' }}">{{ $section->name }}</h1>
             <p class="text-secondary text-sm">Select a sub-section below to continue.</p>
@@ -8,7 +12,11 @@
         @if($section->name === 'Theory Test Practice')
             <div class="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Choose Language</label>
-                <select class="w-full border-gray-200 rounded-md focus:ring-primary focus:border-primary p-2 bg-surface-dim appearance-none">
+                <select
+                    x-model="languagePreference"
+                    @change="localStorage.setItem('languagePreference', languagePreference)"
+                    class="w-full border-gray-200 rounded-md focus:ring-primary focus:border-primary p-2 bg-surface-dim appearance-none"
+                >
                     <option value="en">English</option>
                     <option value="en-ku">English & Kurdish</option>
                 </select>
