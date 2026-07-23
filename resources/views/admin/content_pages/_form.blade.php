@@ -40,6 +40,13 @@
     @endif
 
     <div class="admin-card rounded-lg border bg-white p-8">
+        <div class="mb-6">
+            <label class="mb-1 block text-sm font-medium text-gray-700">Page title *</label>
+            <input name="admin_title" type="text" maxlength="150" required value="{{ old('admin_title', $isEditing ? $contentPage->admin_title : '') }}" placeholder="Example: No waiting except for loading" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">
+            <p class="mt-1 text-xs text-gray-500">Used only in the admin panel to help you find this learning page.</p>
+            @error('admin_title')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+        </div>
+
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700">Category *</label>
@@ -156,11 +163,12 @@
     <section x-cloak x-show="type === 'motorway_sign'" class="admin-card rounded-lg border bg-white p-8">
         <div class="mb-6">
             <h3 class="text-lg font-bold text-gray-900">Motorway sign</h3>
-            <p class="mt-1 text-sm text-gray-500">The mobile page shows the sign first and reveals the explanation when the learner taps the button.</p>
+            <p class="mt-1 text-sm text-gray-500">Build the complete sign guide shown to learners: the main sign, guidance, and related signs.</p>
         </div>
 
-        <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-            <div>
+        <div class="space-y-8">
+            <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700">Sign image *</label>
                 @if($isEditing && $contentPage->sign_image_path)
                     <div class="mb-3 inline-flex rounded-lg border border-gray-200 bg-gray-50 p-3">
@@ -170,18 +178,55 @@
                 <input type="file" name="sign_image" accept="image/jpeg,image/png,image/webp" class="w-full rounded-md border border-gray-300 p-2 text-sm">
                 <p class="mt-1 text-xs text-gray-500">JPG, PNG or WebP; maximum 10 MB. {{ $isEditing && $contentPage->sign_image_path ? 'Leave empty to keep the current image.' : '' }}</p>
                 @error('sign_image')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                </div>
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-gray-700">About this sign (English) *</label>
+                        <textarea name="explanation_en" rows="5" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">{{ old('explanation_en', $isEditing ? $contentPage->explanation_en : '') }}</textarea>
+                        @error('explanation_en')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-gray-700">About this sign (Kurdish)</label>
+                        <textarea name="explanation_ku" dir="rtl" rows="5" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">{{ old('explanation_ku', $isEditing ? $contentPage->explanation_ku : '') }}</textarea>
+                    </div>
+                </div>
             </div>
 
-            <div class="space-y-5">
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-gray-700">Explanation (English) *</label>
-                    <textarea name="explanation_en" rows="5" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">{{ old('explanation_en', $isEditing ? $contentPage->explanation_en : '') }}</textarea>
-                    @error('explanation_en')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                    <label class="mb-1 block text-sm font-medium text-gray-700">What to do (English) *</label>
+                    <textarea name="what_to_do_en" rows="4" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">{{ old('what_to_do_en', $isEditing ? $contentPage->what_to_do_en : '') }}</textarea>
+                    @error('what_to_do_en')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-gray-700">Explanation (Kurdish)</label>
-                    <textarea name="explanation_ku" dir="rtl" rows="5" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">{{ old('explanation_ku', $isEditing ? $contentPage->explanation_ku : '') }}</textarea>
+                    <label class="mb-1 block text-sm font-medium text-gray-700">What to do (Kurdish)</label>
+                    <textarea name="what_to_do_ku" dir="rtl" rows="4" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">{{ old('what_to_do_ku', $isEditing ? $contentPage->what_to_do_ku : '') }}</textarea>
                 </div>
+            </div>
+
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-5">
+                <h4 class="font-bold text-gray-900">Additional signs learners can expect</h4>
+                <p class="mt-1 text-sm text-gray-500">Add up to 8 related signs. They appear as small images below the guidance.</p>
+
+                @if($isEditing && count($contentPage->additional_sign_images ?? []))
+                    <div class="mt-4 flex flex-wrap gap-4">
+                        @foreach($contentPage->additional_sign_images as $image)
+                            <label class="relative rounded-lg border border-gray-200 bg-white p-3 text-center">
+                                <img src="{{ $image }}" alt="Additional sign" class="h-20 w-24 object-contain">
+                                <span class="mt-2 flex items-center justify-center gap-2 text-xs font-medium text-red-600">
+                                    <input type="checkbox" name="remove_additional_sign_images[]" value="{{ $image }}" class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                                    Remove
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                @endif
+
+                <input type="file" name="additional_sign_images[]" accept="image/jpeg,image/png,image/webp" multiple class="mt-4 w-full rounded-md border border-gray-300 p-2 text-sm">
+                <p class="mt-1 text-xs text-gray-500">JPG, PNG or WebP; maximum 5 MB per image.</p>
+                @error('additional_sign_images')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                @error('additional_sign_images.*')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
             </div>
         </div>
     </section>

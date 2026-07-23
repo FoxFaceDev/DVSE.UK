@@ -12,6 +12,7 @@ class ContentPage extends Model
 
     protected $fillable = [
         'category_id',
+        'admin_title',
         'type',
         'text_en',
         'text_ku',
@@ -21,6 +22,9 @@ class ContentPage extends Model
         'sign_image_path',
         'explanation_en',
         'explanation_ku',
+        'what_to_do_en',
+        'what_to_do_ku',
+        'additional_sign_images',
     ];
 
     protected function casts(): array
@@ -29,6 +33,7 @@ class ContentPage extends Model
             'hazard_window_start' => 'float',
             'hazard_window_end' => 'float',
             'hazard_windows' => 'array',
+            'additional_sign_images' => 'array',
         ];
     }
 

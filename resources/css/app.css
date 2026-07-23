@@ -49,6 +49,7 @@
     .admin-shell main input[type='password'],
     .admin-shell main input[type='url'],
     .admin-shell main input[type='number'],
+    .admin-shell main input[type='search'],
     .admin-shell main input[type='file'],
     .admin-shell main textarea,
     .admin-shell main select {
@@ -67,9 +68,14 @@
     .admin-shell main input[type='password'],
     .admin-shell main input[type='url'],
     .admin-shell main input[type='number'],
+    .admin-shell main input[type='search'],
     .admin-shell main textarea,
     .admin-shell main select {
         padding: 0.625rem 0.75rem;
+    }
+
+    .admin-shell main input[type='search'] {
+        padding-left: 2.5rem;
     }
 
     .admin-shell main input[type='file'] {
@@ -113,6 +119,7 @@
     .admin-shell main input[type='password']:focus,
     .admin-shell main input[type='url']:focus,
     .admin-shell main input[type='number']:focus,
+    .admin-shell main input[type='search']:focus,
     .admin-shell main input[type='file']:focus,
     .admin-shell main textarea:focus,
     .admin-shell main select:focus {

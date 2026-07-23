@@ -14,11 +14,36 @@ class ContentPageController extends Controller
     public function index(Request $request)
     {
         $categories = Category::orderBy('name_en')->get();
+        $search = trim((string) $request->input('q'));
+        $sort = $request->input('sort', 'newest');
+
         $contentPages = ContentPage::with(['category', 'clips'])
             ->when($request->category_id, fn ($query, $categoryId) => $query->where('category_id', $categoryId))
             ->when($request->type, fn ($query, $type) => $query->where('type', $type))
-            ->latest('id')
-            ->get();
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($searchQuery) use ($search) {
+                    $searchQuery
+                        ->where('admin_title', 'like', "%{$search}%")
+                        ->orWhere('text_en', 'like', "%{$search}%")
+                        ->orWhere('text_ku', 'like', "%{$search}%")
+                        ->orWhere('explanation_en', 'like', "%{$search}%")
+                        ->orWhere('explanation_ku', 'like', "%{$search}%")
+                        ->orWhere('what_to_do_en', 'like', "%{$search}%")
+                        ->orWhere('what_to_do_ku', 'like', "%{$search}%")
+                        ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery
+                            ->where('name_en', 'like', "%{$search}%")
+                            ->orWhere('name_ku', 'like', "%{$search}%"));
+
+                    if (ctype_digit($search)) {
+                        $searchQuery->orWhere('id', (int) $search);
+                    }
+                });
+            })
+            ->when($sort === 'oldest', fn ($query) => $query->oldest('id'))
+            ->when($sort === 'title', fn ($query) => $query->orderByRaw('admin_title is null, admin_title asc')->orderBy('id'))
+            ->when(! in_array($sort, ['oldest', 'title'], true), fn ($query) => $query->latest('id'))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('admin.content_pages.index', compact('contentPages', 'categories'));
     }
@@ -40,6 +65,7 @@ class ContentPageController extends Controller
             $this->syncClips($request, $contentPage);
         } else {
             $this->storeSignImage($request, $contentPage);
+            $this->syncAdditionalSignImages($request, $contentPage);
         }
 
         return redirect()->route('admin.content-pages.index')
@@ -64,6 +90,10 @@ class ContentPageController extends Controller
             $contentPage->sign_image_path = null;
             $contentPage->explanation_en = null;
             $contentPage->explanation_ku = null;
+            $contentPage->what_to_do_en = null;
+            $contentPage->what_to_do_ku = null;
+            $this->deleteAdditionalSignImages($contentPage);
+            $contentPage->additional_sign_images = null;
             $contentPage->save();
             $this->syncClips($request, $contentPage);
         } else {
@@ -73,6 +103,7 @@ class ContentPageController extends Controller
             $contentPage->text_ku = null;
             $contentPage->save();
             $this->storeSignImage($request, $contentPage);
+            $this->syncAdditionalSignImages($request, $contentPage);
         }
 
         return redirect()->route('admin.content-pages.index')
@@ -82,6 +113,7 @@ class ContentPageController extends Controller
     public function destroy(ContentPage $contentPage)
     {
         $this->deleteStoredFile($contentPage->getRawOriginal('sign_image_path'));
+        $this->deleteAdditionalSignImages($contentPage);
         $this->deleteAllClips($contentPage);
         $contentPage->delete();
 
@@ -106,6 +138,7 @@ class ContentPageController extends Controller
 
         return [
             'category_id' => $request->integer('category_id'),
+            'admin_title' => $request->input('admin_title'),
             'type' => $request->input('type'),
             'text_en' => $request->input('type') === ContentPage::TYPE_CGI_CLIPS
                 ? $request->input('text_en')
@@ -122,6 +155,12 @@ class ContentPageController extends Controller
                 : null,
             'explanation_ku' => $request->input('type') === ContentPage::TYPE_MOTORWAY_SIGN
                 ? $request->input('explanation_ku')
+                : null,
+            'what_to_do_en' => $request->input('type') === ContentPage::TYPE_MOTORWAY_SIGN
+                ? $request->input('what_to_do_en')
+                : null,
+            'what_to_do_ku' => $request->input('type') === ContentPage::TYPE_MOTORWAY_SIGN
+                ? $request->input('what_to_do_ku')
                 : null,
         ];
     }
@@ -173,6 +212,37 @@ class ContentPageController extends Controller
         $this->deleteStoredFile($contentPage->getRawOriginal('sign_image_path'));
         $path = $request->file('sign_image')->store('content-pages/signs', 'public');
         $contentPage->update(['sign_image_path' => '/storage/'.$path]);
+    }
+
+    private function syncAdditionalSignImages(ContentPageRequest $request, ContentPage $contentPage): void
+    {
+        $images = collect($contentPage->additional_sign_images ?? []);
+        $remove = collect($request->input('remove_additional_sign_images', []));
+
+        $images = $images->reject(function ($path) use ($remove) {
+            if (! $remove->contains($path)) {
+                return false;
+            }
+
+            $this->deleteStoredFile($path);
+
+            return true;
+        });
+
+        foreach (array_slice($request->file('additional_sign_images', []), 0, 8 - $images->count()) as $image) {
+            $path = $image->store('content-pages/additional-signs', 'public');
+            $images->push('/storage/'.$path);
+        }
+
+        $contentPage->update([
+            'additional_sign_images' => $images->values()->all(),
+        ]);
+    }
+
+    private function deleteAdditionalSignImages(ContentPage $contentPage): void
+    {
+        collect($contentPage->additional_sign_images ?? [])
+            ->each(fn ($path) => $this->deleteStoredFile($path));
     }
 
     private function deleteAllClips(ContentPage $contentPage): void

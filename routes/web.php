@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\AdController;
 use App\Http\Controllers\Admin\ContentPageController;
+use App\Http\Controllers\Admin\EmailAdvertisementController;
 
 use App\Http\Controllers\Admin\LoginController as AdminLoginController;
 
@@ -97,5 +98,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Advertisements
         Route::resource('ads', AdController::class);
         Route::patch('ads/{ad}/toggle-status', [AdController::class, 'toggleStatus'])->name('ads.toggle-status');
+        Route::get('email-advertisements', [EmailAdvertisementController::class, 'create'])->name('email-advertisements.create');
+        Route::post('email-advertisements', [EmailAdvertisementController::class, 'send'])->name('email-advertisements.send');
     });
 });

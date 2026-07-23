@@ -21,6 +21,7 @@ class ContentPageRequest extends FormRequest
 
         return [
             'category_id' => ['required', 'integer', 'exists:categories,id'],
+            'admin_title' => ['required', 'string', 'max:150'],
             'type' => ['required', Rule::in([
                 ContentPage::TYPE_CGI_CLIPS,
                 ContentPage::TYPE_MOTORWAY_SIGN,
@@ -28,9 +29,15 @@ class ContentPageRequest extends FormRequest
             'text_en' => ['nullable', 'string', 'max:10000'],
             'text_ku' => ['nullable', 'string', 'max:10000'],
             'hazard_windows' => [$isCgiClips ? 'required' : 'nullable', 'array', 'min:1', 'max:20'],
-            'hazard_windows.*.start' => ['required', 'numeric', 'min:0'],
-            'hazard_windows.*.end' => ['required', 'numeric', 'min:0.01'],
-            'hazard_windows.*.points' => ['required', 'integer', 'min:1', 'max:100'],
+            'hazard_windows.*.start' => $isCgiClips
+                ? ['required', 'numeric', 'min:0']
+                : ['nullable'],
+            'hazard_windows.*.end' => $isCgiClips
+                ? ['required', 'numeric', 'min:0.01']
+                : ['nullable'],
+            'hazard_windows.*.points' => $isCgiClips
+                ? ['required', 'integer', 'min:1', 'max:100']
+                : ['nullable'],
             'clips' => ['nullable', 'array', 'size:2'],
             'clips.*.media' => [
                 'nullable',
@@ -51,12 +58,37 @@ class ContentPageRequest extends FormRequest
                 ? ['required', 'string', 'max:10000']
                 : ['nullable', 'string', 'max:10000'],
             'explanation_ku' => ['nullable', 'string', 'max:10000'],
+            'what_to_do_en' => $isMotorwaySign
+                ? ['required', 'string', 'max:10000']
+                : ['nullable', 'string', 'max:10000'],
+            'what_to_do_ku' => ['nullable', 'string', 'max:10000'],
+            'additional_sign_images' => ['nullable', 'array', 'max:8'],
+            'additional_sign_images.*' => [
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:5120',
+            ],
+            'remove_additional_sign_images' => ['nullable', 'array'],
+            'remove_additional_sign_images.*' => ['string'],
         ];
     }
 
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator) {
+            if ($this->input('type') === ContentPage::TYPE_MOTORWAY_SIGN) {
+                $contentPage = $this->route('content_page');
+                $existingImages = $contentPage instanceof ContentPage
+                    ? collect($contentPage->additional_sign_images ?? [])
+                    : collect();
+                $remainingImages = $existingImages->diff($this->input('remove_additional_sign_images', []))->count();
+                $newImages = count($this->file('additional_sign_images', []));
+
+                if ($remainingImages + $newImages > 8) {
+                    $validator->errors()->add('additional_sign_images', 'A motorway sign page can have no more than 8 additional signs.');
+                }
+            }
+
             if ($this->input('type') !== ContentPage::TYPE_CGI_CLIPS) {
                 return;
             }
@@ -109,6 +141,7 @@ class ContentPageRequest extends FormRequest
     {
         return [
             'category_id' => 'category',
+            'admin_title' => 'page title',
             'text_en' => 'English text',
             'text_ku' => 'Kurdish text',
             'hazard_windows' => 'hazard scoring ranges',
@@ -118,6 +151,9 @@ class ContentPageRequest extends FormRequest
             'sign_image' => 'motorway sign image',
             'explanation_en' => 'English explanation',
             'explanation_ku' => 'Kurdish explanation',
+            'what_to_do_en' => 'English what to do text',
+            'what_to_do_ku' => 'Kurdish what to do text',
+            'additional_sign_images.*' => 'additional sign image',
             'clips.*.media' => 'CGI clip',
             'clips.*.media_url' => 'CGI clip URL',
         ];

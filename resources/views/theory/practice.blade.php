@@ -252,27 +252,48 @@
                         </template>
 
                         <template x-if="currentItem.item_type === 'motorway_sign'">
-                            <article class="mb-6 overflow-hidden rounded-xl border border-amber-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]">
-                                <div class="border-b border-amber-100 bg-amber-50 px-5 py-3">
-                                    <h2 class="font-heading font-bold text-amber-900">Motorway sign</h2>
+                            <article class="mb-6 overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-[0_8px_28px_-12px_rgba(0,74,153,0.22)]">
+                                <div class="flex items-center gap-3 border-b border-blue-100 bg-primary/5 px-5 py-4">
+                                    <span class="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white">
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86a2 2 0 001.73-3L13.73 4a2 2 0 00-3.46 0L3.34 16a2 2 0 001.73 3z"/></svg>
+                                    </span>
+                                    <h2 class="font-heading font-bold text-primary-dark">Motorway sign guide</h2>
                                 </div>
 
-                                <div class="p-5">
-                                    <div class="flex min-h-56 items-center justify-center rounded-xl bg-gray-50 p-5">
-                                        <img :src="currentItem.sign_image_path" alt="Motorway sign" class="max-h-72 w-full object-contain">
+                                <div class="p-5 sm:p-6">
+                                    <div class="flex min-h-56 items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 p-6">
+                                        <img :src="currentItem.sign_image_path" alt="Motorway sign" class="max-h-80 w-full object-contain drop-shadow-sm">
                                     </div>
 
-                                    <button @click="signExplanationVisible = !signExplanationVisible" :aria-expanded="signExplanationVisible.toString()" class="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 font-bold text-white shadow-sm transition-colors hover:bg-primary-dark">
-                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        <span x-text="signExplanationVisible ? 'Hide explanation' : 'Show explanation'"></span>
-                                    </button>
-
-                                    <div x-cloak x-show="signExplanationVisible" x-transition class="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
-                                        <p class="leading-relaxed text-gray-800" x-text="currentItem.explanation_en"></p>
+                                    <section class="mt-6 border-l-4 border-primary pl-4">
+                                        <h3 class="font-heading text-lg font-bold text-gray-950">About this sign</h3>
+                                        <p class="mt-2 whitespace-pre-line leading-7 text-gray-700" x-text="currentItem.explanation_en"></p>
                                         <template x-if="showKurdish && currentItem.explanation_ku">
                                             <p class="mt-3 text-right leading-relaxed text-gray-700" dir="rtl" x-text="currentItem.explanation_ku"></p>
                                         </template>
-                                    </div>
+                                    </section>
+
+                                    <section class="mt-6 rounded-xl bg-primary/5 p-4">
+                                        <h3 class="font-heading text-lg font-bold text-primary-dark">What to do</h3>
+                                        <p class="mt-2 whitespace-pre-line leading-7 text-gray-700" x-text="currentItem.what_to_do_en"></p>
+                                        <template x-if="showKurdish && currentItem.what_to_do_ku">
+                                            <p class="mt-3 border-t border-blue-100 pt-3 text-right leading-relaxed text-gray-700" dir="rtl" x-text="currentItem.what_to_do_ku"></p>
+                                        </template>
+                                    </section>
+
+                                    <template x-if="Array.isArray(currentItem.additional_sign_images) && currentItem.additional_sign_images.length">
+                                        <section class="mt-7 border-t border-gray-100 pt-6">
+                                            <h3 class="font-heading text-lg font-bold leading-snug text-gray-950">Additional signs you can expect</h3>
+                                            <p class="mt-1 text-sm text-secondary">These signs may accompany the main road sign.</p>
+                                            <div class="mt-4 grid grid-cols-3 gap-3">
+                                                <template x-for="(image, index) in currentItem.additional_sign_images" :key="image">
+                                                    <div class="flex aspect-square items-center justify-center rounded-xl border border-gray-200 bg-white p-2.5 shadow-sm">
+                                                        <img :src="image" :alt="`Additional road sign ${index + 1}`" class="h-full w-full object-contain">
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </section>
+                                    </template>
                                 </div>
                             </article>
                         </template>
@@ -559,7 +580,10 @@
                         return this.cgiStage === 'explanation' ? (this.currentItem.text_en || '') : '';
                     }
 
-                    return this.signExplanationVisible ? (this.currentItem.explanation_en || '') : '';
+                    return [
+                        this.currentItem.explanation_en,
+                        this.currentItem.what_to_do_en,
+                    ].filter(Boolean).join('. ');
                 },
 
                 selectChoice(choice) {

@@ -39,6 +39,7 @@ test('an admin can create a CGI page with hazard and explanation videos', functi
 
     $response = $this->actingAs(learningPageAdmin(), 'admin')->post(route('admin.content-pages.store'), [
         'category_id' => $category->id,
+        'admin_title' => 'Vehicles approaching a bend',
         'type' => ContentPage::TYPE_CGI_CLIPS,
         'text_en' => 'Compare how the vehicles move through the bend.',
         'hazard_windows' => [
@@ -54,6 +55,7 @@ test('an admin can create a CGI page with hazard and explanation videos', functi
     $response->assertRedirect(route('admin.content-pages.index'))->assertSessionHasNoErrors();
     $this->assertDatabaseHas('content_pages', [
         'category_id' => $category->id,
+        'admin_title' => 'Vehicles approaching a bend',
         'type' => ContentPage::TYPE_CGI_CLIPS,
         'text_en' => 'Compare how the vehicles move through the bend.',
         'hazard_window_start' => 8.5,
@@ -146,16 +148,24 @@ test('an admin can create a motorway sign page with an explanation', function ()
 
     $response = $this->actingAs(learningPageAdmin(), 'admin')->post(route('admin.content-pages.store'), [
         'category_id' => $category->id,
+        'admin_title' => 'Motorway regulations begin',
         'type' => ContentPage::TYPE_MOTORWAY_SIGN,
         'sign_image' => UploadedFile::fake()->image('motorway-sign.png', 600, 600),
         'explanation_en' => 'This sign marks the beginning of motorway regulations.',
+        'what_to_do_en' => 'Follow motorway regulations from this point.',
+        'additional_sign_images' => [
+            UploadedFile::fake()->image('related-sign.png', 200, 200),
+        ],
     ]);
 
     $response->assertRedirect(route('admin.content-pages.index'))->assertSessionHasNoErrors();
     $page = ContentPage::where('type', ContentPage::TYPE_MOTORWAY_SIGN)->firstOrFail();
 
     expect($page->explanation_en)->toBe('This sign marks the beginning of motorway regulations.');
+    expect($page->what_to_do_en)->toBe('Follow motorway regulations from this point.')
+        ->and($page->additional_sign_images)->toHaveCount(1);
     Storage::disk('public')->assertExists(str_replace('/storage/', '', $page->getRawOriginal('sign_image_path')));
+    Storage::disk('public')->assertExists(str_replace('/storage/', '', $page->additional_sign_images[0]));
 });
 
 test('a motorway sign page requires both an image and an explanation', function () {
@@ -166,7 +176,92 @@ test('a motorway sign page requires both an image and an explanation', function 
         'type' => ContentPage::TYPE_MOTORWAY_SIGN,
     ]);
 
-    $response->assertSessionHasErrors(['sign_image', 'explanation_en']);
+    $response->assertSessionHasErrors(['sign_image', 'explanation_en', 'what_to_do_en']);
+});
+
+test('an admin can update a motorway sign when hidden hazard fields are empty', function () {
+    $category = learningPageCategory();
+    $page = ContentPage::create([
+        'category_id' => $category->id,
+        'type' => ContentPage::TYPE_MOTORWAY_SIGN,
+        'sign_image_path' => '/storage/content-pages/signs/example.png',
+        'explanation_en' => 'Original information about this sign.',
+        'what_to_do_en' => 'Original learner guidance.',
+    ]);
+
+    $response = $this->actingAs(learningPageAdmin(), 'admin')->put(route('admin.content-pages.update', $page), [
+        'category_id' => $category->id,
+        'admin_title' => 'Updated motorway sign',
+        'type' => ContentPage::TYPE_MOTORWAY_SIGN,
+        'explanation_en' => 'Updated information about this sign.',
+        'what_to_do_en' => 'Updated learner guidance.',
+        // These blank inputs are present in the shared form but belong only to CGI pages.
+        'hazard_windows' => [
+            ['start' => '', 'end' => '', 'points' => ''],
+        ],
+    ]);
+
+    $response->assertRedirect(route('admin.content-pages.index'))->assertSessionHasNoErrors();
+    expect($page->fresh())
+        ->explanation_en->toBe('Updated information about this sign.')
+        ->what_to_do_en->toBe('Updated learner guidance.');
+});
+
+test('an admin can search learning pages by title content category or id', function () {
+    $category = learningPageCategory();
+    $admin = learningPageAdmin();
+    $matchingPage = ContentPage::create([
+        'category_id' => $category->id,
+        'admin_title' => 'Temporary waiting restriction',
+        'type' => ContentPage::TYPE_MOTORWAY_SIGN,
+        'sign_image_path' => '/storage/content-pages/signs/waiting.png',
+        'explanation_en' => 'A yellow board with a red order circle.',
+        'what_to_do_en' => 'Do not wait here.',
+    ]);
+    ContentPage::create([
+        'category_id' => $category->id,
+        'admin_title' => 'Beginning of motorway',
+        'type' => ContentPage::TYPE_MOTORWAY_SIGN,
+        'sign_image_path' => '/storage/content-pages/signs/motorway.png',
+        'explanation_en' => 'Motorway rules apply.',
+        'what_to_do_en' => 'Follow motorway rules.',
+    ]);
+
+    $this->actingAs($admin, 'admin')
+        ->get(route('admin.content-pages.index', ['q' => 'waiting']))
+        ->assertOk()
+        ->assertSee('Temporary waiting restriction')
+        ->assertDontSee('Beginning of motorway');
+
+    $this->get(route('admin.content-pages.index', ['q' => (string) $matchingPage->id]))
+        ->assertOk()
+        ->assertSee('Temporary waiting restriction');
+});
+
+test('learning page results are paginated and keep filters', function () {
+    $category = learningPageCategory();
+
+    foreach (range(1, 16) as $number) {
+        ContentPage::create([
+            'category_id' => $category->id,
+            'admin_title' => "Sign page {$number}",
+            'type' => ContentPage::TYPE_MOTORWAY_SIGN,
+            'sign_image_path' => "/storage/content-pages/signs/{$number}.png",
+            'explanation_en' => "Explanation {$number}",
+            'what_to_do_en' => "Guidance {$number}",
+        ]);
+    }
+
+    $this->actingAs(learningPageAdmin(), 'admin')
+        ->get(route('admin.content-pages.index', [
+            'type' => ContentPage::TYPE_MOTORWAY_SIGN,
+            'sort' => 'oldest',
+        ]))
+        ->assertOk()
+        ->assertSee('Sign page 1')
+        ->assertDontSee('Sign page 16')
+        ->assertSee('page=2', false)
+        ->assertSee('type=motorway_sign', false);
 });
 
 test('practice contains questions CGI pages and motorway sign pages', function () {
