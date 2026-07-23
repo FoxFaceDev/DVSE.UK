@@ -17,9 +17,16 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\MarketingEmailPreferenceController;
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/email/unsubscribe/{user}', [MarketingEmailPreferenceController::class, 'show'])
+    ->middleware('signed')
+    ->name('marketing.unsubscribe.show');
+Route::post('/email/unsubscribe/{user}', [MarketingEmailPreferenceController::class, 'unsubscribe'])
+    ->middleware('signed')
+    ->name('marketing.unsubscribe');
 
 // User Authentication Routes
 Route::middleware('guest:web')->group(function () {
@@ -46,6 +53,7 @@ Route::middleware('auth:web')->group(function () {
 
     Route::get('/account', [AccountController::class, 'show'])->name('account.show');
     Route::patch('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');
+    Route::patch('/account/marketing-preferences', [AccountController::class, 'updateMarketingPreferences'])->name('account.marketing-preferences.update');
     Route::put('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
     Route::delete('/account', [AccountController::class, 'destroy'])->name('account.destroy');
 });

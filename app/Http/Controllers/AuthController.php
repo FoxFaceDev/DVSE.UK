@@ -62,8 +62,11 @@ class AuthController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'is_instructor' => ['required', Rule::in(['yes', 'no'])],
+            'marketing_email_opt_in' => ['nullable', 'boolean'],
             'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
         ]);
+
+        $marketingOptIn = $request->boolean('marketing_email_opt_in');
 
         $user = User::create([
             'name' => $request->name,
@@ -72,6 +75,9 @@ class AuthController extends Controller
                 ? User::ACCOUNT_TYPE_INSTRUCTOR
                 : User::ACCOUNT_TYPE_USER,
             'password' => Hash::make($request->password),
+            'marketing_email_opt_in' => $marketingOptIn,
+            'marketing_email_opted_in_at' => $marketingOptIn ? now() : null,
+            'marketing_email_consent_source' => $marketingOptIn ? 'registration' : null,
         ]);
 
         Auth::guard('web')->login($user);

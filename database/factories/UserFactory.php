@@ -50,4 +50,14 @@ class UserFactory extends Factory
             'account_type' => User::ACCOUNT_TYPE_INSTRUCTOR,
         ]);
     }
+
+    public function subscribedToMarketing(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'marketing_email_opt_in' => true,
+            'marketing_email_opted_in_at' => now(),
+            'marketing_email_unsubscribed_at' => null,
+            'marketing_email_consent_source' => 'factory',
+        ]);
+    }
 }

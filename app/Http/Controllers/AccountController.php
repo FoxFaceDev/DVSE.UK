@@ -47,6 +47,8 @@ class AccountController extends Controller
 
         if ($emailChanged) {
             $user->email_verified_at = null;
+            $user->marketing_email_opt_in = false;
+            $user->marketing_email_unsubscribed_at = now();
         }
 
         $user->save();
@@ -56,6 +58,29 @@ class AccountController extends Controller
         }
 
         return back()->with('status', $emailChanged ? 'profile-updated-verification-sent' : 'profile-updated');
+    }
+
+    public function updateMarketingPreferences(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'marketing_email_opt_in' => ['required', 'boolean'],
+        ]);
+        $user = $request->user();
+        $optedIn = (bool) $validated['marketing_email_opt_in'];
+
+        $user->marketing_email_opt_in = $optedIn;
+
+        if ($optedIn) {
+            $user->marketing_email_opted_in_at = now();
+            $user->marketing_email_unsubscribed_at = null;
+            $user->marketing_email_consent_source = 'account_settings';
+        } else {
+            $user->marketing_email_unsubscribed_at ??= now();
+        }
+
+        $user->save();
+
+        return back()->with('status', $optedIn ? 'marketing-subscribed' : 'marketing-unsubscribed');
     }
 
     public function updatePassword(Request $request): RedirectResponse

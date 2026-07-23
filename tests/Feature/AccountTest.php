@@ -46,6 +46,24 @@ test('a new account can register as an instructor', function () {
         ->and($instructor->isInstructor())->toBeTrue();
 });
 
+test('a user can explicitly consent to marketing during registration', function () {
+    Notification::fake();
+
+    $this->post(route('register'), [
+        'name' => 'Marketing Subscriber',
+        'email' => 'subscriber@example.com',
+        'is_instructor' => 'no',
+        'marketing_email_opt_in' => '1',
+        'password' => 'safe-password1',
+        'password_confirmation' => 'safe-password1',
+    ])->assertRedirect(route('verification.notice'));
+
+    expect(User::where('email', 'subscriber@example.com')->firstOrFail())
+        ->marketing_email_opt_in->toBeTrue()
+        ->marketing_email_opted_in_at->not->toBeNull()
+        ->marketing_email_consent_source->toBe('registration');
+});
+
 test('registration requires an instructor choice', function () {
     $this->post(route('register'), [
         'name' => 'Test Driver',
@@ -119,6 +137,27 @@ test('updating only the name does not require the current password', function ()
     ])->assertRedirect();
 
     expect($user->fresh()->name)->toBe('A New Name');
+});
+
+test('a user can update their marketing email preference', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user, 'web')->patch(route('account.marketing-preferences.update'), [
+        'marketing_email_opt_in' => '1',
+    ])->assertRedirect()->assertSessionHas('status', 'marketing-subscribed');
+
+    expect($user->fresh())
+        ->marketing_email_opt_in->toBeTrue()
+        ->marketing_email_opted_in_at->not->toBeNull()
+        ->marketing_email_consent_source->toBe('account_settings');
+
+    $this->patch(route('account.marketing-preferences.update'), [
+        'marketing_email_opt_in' => '0',
+    ])->assertRedirect()->assertSessionHas('status', 'marketing-unsubscribed');
+
+    expect($user->fresh())
+        ->marketing_email_opt_in->toBeFalse()
+        ->marketing_email_unsubscribed_at->not->toBeNull();
 });
 
 test('a user can change their password and delete their account', function () {

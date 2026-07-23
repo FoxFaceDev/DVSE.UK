@@ -2,7 +2,7 @@
     <div class="mx-auto max-w-5xl">
         <div class="mb-6">
             <h3 class="text-xl font-bold text-gray-900">Send an email advertisement</h3>
-            <p class="mt-1 text-sm text-gray-600">Create a branded campaign and send it directly to registered DVSE.UK users.</p>
+            <p class="mt-1 text-sm text-gray-600">Create a branded campaign for verified users who explicitly subscribed to marketing.</p>
         </div>
 
         @if(session('success'))
@@ -21,6 +21,11 @@
         <form method="POST" action="{{ route('admin.email-advertisements.send') }}" enctype="multipart/form-data" class="space-y-6" onsubmit="return confirm('Send this email advertisement to the selected audience?')">
             @csrf
 
+            <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+                <p class="font-bold">UK marketing safeguards are active</p>
+                <p class="mt-1">Only verified, opted-in users are included. Every email identifies the sender and contains a signed unsubscribe link.</p>
+            </div>
+
             <section class="admin-card rounded-xl border bg-white p-7">
                 <h4 class="font-bold text-gray-900">Recipients</h4>
                 <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -33,10 +38,29 @@
                             <input type="radio" name="audience" value="{{ $value }}" @checked(old('audience', 'all') === $value) class="h-4 w-4 text-primary focus:ring-primary">
                             <span>
                                 <span class="block font-bold text-gray-900">{{ $label }}</span>
-                                <span class="text-sm text-gray-500">{{ number_format($count) }} {{ Str::plural('recipient', $count) }}</span>
+                                <span class="text-sm text-gray-500">{{ number_format($count) }} subscribed {{ Str::plural('recipient', $count) }}</span>
                             </span>
                         </label>
                     @endforeach
+                </div>
+            </section>
+
+            <section class="admin-card rounded-xl border bg-white p-7">
+                <h4 class="font-bold text-gray-900">Sender details</h4>
+                <p class="mt-1 text-sm text-gray-500">These details appear in the footer of every campaign email.</p>
+                <div class="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+                    <div>
+                        <label for="business_name" class="mb-1 block text-sm">Business or organisation name *</label>
+                        <input id="business_name" name="business_name" type="text" maxlength="150" required value="{{ old('business_name', 'DVSE.UK') }}" class="w-full">
+                    </div>
+                    <div>
+                        <label for="contact_email" class="mb-1 block text-sm">Contact email *</label>
+                        <input id="contact_email" name="contact_email" type="email" maxlength="255" required value="{{ old('contact_email', config('mail.from.address')) }}" class="w-full">
+                    </div>
+                    <div class="lg:col-span-2">
+                        <label for="business_address" class="mb-1 block text-sm">Valid business postal address *</label>
+                        <textarea id="business_address" name="business_address" rows="3" maxlength="500" required placeholder="Full postal address shown in the email footer" class="w-full">{{ old('business_address') }}</textarea>
+                    </div>
                 </div>
             </section>
 

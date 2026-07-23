@@ -108,6 +108,8 @@
                     @case('profile-updated') Your account details were updated. @break
                     @case('profile-updated-verification-sent') Your details were updated. Please verify your new email address. @break
                     @case('password-updated') Your password was changed successfully. @break
+                    @case('marketing-subscribed') You are now subscribed to DVSE.UK marketing emails. @break
+                    @case('marketing-unsubscribed') You have unsubscribed from DVSE.UK marketing emails. @break
                     @case('account-deleted') Your account has been deleted. @break
                     @default {{ session('status') }}
                 @endswitch

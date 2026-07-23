@@ -8,16 +8,19 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 
 class EmailAdvertisementController extends Controller
 {
     public function create()
     {
+        $subscribers = User::eligibleForMarketing();
+
         return view('admin.email_advertisements.create', [
             'recipientCounts' => [
-                'all' => User::count(),
-                User::ACCOUNT_TYPE_USER => User::where('account_type', User::ACCOUNT_TYPE_USER)->count(),
-                User::ACCOUNT_TYPE_INSTRUCTOR => User::where('account_type', User::ACCOUNT_TYPE_INSTRUCTOR)->count(),
+                'all' => (clone $subscribers)->count(),
+                User::ACCOUNT_TYPE_USER => (clone $subscribers)->where('account_type', User::ACCOUNT_TYPE_USER)->count(),
+                User::ACCOUNT_TYPE_INSTRUCTOR => (clone $subscribers)->where('account_type', User::ACCOUNT_TYPE_INSTRUCTOR)->count(),
             ],
         ]);
     }
@@ -32,6 +35,9 @@ class EmailAdvertisementController extends Controller
             'button_label' => ['nullable', 'required_with:link_url', 'string', 'max:40'],
             'link_url' => ['nullable', 'url', 'max:2048'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'business_name' => ['required', 'string', 'max:150'],
+            'business_address' => ['required', 'string', 'max:500'],
+            'contact_email' => ['required', 'email', 'max:255'],
         ]);
 
         $imageUrl = null;
@@ -54,6 +60,10 @@ class EmailAdvertisementController extends Controller
                     buttonLabel: $validated['button_label'] ?? null,
                     linkUrl: $validated['link_url'] ?? null,
                     imageUrl: $imageUrl,
+                    businessName: $validated['business_name'],
+                    businessAddress: $validated['business_address'],
+                    contactEmail: $validated['contact_email'],
+                    unsubscribeUrl: URL::signedRoute('marketing.unsubscribe.show', ['user' => $user]),
                 ));
                 $sent++;
             }
@@ -66,6 +76,7 @@ class EmailAdvertisementController extends Controller
     private function recipients(string $audience): Builder
     {
         return User::query()
+            ->eligibleForMarketing()
             ->when($audience !== 'all', fn (Builder $query) => $query->where('account_type', $audience))
             ->orderBy('id');
     }

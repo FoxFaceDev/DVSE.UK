@@ -6,6 +6,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -28,6 +29,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'account_type',
         'password',
+        'marketing_email_opt_in',
+        'marketing_email_opted_in_at',
+        'marketing_email_unsubscribed_at',
+        'marketing_email_consent_source',
     ];
 
     /**
@@ -50,6 +55,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'marketing_email_opt_in' => 'boolean',
+            'marketing_email_opted_in_at' => 'datetime',
+            'marketing_email_unsubscribed_at' => 'datetime',
         ];
     }
 
@@ -61,5 +69,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isInstructor(): bool
     {
         return $this->account_type === self::ACCOUNT_TYPE_INSTRUCTOR;
+    }
+
+    public function scopeEligibleForMarketing(Builder $query): Builder
+    {
+        return $query
+            ->where('marketing_email_opt_in', true)
+            ->whereNotNull('email_verified_at')
+            ->whereNull('marketing_email_unsubscribed_at');
     }
 }

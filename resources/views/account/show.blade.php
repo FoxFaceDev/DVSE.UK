@@ -65,6 +65,25 @@
         </section>
 
         <section class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-100">
+                <h2 class="font-heading font-bold text-primary-dark">Marketing emails</h2>
+                <p class="mt-1 text-xs text-gray-500">Choose whether DVSE.UK may email you about learning products, services and promotions.</p>
+            </div>
+            <form method="POST" action="{{ route('account.marketing-preferences.update') }}" class="p-5">
+                @csrf @method('PATCH')
+                <input type="hidden" name="marketing_email_opt_in" value="0">
+                <label class="flex cursor-pointer items-start gap-3">
+                    <input type="checkbox" name="marketing_email_opt_in" value="1" @checked($user->marketing_email_opt_in) class="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary">
+                    <span>
+                        <span class="block text-sm font-semibold text-gray-800">I want to receive marketing emails</span>
+                        <span class="mt-1 block text-xs leading-5 text-gray-500">You can change this preference or unsubscribe from any campaign at any time.</span>
+                    </span>
+                </label>
+                <button type="submit" class="mt-4 min-h-11 w-full rounded-xl border border-primary px-4 py-2.5 font-bold text-primary hover:bg-primary/5">Save email preference</button>
+            </form>
+        </section>
+
+        <section class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-100"><h2 class="font-heading font-bold text-primary-dark">Password & security</h2><p class="text-xs text-gray-500 mt-1">Change your password regularly to keep your account safe.</p></div>
             <form method="POST" action="{{ route('account.password.update') }}" class="p-5 space-y-4">
                 @csrf @method('PUT')

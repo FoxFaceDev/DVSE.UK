@@ -31,7 +31,13 @@
                         </td>
                     </tr>
                     <tr>
-                        <td style="border-top:1px solid #e2e8f0;padding:20px 28px;color:#64748b;font-size:12px;">Sent by DVSE.UK</td>
+                        <td style="border-top:1px solid #e2e8f0;padding:20px 28px;color:#64748b;font-size:12px;line-height:1.6;">
+                            <strong style="color:#334155;">{{ $businessName }}</strong><br>
+                            {{ $businessAddress }}<br>
+                            Contact: <a href="mailto:{{ $contactEmail }}" style="color:#004a99;">{{ $contactEmail }}</a>
+                            <p style="margin:14px 0 0;">You received this email because you chose to receive DVSE.UK marketing emails.</p>
+                            <p style="margin:6px 0 0;"><a href="{{ $unsubscribeUrl }}" style="color:#004a99;text-decoration:underline;">Unsubscribe from marketing emails</a></p>
+                        </td>
                     </tr>
                 </table>
             </td>

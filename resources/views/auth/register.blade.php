@@ -72,6 +72,14 @@
                     </div>
                 </div>
 
+                <label class="mb-6 flex cursor-pointer items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+                    <input type="checkbox" name="marketing_email_opt_in" value="1" @checked(old('marketing_email_opt_in')) class="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary">
+                    <span>
+                        <span class="block text-sm font-semibold text-gray-800">Send me DVSE.UK offers and learning updates</span>
+                        <span class="mt-1 block text-xs leading-5 text-gray-600">Optional. I agree to receive marketing emails about DVSE.UK learning products, services and promotions. I can unsubscribe at any time.</span>
+                    </span>
+                </label>
+
                 <button type="submit" class="w-full min-h-12 py-3.5 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold text-base shadow-md shadow-primary/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2" :disabled="loading">
                     <span x-show="!loading">Create account</span>
                     <span x-show="loading" style="display: none;">Creating account...</span>
