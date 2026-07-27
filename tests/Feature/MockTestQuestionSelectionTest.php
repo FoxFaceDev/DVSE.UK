@@ -4,6 +4,7 @@ use App\Models\Category;
 use App\Models\Question;
 use App\Models\Section;
 use App\Models\SubSection;
+use App\Models\Topic;
 
 test('mock tests contain only three video questions and place them last', function () {
     $section = Section::create(['name' => 'Theory Test Practice']);
@@ -13,23 +14,25 @@ test('mock tests contain only three video questions and place them last', functi
     ]);
     $category = Category::create([
         'sub_section_id' => $subSection->id,
-        'name_en' => 'Mock test questions',
+        'name_en' => 'General Rules',
     ]);
 
-    foreach (range(1, 55) as $number) {
-        Question::create([
-            'category_id' => $category->id,
-            'text_en' => "Non-video question $number",
-            'media_type' => null,
-        ]);
-    }
+    $topic = Topic::create([
+        'topicable_type' => Category::class,
+        'topicable_id' => $category->id,
+        'name_en' => 'General Rules Topic'
+    ]);
 
-    foreach (range(1, 6) as $number) {
-        Question::create([
-            'category_id' => $category->id,
-            'text_en' => "Video question $number",
-            'media_type' => 'video',
-            'media_url' => "https://example.com/video-$number.mp4",
+    foreach (range(1, 55) as $i) {
+        $question = Question::create([
+            'topic_id' => $topic->id,
+            'text_en' => "Test Question $i",
+            'media_type' => $i <= 5 ? 'video' : 'image',
+        ]);
+
+        $question->choices()->createMany([
+            ['text_en' => "Correct Choice $i", 'is_correct' => true],
+            ['text_en' => "Wrong Choice $i", 'is_correct' => false],
         ]);
     }
 
@@ -60,16 +63,22 @@ test('mock tests keep available video questions last when fewer than three exist
         'name_en' => 'Small mock test pool',
     ]);
 
+    $topic = Topic::create([
+        'topicable_type' => Category::class,
+        'topicable_id' => $category->id,
+        'name_en' => 'Small mock test pool topic'
+    ]);
+
     foreach (range(1, 48) as $number) {
         Question::create([
-            'category_id' => $category->id,
+            'topic_id' => $topic->id,
             'text_en' => "Non-video question $number",
         ]);
     }
 
     foreach (range(1, 2) as $number) {
         Question::create([
-            'category_id' => $category->id,
+            'topic_id' => $topic->id,
             'text_en' => "Video question $number",
             'media_type' => 'video',
             'media_url' => "https://example.com/video-$number.mp4",

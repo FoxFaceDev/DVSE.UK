@@ -6,34 +6,34 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Question;
-use App\Models\Category;
+use App\Models\Topic;
 
 class QuestionController extends Controller
 {
     public function index(Request $request)
     {
-        $categories = Category::all();
-        $questions = Question::with('category')
-            ->when($request->category_id, function ($query, $categoryId) {
-                $query->where('category_id', $categoryId);
+        $topics = Topic::with('topicable')->get();
+        $questions = Question::with('topic')
+            ->when($request->topic_id, function ($query, $topicId) {
+                $query->where('topic_id', $topicId);
             })
             ->orderBy('id', 'desc')
             ->get();
 
-        return view('admin.questions.index', compact('questions', 'categories'));
+        return view('admin.questions.index', compact('questions', 'topics'));
     }
 
     public function create(\Illuminate\Http\Request $request)
     {
-        $categories = Category::all();
-        $selectedCategoryId = $request->query('category_id');
-        return view('admin.questions.create', compact('categories', 'selectedCategoryId'));
+        $topics = Topic::with('topicable')->get();
+        $selectedTopicId = $request->query('topic_id');
+        return view('admin.questions.create', compact('topics', 'selectedTopicId'));
     }
 
     public function store(\Illuminate\Http\Request $request)
     {
         $request->validate([
-            'category_id' => 'required|exists:categories,id',
+            'topic_id' => 'required|exists:topics,id',
             'text_en' => 'required|string',
             'text_ku' => 'nullable|string',
             'media_type' => 'nullable|in:image,video,gif',
@@ -85,15 +85,15 @@ class QuestionController extends Controller
 
     public function edit(Question $question)
     {
-        $categories = Category::all();
+        $topics = Topic::with('topicable')->get();
         $question->load('choices');
-        return view('admin.questions.edit', compact('question', 'categories'));
+        return view('admin.questions.edit', compact('question', 'topics'));
     }
 
     public function update(Request $request, Question $question)
     {
         $request->validate([
-            'category_id' => 'required|exists:categories,id',
+            'topic_id' => 'required|exists:topics,id',
             'text_en' => 'required|string',
             'text_ku' => 'nullable|string',
             'media_type' => 'nullable|in:image,video,gif',

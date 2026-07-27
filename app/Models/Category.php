@@ -13,13 +13,8 @@ class Category extends Model
         return $this->belongsTo(SubSection::class);
     }
 
-    public function questions()
+    public function topics()
     {
-        return $this->hasMany(Question::class);
-    }
-
-    public function contentPages()
-    {
-        return $this->hasMany(ContentPage::class);
+        return $this->morphMany(Topic::class, 'topicable');
     }
 }

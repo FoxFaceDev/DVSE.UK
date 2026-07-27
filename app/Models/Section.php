@@ -19,4 +19,9 @@ class Section extends Model
     {
         return $this->hasMany(SubSection::class);
     }
+
+    public function topics()
+    {
+        return $this->morphMany(Topic::class, 'topicable');
+    }
 }

@@ -10,11 +10,11 @@
                     <h4 class="font-bold text-gray-900 border-b pb-2">Question Details</h4>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
-                        <select name="category_id" required class="w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                            <option value="">Select a category</option>
-                            @foreach($categories as $cat)
-                                <option value="{{ $cat->id }}" {{ $question->category_id == $cat->id ? 'selected' : '' }}>{{ $cat->name_en }}</option>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Topic *</label>
+                        <select name="topic_id" required class="w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                            <option value="">Select a topic</option>
+                            @foreach($topics as $topic)
+                                <option value="{{ $topic->id }}" {{ $question->topic_id == $topic->id ? 'selected' : '' }}>{{ $topic->name_en }} ({{ class_basename($topic->topicable_type) }})</option>
                             @endforeach
                         </select>
                     </div>

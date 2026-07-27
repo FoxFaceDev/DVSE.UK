@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\AdController;
 use App\Http\Controllers\Admin\ContentPageController;
 use App\Http\Controllers\Admin\EmailAdvertisementController;
+use App\Http\Controllers\CgiClipMediaController;
 
 use App\Http\Controllers\Admin\LoginController as AdminLoginController;
 
@@ -61,9 +62,11 @@ Route::middleware('auth:web')->group(function () {
 // Dynamic Sections
 Route::get('/section/{section}', [FrontendController::class, 'showSection'])->name('frontend.section');
 Route::get('/sub-section/{subSection}', [FrontendController::class, 'showSubSection'])->name('frontend.sub_section');
+Route::get('/category/{category}', [FrontendController::class, 'showCategory'])->name('frontend.category');
+Route::get('/media/cgi-clips/{cgiClip}', CgiClipMediaController::class)->name('media.cgi-clips.stream');
 
 Route::prefix('theory-test-practice')->name('theory.')->group(function () {
-    Route::get('/category/{category}', [TheoryTestController::class, 'practice'])->name('practice');
+    Route::get('/topic/{topic}', [TheoryTestController::class, 'practice'])->name('practice');
     Route::get('/result', [TheoryTestController::class, 'result'])->name('result');
 
     // Mock Test Routes
@@ -99,7 +102,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Categories (nested under sub_sections)
         Route::resource('sections.sub_sections.categories', CategoryController::class)->except(['index']);
         
-        // We will keep a generic categories fallback if needed, but preferably they should go through the tree.
+        // Topics (flat route to handle polymorphic creation/editing)
+        Route::resource('topics', App\Http\Controllers\Admin\TopicController::class)->except(['show']);
         Route::resource('questions', QuestionController::class);
         Route::resource('content-pages', ContentPageController::class)->except('show');
 

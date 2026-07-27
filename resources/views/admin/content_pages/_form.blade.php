@@ -1,7 +1,7 @@
 @php
     $isEditing = isset($contentPage) && $contentPage;
     $currentType = old('type', $isEditing ? $contentPage->type : ($selectedType ?? 'cgi_clips'));
-    $currentCategoryId = old('category_id', $isEditing ? $contentPage->category_id : ($selectedCategoryId ?? null));
+    $currentTopicId = old('topic_id', $isEditing ? $contentPage->topic_id : ($selectedTopicId ?? null));
     $hazardWindows = old('hazard_windows');
 
     if ($hazardWindows === null) {
@@ -16,13 +16,14 @@
         ]];
     }
 
-    $hazardWindows = collect($hazardWindows ?: [['start' => '', 'end' => '', 'points' => 5]])
+    $hazardWindows = collect($hazardWindows ?: [['start' => '', 'end' => '', 'points' => 5, 'flag_time' => '']])
         ->values()
         ->map(fn ($window, $index) => [
             'key' => $index + 1,
             'start' => $window['start'] ?? '',
             'end' => $window['end'] ?? '',
             'points' => $window['points'] ?? 5,
+            'flag_time' => $window['flag_time'] ?? '',
         ])
         ->all();
 @endphp
@@ -49,11 +50,11 @@
 
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Category *</label>
-                <select name="category_id" required class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">
-                    <option value="">Select a category</option>
-                    @foreach($categories as $category)
-                        <option value="{{ $category->id }}" @selected((string) $currentCategoryId === (string) $category->id)>{{ $category->name_en }}</option>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Topic *</label>
+                <select name="topic_id" required class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">
+                    <option value="">Select a topic</option>
+                    @foreach($topics as $topic)
+                        <option value="{{ $topic->id }}" @selected((string) $currentTopicId === (string) $topic->id)>{{ $topic->name_en }} ({{ class_basename($topic->topicable_type) }})</option>
                     @endforeach
                 </select>
             </div>
@@ -123,25 +124,29 @@
                             <h5 class="font-bold text-gray-800">Hazard range <span x-text="index + 1"></span></h5>
                             <button x-show="hazardWindows.length > 1" type="button" @click="hazardWindows.splice(index, 1)" class="text-sm font-medium text-red-600 hover:text-red-700">Remove</button>
                         </div>
-                        <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                        <div class="grid grid-cols-1 gap-5 sm:grid-cols-4">
                             <div>
-                                <label class="mb-1 block text-sm font-medium text-gray-700">Starts at (seconds) *</label>
-                                <input type="number" :name="`hazard_windows[${index}][start]`" x-model="window.start" min="0" step="0.01" :required="type === 'cgi_clips'" placeholder="Example: 8.50" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">
+                                <label class="mb-1 block text-sm font-medium text-gray-700">Starts at (s) *</label>
+                                <input type="number" :name="`hazard_windows[${index}][start]`" x-model="window.start" min="0" step="0.01" :required="type === 'cgi_clips'" placeholder="e.g. 8.50" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">
                             </div>
                             <div>
-                                <label class="mb-1 block text-sm font-medium text-gray-700">Ends at (seconds) *</label>
-                                <input type="number" :name="`hazard_windows[${index}][end]`" x-model="window.end" min="0.01" step="0.01" :required="type === 'cgi_clips'" placeholder="Example: 13.50" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">
+                                <label class="mb-1 block text-sm font-medium text-gray-700">Ends at (s) *</label>
+                                <input type="number" :name="`hazard_windows[${index}][end]`" x-model="window.end" min="0.01" step="0.01" :required="type === 'cgi_clips'" placeholder="e.g. 13.50" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">
                             </div>
                             <div>
-                                <label class="mb-1 block text-sm font-medium text-gray-700">Maximum points *</label>
-                                <input type="number" :name="`hazard_windows[${index}][points]`" x-model="window.points" min="1" max="100" step="1" :required="type === 'cgi_clips'" placeholder="Example: 5" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">
+                                <label class="mb-1 block text-sm font-medium text-gray-700">Max points *</label>
+                                <input type="number" :name="`hazard_windows[${index}][points]`" x-model="window.points" min="0" max="100" step="1" :required="type === 'cgi_clips'" placeholder="e.g. 5" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-sm font-medium text-gray-700">Flag time (s)</label>
+                                <input type="number" :name="`hazard_windows[${index}][flag_time]`" x-model="window.flag_time" min="0" step="0.01" placeholder="defaults to start" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">
                             </div>
                         </div>
                     </div>
                 </template>
             </div>
 
-            <button type="button" @click="hazardWindows.push({ key: nextHazardRangeId++, start: '', end: '', points: 5 })" class="mt-4 inline-flex min-h-11 items-center gap-2 rounded-md border border-amber-400 bg-white px-4 py-2 text-sm font-bold text-amber-900 hover:bg-amber-100">
+            <button type="button" @click="hazardWindows.push({ key: nextHazardRangeId++, start: '', end: '', points: 5, flag_time: '' })" class="mt-4 inline-flex min-h-11 items-center gap-2 rounded-md border border-amber-400 bg-white px-4 py-2 text-sm font-bold text-amber-900 hover:bg-amber-100">
                 <span class="text-lg leading-none">+</span> Add another hazard range
             </button>
         </div>

@@ -35,6 +35,10 @@ class CgiClip extends Model
 
     public function getSourceAttribute()
     {
-        return $this->media_path ?? $this->media_url;
+        if ($this->getRawOriginal('media_path')) {
+            return route('media.cgi-clips.stream', $this, false);
+        }
+
+        return $this->media_url;
     }
 }

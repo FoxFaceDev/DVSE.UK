@@ -23,6 +23,12 @@ class CategoryController extends Controller
         return view('admin.categories.create', compact('section', 'subSection'));
     }
 
+    public function show(Section $section, SubSection $subSection, Category $category)
+    {
+        $category->load('topics');
+        return view('admin.categories.show', compact('section', 'subSection', 'category'));
+    }
+
     public function store(Request $request, Section $section, SubSection $subSection)
     {
         $request->validate(['name_en' => 'required|string', 'name_ku' => 'nullable|string']);

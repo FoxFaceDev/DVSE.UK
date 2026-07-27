@@ -6,10 +6,16 @@
             </a>
             <h2 class="text-xl font-heading font-bold text-gray-800" style="color: {{ $subSection->color ?? $section->color }}">{{ $subSection->name }}</h2>
         </div>
-        <a href="{{ route('admin.sections.sub_sections.categories.create', [$section, $subSection]) }}" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            Add Category
-        </a>
+        <div class="flex gap-2">
+            <a href="{{ route('admin.topics.create', ['topicable_type' => 'App\Models\SubSection', 'topicable_id' => $subSection->id]) }}" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Add Topic
+            </a>
+            <a href="{{ route('admin.sections.sub_sections.categories.create', [$section, $subSection]) }}" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Add Category
+            </a>
+        </div>
     </div>
 
     @if(session('success'))
@@ -25,7 +31,6 @@
                     <th class="px-6 py-3">ID</th>
                     <th class="px-6 py-3">English Name</th>
                     <th class="px-6 py-3">Kurdish Name</th>
-                    <th class="px-6 py-3">Content</th>
                     <th class="px-6 py-3 text-right">Actions</th>
                 </tr>
             </thead>
@@ -33,16 +38,14 @@
                 @forelse($subSection->categories as $category)
                 <tr class="hover:bg-gray-50/50">
                     <td class="px-6 py-4 text-gray-500">#{{ $category->id }}</td>
-                    <td class="px-6 py-4 font-medium text-gray-900">{{ $category->name_en }}</td>
-                    <td class="px-6 py-4 text-gray-600" dir="rtl">{{ $category->name_ku ?? '-' }}</td>
-                    <td class="px-6 py-4">
-                        <span class="rounded-full bg-blue-50 px-2 py-1 text-xs font-bold text-primary">{{ $category->questions_count }} questions</span>
-                        <span class="ml-1 rounded-full bg-purple-50 px-2 py-1 text-xs font-bold text-purple-700">{{ $category->content_pages_count }} pages</span>
+                    <td class="px-6 py-4 font-medium text-gray-900">
+                        <a href="{{ route('admin.sections.sub_sections.categories.show', [$section, $subSection, $category]) }}" class="hover:text-primary hover:underline">
+                            {{ $category->name_en }}
+                        </a>
                     </td>
+                    <td class="px-6 py-4 text-gray-600" dir="rtl">{{ $category->name_ku ?? '-' }}</td>
                     <td class="px-6 py-4 text-right flex justify-end gap-2 items-center h-full">
-                        <a href="{{ route('admin.questions.create', ['category_id' => $category->id]) }}" class="text-sm text-primary hover:underline font-medium">Add Question</a>
-                        <span class="text-gray-300">|</span>
-                        <a href="{{ route('admin.content-pages.create', ['category_id' => $category->id]) }}" class="text-sm font-medium text-purple-700 hover:underline">Add Page</a>
+                        <a href="{{ route('admin.topics.create', ['topicable_type' => 'App\Models\Category', 'topicable_id' => $category->id]) }}" class="text-sm font-medium text-primary hover:underline">Add Topic</a>
                         <span class="text-gray-300">|</span>
                         <a href="{{ route('admin.sections.sub_sections.categories.edit', [$section, $subSection, $category]) }}" class="text-sm text-gray-500 hover:text-primary transition-colors">Edit</a>
                         <span class="text-gray-300">|</span>

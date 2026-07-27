@@ -7,16 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class Question extends Model
 {
     protected $fillable = [
-        'category_id', 'text_en', 'text_ku', 'media_path',
+        'topic_id', 'text_en', 'text_ku', 'media_path',
         'media_type', 'media_url',
         'explanation_en', 'explanation_ku'
     ];
 
     protected $appends = ['media_source'];
 
-    public function category()
+    public function topic()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Topic::class);
     }
 
     public function getMediaPathAttribute($value)

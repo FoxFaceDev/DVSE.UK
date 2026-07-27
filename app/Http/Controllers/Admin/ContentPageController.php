@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ContentPageRequest;
-use App\Models\Category;
+use App\Models\Topic;
 use App\Models\ContentPage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -13,12 +13,12 @@ class ContentPageController extends Controller
 {
     public function index(Request $request)
     {
-        $categories = Category::orderBy('name_en')->get();
+        $topics = Topic::with('topicable')->orderBy('name_en')->get();
         $search = trim((string) $request->input('q'));
         $sort = $request->input('sort', 'newest');
 
-        $contentPages = ContentPage::with(['category', 'clips'])
-            ->when($request->category_id, fn ($query, $categoryId) => $query->where('category_id', $categoryId))
+        $contentPages = ContentPage::with(['topic', 'clips'])
+            ->when($request->topic_id, fn ($query, $topicId) => $query->where('topic_id', $topicId))
             ->when($request->type, fn ($query, $type) => $query->where('type', $type))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($searchQuery) use ($search) {
@@ -30,7 +30,7 @@ class ContentPageController extends Controller
                         ->orWhere('explanation_ku', 'like', "%{$search}%")
                         ->orWhere('what_to_do_en', 'like', "%{$search}%")
                         ->orWhere('what_to_do_ku', 'like', "%{$search}%")
-                        ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery
+                        ->orWhereHas('topic', fn ($topicQuery) => $topicQuery
                             ->where('name_en', 'like', "%{$search}%")
                             ->orWhere('name_ku', 'like', "%{$search}%"));
 
@@ -45,16 +45,16 @@ class ContentPageController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.content_pages.index', compact('contentPages', 'categories'));
+        return view('admin.content_pages.index', compact('contentPages', 'topics'));
     }
 
     public function create(Request $request)
     {
-        $categories = Category::orderBy('name_en')->get();
-        $selectedCategoryId = $request->query('category_id');
+        $topics = Topic::with('topicable')->orderBy('name_en')->get();
+        $selectedTopicId = $request->query('topic_id');
         $selectedType = $request->query('type', ContentPage::TYPE_CGI_CLIPS);
 
-        return view('admin.content_pages.create', compact('categories', 'selectedCategoryId', 'selectedType'));
+        return view('admin.content_pages.create', compact('topics', 'selectedTopicId', 'selectedType'));
     }
 
     public function store(ContentPageRequest $request)
@@ -74,10 +74,10 @@ class ContentPageController extends Controller
 
     public function edit(ContentPage $contentPage)
     {
-        $categories = Category::orderBy('name_en')->get();
+        $topics = Topic::with('topicable')->orderBy('name_en')->get();
         $contentPage->load('clips');
 
-        return view('admin.content_pages.edit', compact('contentPage', 'categories'));
+        return view('admin.content_pages.edit', compact('contentPage', 'topics'));
     }
 
     public function update(ContentPageRequest $request, ContentPage $contentPage)
@@ -130,6 +130,7 @@ class ContentPageController extends Controller
                     'start' => (float) $window['start'],
                     'end' => (float) $window['end'],
                     'points' => (int) $window['points'],
+                    'flag_time' => isset($window['flag_time']) && $window['flag_time'] !== '' ? (float) $window['flag_time'] : (float) $window['start'],
                 ])
                 ->values()
                 ->all()
@@ -137,7 +138,7 @@ class ContentPageController extends Controller
         $firstHazardWindow = $hazardWindows[0] ?? null;
 
         return [
-            'category_id' => $request->integer('category_id'),
+            'topic_id' => $request->integer('topic_id'),
             'admin_title' => $request->input('admin_title'),
             'type' => $request->input('type'),
             'text_en' => $request->input('type') === ContentPage::TYPE_CGI_CLIPS

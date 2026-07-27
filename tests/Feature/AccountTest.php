@@ -189,8 +189,9 @@ test('a user can change their password and delete their account', function () {
 test('mock test scores are calculated on the server before history is saved', function () {
     $user = User::factory()->create();
     $category = Category::create(['name_en' => 'Safe Driving', 'name_ku' => null]);
+    $topic = \App\Models\Topic::create(['topicable_type' => Category::class, 'topicable_id' => $category->id, 'name_en' => 'Safe Driving Topic']);
     $question = Question::create([
-        'category_id' => $category->id,
+        'topic_id' => $topic->id,
         'text_en' => 'Which choice is correct?',
         'text_ku' => null,
     ]);

@@ -18,7 +18,7 @@ function learningPageAdmin(): Admin
     ]);
 }
 
-function learningPageCategory(): Category
+function learningPageTopic(): \App\Models\Topic
 {
     $section = Section::create(['name' => 'Theory']);
     $subSection = SubSection::create([
@@ -26,19 +26,25 @@ function learningPageCategory(): Category
         'name' => 'Road knowledge',
     ]);
 
-    return Category::create([
+    $category = Category::create([
         'sub_section_id' => $subSection->id,
         'name_en' => 'Motorways',
         'name_ku' => null,
+    ]);
+
+    return \App\Models\Topic::create([
+        'topicable_type' => Category::class,
+        'topicable_id' => $category->id,
+        'name_en' => 'Motorways Topic'
     ]);
 }
 
 test('an admin can create a CGI page with hazard and explanation videos', function () {
     Storage::fake('public');
-    $category = learningPageCategory();
+    $topic = learningPageTopic();
 
     $response = $this->actingAs(learningPageAdmin(), 'admin')->post(route('admin.content-pages.store'), [
-        'category_id' => $category->id,
+        'topic_id' => $topic->id,
         'admin_title' => 'Vehicles approaching a bend',
         'type' => ContentPage::TYPE_CGI_CLIPS,
         'text_en' => 'Compare how the vehicles move through the bend.',
@@ -54,7 +60,7 @@ test('an admin can create a CGI page with hazard and explanation videos', functi
 
     $response->assertRedirect(route('admin.content-pages.index'))->assertSessionHasNoErrors();
     $this->assertDatabaseHas('content_pages', [
-        'category_id' => $category->id,
+        'topic_id' => $topic->id,
         'admin_title' => 'Vehicles approaching a bend',
         'type' => ContentPage::TYPE_CGI_CLIPS,
         'text_en' => 'Compare how the vehicles move through the bend.',
@@ -63,8 +69,8 @@ test('an admin can create a CGI page with hazard and explanation videos', functi
     ]);
     $page = ContentPage::where('type', ContentPage::TYPE_CGI_CLIPS)->firstOrFail();
     expect($page->hazard_windows)->toBe([
-        ['start' => 8.5, 'end' => 13.5, 'points' => 5],
-        ['start' => 22, 'end' => 27, 'points' => 8],
+        ['start' => 8.5, 'end' => 13.5, 'points' => 5, 'flag_time' => 8.5],
+        ['start' => 22, 'end' => 27, 'points' => 8, 'flag_time' => 22],
     ]);
     $this->assertDatabaseHas('cgi_clips', [
         'slot' => 0,
@@ -75,13 +81,13 @@ test('an admin can create a CGI page with hazard and explanation videos', functi
     $this->get(route('admin.content-pages.create'))
         ->assertOk()
         ->assertSee('Add another hazard range')
-        ->assertSee('Maximum points');
+        ->assertSee('Max points');
 });
 
 test('a CGI page requires at least one remaining clip', function () {
-    $category = learningPageCategory();
+    $topic = learningPageTopic();
     $page = ContentPage::create([
-        'category_id' => $category->id,
+        'topic_id' => $topic->id,
         'type' => ContentPage::TYPE_CGI_CLIPS,
     ]);
     $clip = $page->clips()->create([
@@ -90,7 +96,7 @@ test('a CGI page requires at least one remaining clip', function () {
     ]);
 
     $response = $this->actingAs(learningPageAdmin(), 'admin')->put(route('admin.content-pages.update', $page), [
-        'category_id' => $category->id,
+        'topic_id' => $topic->id,
         'type' => ContentPage::TYPE_CGI_CLIPS,
         'hazard_windows' => [
             ['start' => 8.5, 'end' => 13.5, 'points' => 5],
@@ -106,10 +112,10 @@ test('a CGI page requires at least one remaining clip', function () {
 
 test('a CGI page requires a valid hazard scoring window', function () {
     Storage::fake('public');
-    $category = learningPageCategory();
+    $topic = learningPageTopic();
 
     $response = $this->actingAs(learningPageAdmin(), 'admin')->post(route('admin.content-pages.store'), [
-        'category_id' => $category->id,
+        'topic_id' => $topic->id,
         'type' => ContentPage::TYPE_CGI_CLIPS,
         'hazard_windows' => [
             ['start' => 12, 'end' => 8, 'points' => 5],
@@ -125,10 +131,10 @@ test('a CGI page requires a valid hazard scoring window', function () {
 
 test('each CGI hazard range requires a positive point value', function () {
     Storage::fake('public');
-    $category = learningPageCategory();
+    $topic = learningPageTopic();
 
     $response = $this->actingAs(learningPageAdmin(), 'admin')->post(route('admin.content-pages.store'), [
-        'category_id' => $category->id,
+        'topic_id' => $topic->id,
         'type' => ContentPage::TYPE_CGI_CLIPS,
         'hazard_windows' => [
             ['start' => 8, 'end' => 12, 'points' => 0],
@@ -144,10 +150,10 @@ test('each CGI hazard range requires a positive point value', function () {
 
 test('an admin can create a motorway sign page with an explanation', function () {
     Storage::fake('public');
-    $category = learningPageCategory();
+    $topic = learningPageTopic();
 
     $response = $this->actingAs(learningPageAdmin(), 'admin')->post(route('admin.content-pages.store'), [
-        'category_id' => $category->id,
+        'topic_id' => $topic->id,
         'admin_title' => 'Motorway regulations begin',
         'type' => ContentPage::TYPE_MOTORWAY_SIGN,
         'sign_image' => UploadedFile::fake()->image('motorway-sign.png', 600, 600),
@@ -169,10 +175,10 @@ test('an admin can create a motorway sign page with an explanation', function ()
 });
 
 test('a motorway sign page requires both an image and an explanation', function () {
-    $category = learningPageCategory();
+    $topic = learningPageTopic();
 
     $response = $this->actingAs(learningPageAdmin(), 'admin')->post(route('admin.content-pages.store'), [
-        'category_id' => $category->id,
+        'topic_id' => $topic->id,
         'type' => ContentPage::TYPE_MOTORWAY_SIGN,
     ]);
 
@@ -180,9 +186,9 @@ test('a motorway sign page requires both an image and an explanation', function 
 });
 
 test('an admin can update a motorway sign when hidden hazard fields are empty', function () {
-    $category = learningPageCategory();
+    $topic = learningPageTopic();
     $page = ContentPage::create([
-        'category_id' => $category->id,
+        'topic_id' => $topic->id,
         'type' => ContentPage::TYPE_MOTORWAY_SIGN,
         'sign_image_path' => '/storage/content-pages/signs/example.png',
         'explanation_en' => 'Original information about this sign.',
@@ -190,7 +196,7 @@ test('an admin can update a motorway sign when hidden hazard fields are empty', 
     ]);
 
     $response = $this->actingAs(learningPageAdmin(), 'admin')->put(route('admin.content-pages.update', $page), [
-        'category_id' => $category->id,
+        'topic_id' => $topic->id,
         'admin_title' => 'Updated motorway sign',
         'type' => ContentPage::TYPE_MOTORWAY_SIGN,
         'explanation_en' => 'Updated information about this sign.',
@@ -208,10 +214,10 @@ test('an admin can update a motorway sign when hidden hazard fields are empty', 
 });
 
 test('an admin can search learning pages by title content category or id', function () {
-    $category = learningPageCategory();
+    $topic = learningPageTopic();
     $admin = learningPageAdmin();
     $matchingPage = ContentPage::create([
-        'category_id' => $category->id,
+        'topic_id' => $topic->id,
         'admin_title' => 'Temporary waiting restriction',
         'type' => ContentPage::TYPE_MOTORWAY_SIGN,
         'sign_image_path' => '/storage/content-pages/signs/waiting.png',
@@ -219,7 +225,7 @@ test('an admin can search learning pages by title content category or id', funct
         'what_to_do_en' => 'Do not wait here.',
     ]);
     ContentPage::create([
-        'category_id' => $category->id,
+        'topic_id' => $topic->id,
         'admin_title' => 'Beginning of motorway',
         'type' => ContentPage::TYPE_MOTORWAY_SIGN,
         'sign_image_path' => '/storage/content-pages/signs/motorway.png',
@@ -239,11 +245,11 @@ test('an admin can search learning pages by title content category or id', funct
 });
 
 test('learning page results are paginated and keep filters', function () {
-    $category = learningPageCategory();
+    $topic = learningPageTopic();
 
     foreach (range(1, 16) as $number) {
         ContentPage::create([
-            'category_id' => $category->id,
+            'topic_id' => $topic->id,
             'admin_title' => "Sign page {$number}",
             'type' => ContentPage::TYPE_MOTORWAY_SIGN,
             'sign_image_path' => "/storage/content-pages/signs/{$number}.png",
@@ -265,9 +271,9 @@ test('learning page results are paginated and keep filters', function () {
 });
 
 test('practice contains questions CGI pages and motorway sign pages', function () {
-    $category = learningPageCategory();
+    $topic = learningPageTopic();
     $question = Question::create([
-        'category_id' => $category->id,
+        'topic_id' => $topic->id,
         'text_en' => 'What should you do?',
     ]);
     $question->choices()->createMany([
@@ -278,7 +284,7 @@ test('practice contains questions CGI pages and motorway sign pages', function (
     ]);
 
     $cgiPage = ContentPage::create([
-        'category_id' => $category->id,
+        'topic_id' => $topic->id,
         'type' => ContentPage::TYPE_CGI_CLIPS,
     ]);
     $cgiPage->clips()->create([
@@ -286,19 +292,31 @@ test('practice contains questions CGI pages and motorway sign pages', function (
         'media_url' => 'https://example.com/cgi.mp4',
     ]);
     ContentPage::create([
-        'category_id' => $category->id,
+        'topic_id' => $topic->id,
         'type' => ContentPage::TYPE_MOTORWAY_SIGN,
         'sign_image_path' => '/storage/content-pages/signs/example.png',
         'explanation_en' => 'Motorway regulations begin here.',
     ]);
 
-    $response = $this->get(route('theory.practice', $category));
+    $response = $this->get(route('theory.practice', $topic));
 
     $response
         ->assertOk()
-        ->assertSee('Start hazard clip with sound')
+        ->assertSee('Start hazard clip')
         ->assertSee('cgi-flag-strip', false)
         ->assertSee('toggleCgiFullscreen()', false)
+        ->assertSee("toggleCgiFullscreen('explanation')", false)
+        ->assertSee("@play=\"enterCgiFullscreen('hazard')\"", false)
+        ->assertSee("enterCgiFullscreen('explanation')", false)
+        ->assertSee('cgiHazardTimelineMarkers', false)
+        ->assertSee('x-if="cgiExplanationTime >= marker.time"', false)
+        ->assertSee('blockDuration * blockIndex', false)
+        ->assertDontSee('x-show="cgiExplanationTime >= range.flag_time"', false)
+        ->assertSee('A flag appears only when the playhead reaches each scoring block.', false)
+        ->assertSee('Explanation video timeline')
+        ->assertSee('Tap to pause or play the explanation video')
+        ->assertSee('Preparing hazard clip')
+        ->assertSee('Loading explanation')
         ->assertViewHas('practiceItems', function ($items) {
         return $items->pluck('item_type')->sort()->values()->all() === [
             ContentPage::TYPE_CGI_CLIPS,

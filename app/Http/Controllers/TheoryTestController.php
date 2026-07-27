@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ad;
 use App\Models\Category;
+use App\Models\Topic;
 use App\Models\MockTestHistory;
 use App\Models\Question;
 use App\Models\SubSection;
@@ -11,10 +12,10 @@ use Illuminate\Http\Request;
 
 class TheoryTestController extends Controller
 {
-    public function practice(Category $category)
+    public function practice(Topic $topic)
     {
-        $questions = $category->questions()->with('choices')->get();
-        $contentPages = $category->contentPages()->with('clips')->get();
+        $questions = $topic->questions()->with('choices')->get();
+        $contentPages = $topic->contentPages()->with('clips')->get();
 
         $practiceItems = $questions
             ->map(fn ($question) => array_merge($question->toArray(), [
@@ -26,16 +27,19 @@ class TheoryTestController extends Controller
             ->shuffle()
             ->values();
 
-        // Fetch an active ad for this category (or global ad)
+        // If the topic belongs to a category, we might want to fetch an ad for it
+        // We can just fetch global ads or ads targeting this specific category (if applicable)
         $ad = Ad::where('is_active', true)
-            ->where(function ($query) use ($category) {
-                $query->where('targets_all_categories', true)
-                    ->orWhereHas('categories', fn ($categoryQuery) => $categoryQuery->where('categories.id', $category->id));
+            ->where(function ($query) use ($topic) {
+                $query->where('targets_all_categories', true);
+                if ($topic->topicable_type === 'App\Models\Category') {
+                    $query->orWhereHas('categories', fn ($categoryQuery) => $categoryQuery->where('categories.id', $topic->topicable_id));
+                }
             })
             ->inRandomOrder()
             ->first();
 
-        return view('theory.practice', compact('category', 'practiceItems', 'ad'));
+        return view('theory.practice', compact('topic', 'practiceItems', 'ad'));
     }
 
     public function result()

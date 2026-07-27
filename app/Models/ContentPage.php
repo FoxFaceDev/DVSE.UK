@@ -11,7 +11,7 @@ class ContentPage extends Model
     public const TYPE_MOTORWAY_SIGN = 'motorway_sign';
 
     protected $fillable = [
-        'category_id',
+        'topic_id',
         'admin_title',
         'type',
         'text_en',
@@ -37,9 +37,9 @@ class ContentPage extends Model
         ];
     }
 
-    public function category()
+    public function topic()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Topic::class);
     }
 
     public function clips()

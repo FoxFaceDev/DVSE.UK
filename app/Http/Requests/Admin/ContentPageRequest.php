@@ -20,7 +20,7 @@ class ContentPageRequest extends FormRequest
         $isCgiClips = $this->input('type') === ContentPage::TYPE_CGI_CLIPS;
 
         return [
-            'category_id' => ['required', 'integer', 'exists:categories,id'],
+            'topic_id' => ['required', 'integer', 'exists:topics,id'],
             'admin_title' => ['required', 'string', 'max:150'],
             'type' => ['required', Rule::in([
                 ContentPage::TYPE_CGI_CLIPS,
@@ -140,7 +140,7 @@ class ContentPageRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'category_id' => 'category',
+            'topic_id' => 'topic',
             'admin_title' => 'page title',
             'text_en' => 'English text',
             'text_ku' => 'Kurdish text',

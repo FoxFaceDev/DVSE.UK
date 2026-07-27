@@ -35,9 +35,7 @@ class SubSectionController extends Controller
 
     public function show(Section $section, SubSection $subSection)
     {
-        $subSection->load(['categories' => function($query) {
-            $query->withCount(['questions', 'contentPages']);
-        }]);
+        $subSection->load('categories');
         
         return view('admin.sub_sections.show', compact('section', 'subSection'));
     }

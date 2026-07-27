@@ -124,11 +124,14 @@ test('practice only receives ads that target its category or all categories', fu
     ]);
     $targetedAd->categories()->attach($roadSigns);
 
-    $this->get(route('theory.practice', $motorways))
+    $topicMotorways = \App\Models\Topic::create(['topicable_type' => 'App\Models\Category', 'topicable_id' => $motorways->id, 'name_en' => 'Motorways Topic']);
+    $topicRoadSigns = \App\Models\Topic::create(['topicable_type' => 'App\Models\Category', 'topicable_id' => $roadSigns->id, 'name_en' => 'Road Signs Topic']);
+
+    $this->get(route('theory.practice', $topicMotorways))
         ->assertOk()
         ->assertViewHas('ad', fn ($ad) => $ad === null);
 
-    $this->get(route('theory.practice', $roadSigns))
+    $this->get(route('theory.practice', $topicRoadSigns))
         ->assertOk()
         ->assertViewHas('ad', fn ($ad) => $ad?->is($targetedAd));
 
@@ -140,7 +143,7 @@ test('practice only receives ads that target its category or all categories', fu
         'is_active' => true,
     ]);
 
-    $this->get(route('theory.practice', $motorways))
+    $this->get(route('theory.practice', $topicMotorways))
         ->assertOk()
         ->assertViewHas('ad', fn ($ad) => $ad?->is($globalAd));
 });

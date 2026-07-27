@@ -24,4 +24,9 @@ class SubSection extends Model
     {
         return $this->hasMany(Category::class);
     }
+
+    public function topics()
+    {
+        return $this->morphMany(Topic::class, 'topicable');
+    }
 }

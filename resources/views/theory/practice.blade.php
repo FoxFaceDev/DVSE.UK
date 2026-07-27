@@ -1,7 +1,19 @@
+@php
+    $backUrl = route('home');
+    if ($topic->topicable_type === 'App\Models\Category') {
+        $backUrl = route('frontend.category', $topic->topicable_id);
+    } elseif ($topic->topicable_type === 'App\Models\SubSection') {
+        $backUrl = route('frontend.sub_section', $topic->topicable_id);
+    } elseif ($topic->topicable_type === 'App\Models\Section') {
+        $backUrl = route('frontend.section', $topic->topicable_id);
+    }
+@endphp
 <x-layouts.app :showBack="false" title="Practice">
     <div
         x-data="practiceRunner()"
-        x-init="initData({{ Js::from($category) }}, {{ Js::from($practiceItems) }}, {{ Js::from($ad) }})"
+        x-init="initData({{ Js::from($topic) }}, {{ Js::from($practiceItems) }}, {{ Js::from($ad) }})"
+        @fullscreenchange.window="handleCgiFullscreenChange()"
+        @webkitfullscreenchange.window="handleCgiFullscreenChange()"
         class="space-y-6"
     >
         <template x-if="!initialized">
@@ -36,7 +48,7 @@
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
                             </button>
                         </template>
-                        <a href="{{ route('frontend.sub_section', $category->subSection) }}" class="rounded-full p-2 text-error transition-colors hover:bg-error-container" title="Exit practice" aria-label="Exit practice">
+                        <a href="{{ $backUrl }}" class="rounded-full p-2 text-error transition-colors hover:bg-error-container" title="Exit practice" aria-label="Exit practice">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </a>
                     </div>
@@ -183,7 +195,15 @@
                                                         x-ref="cgiHazardVideo"
                                                         :key="'cgi-hazard-' + currentIndex"
                                                         :src="currentItem.clips[0].source"
-                                                        playsinline preload="auto"
+                                                        playsinline preload="auto" muted
+                                                        @loadstart="startCgiLoading('hazard')"
+                                                        @loadedmetadata="updateCgiLoadProgress($event.target, 'hazard')"
+                                                        @progress="updateCgiLoadProgress($event.target, 'hazard')"
+                                                        @canplay="finishCgiLoading($event.target, 'hazard')"
+                                                        @waiting="cgiHazardLoading = true"
+                                                        @play="enterCgiFullscreen('hazard')"
+                                                        @playing="finishCgiLoading($event.target, 'hazard')"
+                                                        x-on:error="cgiHazardLoading = false"
                                                         @ended="finishCgiHazard()"
                                                         class="h-full w-full object-contain"
                                                     ></video>
@@ -191,9 +211,28 @@
                                                     <button x-show="cgiHazardStarted" type="button" @click="placeCgiFlag($event)" class="absolute inset-0 z-10 cursor-crosshair touch-manipulation" aria-label="Flag a developing hazard"></button>
 
                                                     <div x-show="!cgiHazardStarted" class="absolute inset-0 z-30 flex items-center justify-center bg-black/55 px-5 text-center">
-                                                        <button type="button" @click="startCgiHazard()" class="min-h-14 rounded-full bg-white px-7 py-3 font-bold text-purple-900 shadow-lg transition-transform hover:scale-105">
-                                                            Start hazard clip with sound
+                                                        <button x-show="!cgiHazardPlayRequested" type="button" @click="startCgiHazard()" class="min-h-14 rounded-full bg-white px-7 py-3 font-bold text-purple-900 shadow-lg transition-transform hover:scale-105">
+                                                            Start hazard clip
                                                         </button>
+
+                                                        <div x-show="cgiHazardPlayRequested" x-transition.opacity class="w-full max-w-56 rounded-2xl bg-black/75 px-5 py-4 text-white shadow-xl backdrop-blur-sm">
+                                                            <div class="mx-auto h-11 w-11 animate-spin rounded-full border-4 border-white/25 border-t-white"></div>
+                                                            <p class="mt-3 text-sm font-bold">Preparing hazard clip</p>
+                                                            <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-white/20">
+                                                                <div class="h-full rounded-full bg-white transition-[width] duration-300" :style="'width:' + cgiHazardLoadProgress + '%'"></div>
+                                                            </div>
+                                                            <p class="mt-1.5 text-xs text-white/70"><span x-text="Math.round(cgiHazardLoadProgress)"></span>% buffered</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div x-show="cgiHazardStarted && cgiHazardLoading" x-transition.opacity class="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-black/45 px-5 text-center">
+                                                        <div class="w-full max-w-52 rounded-2xl bg-black/75 px-5 py-4 text-white shadow-xl backdrop-blur-sm">
+                                                            <div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-white/25 border-t-white"></div>
+                                                            <p class="mt-3 text-sm font-bold">Buffering video</p>
+                                                            <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-white/20">
+                                                                <div class="h-full rounded-full bg-white transition-[width] duration-300" :style="'width:' + cgiHazardLoadProgress + '%'"></div>
+                                                            </div>
+                                                        </div>
                                                     </div>
 
                                                     <button type="button" @click.stop="toggleCgiFullscreen()" class="absolute bottom-2 right-2 z-40 flex h-10 w-10 items-center justify-center rounded-md bg-black/70 text-white hover:bg-black" title="Landscape fullscreen" aria-label="Open landscape fullscreen">
@@ -227,14 +266,120 @@
                                     </template>
 
                                     <template x-if="cgiStage === 'explanation'">
-                                        <div class="mx-auto aspect-video w-full max-w-3xl overflow-hidden rounded-lg bg-gray-950 shadow-sm">
-                                            <video
-                                                x-ref="cgiExplanationVideo"
-                                                :key="'cgi-explanation-' + currentIndex"
-                                                :src="currentItem.clips[1].source"
-                                                controls playsinline preload="auto"
-                                                class="h-full w-full object-contain"
-                                            ></video>
+                                        <div
+                                            x-ref="cgiExplanationPlayer"
+                                            class="cgi-explanation-shell mx-auto w-full max-w-3xl overflow-hidden rounded-lg bg-white shadow-sm"
+                                            :class="{ 'cgi-landscape-fallback': cgiFullscreenFallback && cgiFullscreenTarget === 'explanation' }"
+                                        >
+                                            <div class="cgi-explanation-video-frame relative aspect-video overflow-hidden bg-gray-950">
+                                                <video
+                                                    x-ref="cgiExplanationVideo"
+                                                    :key="'cgi-explanation-' + currentIndex"
+                                                    :src="currentItem.clips[1].source"
+                                                    disablepictureinpicture
+                                                    playsinline webkit-playsinline preload="auto" tabindex="0"
+                                                    role="button"
+                                                    aria-label="Tap to pause or play the explanation video"
+                                                    class="h-full w-full cursor-pointer touch-manipulation object-contain"
+                                                    @click="toggleCgiExplanationPlayback()"
+                                                    @keydown.space.prevent="toggleCgiExplanationPlayback()"
+                                                    @keydown.enter.prevent="toggleCgiExplanationPlayback()"
+                                                    @loadstart="startCgiLoading('explanation')"
+                                                    @loadedmetadata="syncCgiExplanationVideo($event.target)"
+                                                    @durationchange="syncCgiExplanationVideo($event.target)"
+                                                    @progress="updateCgiLoadProgress($event.target, 'explanation')"
+                                                    @canplay="finishCgiLoading($event.target, 'explanation')"
+                                                    @timeupdate="syncCgiExplanationVideo($event.target)"
+                                                    @waiting="cgiExplanationLoading = true"
+                                                    @seeking="cgiExplanationLoading = true; cgiExplanationTime = $event.target.currentTime"
+                                                    @seeked="finishCgiSeek($event.target)"
+                                                    @play="cgiExplanationPaused = false; enterCgiFullscreen('explanation')"
+                                                    @playing="cgiExplanationPaused = false; finishCgiLoading($event.target, 'explanation')"
+                                                    @pause="cgiExplanationPaused = true"
+                                                    x-on:error="cgiExplanationLoading = false"
+                                                    @ended="exitCgiFullscreen()"
+                                                ></video>
+
+                                                <div x-show="cgiExplanationLoading" x-transition.opacity class="pointer-events-none absolute inset-0 z-[105] flex items-center justify-center bg-black/45 px-5 text-center">
+                                                    <div class="w-full max-w-56 rounded-2xl bg-black/75 px-5 py-4 text-white shadow-xl backdrop-blur-sm">
+                                                        <div class="mx-auto h-11 w-11 animate-spin rounded-full border-4 border-white/25 border-t-white"></div>
+                                                        <p class="mt-3 text-sm font-bold">Loading explanation</p>
+                                                        <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-white/20">
+                                                            <div class="h-full rounded-full bg-white transition-[width] duration-300" :style="'width:' + cgiExplanationLoadProgress + '%'"></div>
+                                                        </div>
+                                                        <p class="mt-1.5 text-xs text-white/70"><span x-text="Math.round(cgiExplanationLoadProgress)"></span>% buffered</p>
+                                                    </div>
+                                                </div>
+
+                                                <div x-show="cgiExplanationPaused && !cgiExplanationLoading && !cgiScrubbing" x-transition.opacity class="pointer-events-none absolute inset-0 z-[90] flex items-center justify-center bg-black/15">
+                                                    <span class="flex h-18 w-18 items-center justify-center rounded-full bg-black/70 text-white shadow-xl backdrop-blur-sm">
+                                                        <svg class="ml-1 h-8 w-8" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                                                    </span>
+                                                </div>
+
+                                                <button type="button" @click.stop="toggleCgiFullscreen('explanation')" class="absolute right-2 top-2 z-[110] flex h-11 w-11 touch-manipulation items-center justify-center rounded-md bg-black/75 text-white shadow-md hover:bg-black" title="Fullscreen with timeline" aria-label="Open video and timeline fullscreen">
+                                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4h4m8 0h4v4m0 8v4h-4M8 20H4v-4"/></svg>
+                                                </button>
+                                            </div>
+
+                                            <!-- Timeline bar -->
+                                            <div class="cgi-timeline-panel w-full select-none bg-white p-3" x-show="cgiVideoDuration > 0" x-cloak>
+                                                <div class="relative w-full cursor-pointer overflow-visible"
+                                                     style="height: 48px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px"
+                                                     x-ref="cgiTimeline">
+                                                    <input
+                                                        x-model.number="cgiExplanationTime"
+                                                        type="range"
+                                                        min="0"
+                                                        :max="cgiVideoDuration"
+                                                        step="0.01"
+                                                        class="absolute inset-0 z-40 h-full w-full cursor-pointer opacity-0"
+                                                        style="touch-action: none"
+                                                        aria-label="Explanation video timeline"
+                                                        :aria-valuemin="0"
+                                                        :aria-valuemax="cgiVideoDuration"
+                                                        :aria-valuenow="cgiExplanationTime"
+                                                        @pointerdown="cgiStartScrub()"
+                                                        @pointerup="cgiStopScrub()"
+                                                        @pointercancel="cgiStopScrub()"
+                                                        @input="seekCgiTimeline($event.target.value)"
+                                                        @change="cgiStopScrub()"
+                                                    >
+
+                                                    <!-- Playhead line -->
+                                                    <div class="absolute top-0 bottom-0 z-30 pointer-events-none"
+                                                         :style="'left:' + (cgiVideoDuration > 0 ? (cgiExplanationTime / cgiVideoDuration * 100) : 0) + '%; width: 2px; background: #000'">
+                                                        <!-- Playhead dot -->
+                                                        <div style="position:absolute; top:-6px; left:-7px; width:16px; height:16px; border-radius:50%; background:#000; box-shadow: 0 1px 4px rgba(0,0,0,0.4)"></div>
+                                                    </div>
+
+                                                    <!-- Scoring blocks -->
+                                                    <template x-for="(range, ri) in cgiHazardRanges" :key="'tl-' + ri">
+                                                        <div class="absolute top-0 bottom-0 z-10 flex overflow-hidden"
+                                                             :style="'left:' + (range.start / cgiVideoDuration * 100) + '%; width:' + ((range.end - range.start) / cgiVideoDuration * 100) + '%'">
+                                                            <template x-for="si in range.points" :key="si">
+                                                                <div class="flex-1 flex items-center justify-center font-bold text-white"
+                                                                     :style="'font-size:11px; border-right:1px solid rgba(255,255,255,0.3); background:' + ['#b91c1c','#dc2626','#ef4444','#f87171','#fca5a5','#fecaca'][Math.min(si - 1, 5)]">
+                                                                    <span x-text="range.points - si + 1"></span>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+
+                                                    <!-- A flag appears only when the playhead reaches each scoring block. -->
+                                                    <template x-for="marker in cgiHazardTimelineMarkers" :key="marker.id">
+                                                        <template x-if="cgiExplanationTime >= marker.time">
+                                                            <div class="absolute z-20 pointer-events-none"
+                                                                 :style="'left:' + (marker.time / cgiVideoDuration * 100) + '%; top:-8px; transform:translateX(-50%)'"
+                                                                 :aria-label="'Reached ' + marker.points + '-point hazard marker'">
+                                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="#dc2626">
+                                                                    <path d="M5 2.5a1 1 0 0 1 2 0V4h11.2a1 1 0 0 1 .9 1.43L17.4 9l1.7 3.57a1 1 0 0 1-.9 1.43H7v7.5a1 1 0 0 1-2 0v-19Z"/>
+                                                                </svg>
+                                                            </div>
+                                                        </template>
+                                                    </template>
+                                                </div>
+                                            </div>
                                         </div>
                                     </template>
 
@@ -324,13 +469,17 @@
     <style>
         .cgi-hazard-shell:fullscreen,
         .cgi-hazard-shell:-webkit-full-screen,
-        .cgi-hazard-shell.cgi-landscape-fallback {
+        .cgi-hazard-shell.cgi-landscape-fallback,
+        .cgi-explanation-shell:fullscreen,
+        .cgi-explanation-shell:-webkit-full-screen,
+        .cgi-explanation-shell.cgi-landscape-fallback {
             display: flex;
             position: fixed;
             inset: 0;
             z-index: 100;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             max-width: none;
             flex-direction: column;
             border-radius: 0;
@@ -339,7 +488,10 @@
 
         .cgi-hazard-shell:fullscreen .cgi-video-frame,
         .cgi-hazard-shell:-webkit-full-screen .cgi-video-frame,
-        .cgi-hazard-shell.cgi-landscape-fallback .cgi-video-frame {
+        .cgi-hazard-shell.cgi-landscape-fallback .cgi-video-frame,
+        .cgi-explanation-shell:fullscreen .cgi-explanation-video-frame,
+        .cgi-explanation-shell:-webkit-full-screen .cgi-explanation-video-frame,
+        .cgi-explanation-shell.cgi-landscape-fallback .cgi-explanation-video-frame {
             min-height: 0;
             flex: 1 1 auto;
             aspect-ratio: auto;
@@ -351,13 +503,22 @@
             min-height: 4.75rem;
             flex: 0 0 auto;
         }
+
+        .cgi-explanation-shell:fullscreen .cgi-timeline-panel,
+        .cgi-explanation-shell:-webkit-full-screen .cgi-timeline-panel,
+        .cgi-explanation-shell.cgi-landscape-fallback .cgi-timeline-panel {
+            flex: 0 0 auto;
+            padding-right: max(0.75rem, env(safe-area-inset-right));
+            padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+            padding-left: max(0.75rem, env(safe-area-inset-left));
+        }
     </style>
 
     <script>
         function practiceRunner() {
             return {
                 initialized: false,
-                category: null,
+                topic: null,
                 items: [],
                 currentIndex: 0,
                 answers: {},
@@ -371,7 +532,18 @@
                 cgiScore: 0,
                 cgiRangeScores: [],
                 cgiHazardStarted: false,
+                cgiHazardPlayRequested: false,
+                cgiHazardLoading: true,
+                cgiHazardLoadProgress: 0,
+                cgiExplanationTime: 0,
+                cgiVideoDuration: 0,
+                cgiExplanationLoading: true,
+                cgiExplanationLoadProgress: 0,
+                cgiExplanationPaused: true,
+                cgiScrubbing: false,
+                cgiSeekResumePending: false,
                 cgiFullscreenFallback: false,
+                cgiFullscreenTarget: null,
                 languagePreference: 'en',
                 showKurdish: false,
                 adData: null,
@@ -381,8 +553,8 @@
                 adTimer: null,
                 adShown: false,
 
-                initData(category, items, ad) {
-                    this.category = category;
+                initData(topic, items, ad) {
+                    this.topic = topic;
                     this.items = items;
                     this.languagePreference = localStorage.getItem('languagePreference') || 'en';
                     this.showKurdish = this.languagePreference === 'en-ku';
@@ -436,14 +608,21 @@
 
                 get cgiHazardRanges() {
                     const ranges = Array.isArray(this.currentItem.hazard_windows)
-                        ? this.currentItem.hazard_windows.filter(range => Number(range.end) > Number(range.start))
+                        ? this.currentItem.hazard_windows
+                            .filter(range => Number(range.end) > Number(range.start))
+                            .map(range => {
+                                const flagTime = (range.flag_time !== undefined && range.flag_time !== null && range.flag_time !== '')
+                                    ? Number(range.flag_time)
+                                    : Number(range.start);
+                                return { ...range, flag_time: flagTime };
+                            })
                         : [];
 
                     if (ranges.length) return ranges;
 
                     const legacyStart = Number(this.currentItem.hazard_window_start);
                     const legacyEnd = Number(this.currentItem.hazard_window_end);
-                    return legacyEnd > legacyStart ? [{ start: legacyStart, end: legacyEnd, points: 5 }] : [];
+                    return legacyEnd > legacyStart ? [{ start: legacyStart, end: legacyEnd, points: 5, flag_time: legacyStart }] : [];
                 },
 
                 get cgiMaxScore() {
@@ -453,18 +632,81 @@
                     ) || 5;
                 },
 
+                get cgiHazardTimelineMarkers() {
+                    return this.cgiHazardRanges.flatMap((range, rangeIndex) => {
+                        const start = Number(range.start);
+                        const end = Number(range.end);
+                        const points = Math.max(1, Number.parseInt(range.points, 10) || 5);
+                        const blockDuration = (end - start) / points;
+
+                        return Array.from({ length: points }, (_, blockIndex) => ({
+                            id: `range-${rangeIndex}-block-${blockIndex}`,
+                            time: start + (blockDuration * blockIndex),
+                            points: points - blockIndex,
+                        }));
+                    });
+                },
+
+                startCgiLoading(target) {
+                    if (target === 'hazard') {
+                        this.cgiHazardLoading = true;
+                        this.cgiHazardLoadProgress = 0;
+                        return;
+                    }
+
+                    this.cgiExplanationLoading = true;
+                    this.cgiExplanationLoadProgress = 0;
+                },
+
+                updateCgiLoadProgress(video, target) {
+                    if (!video) return;
+
+                    const duration = Number(video.duration);
+                    let progress = 0;
+
+                    if (Number.isFinite(duration) && duration > 0 && video.buffered && video.buffered.length) {
+                        try {
+                            const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+                            progress = Math.max(0, Math.min(100, (bufferedEnd / duration) * 100));
+                        } catch (error) {
+                            progress = 0;
+                        }
+                    }
+
+                    if (target === 'hazard') {
+                        this.cgiHazardLoadProgress = progress;
+                    } else {
+                        this.cgiExplanationLoadProgress = progress;
+                    }
+                },
+
+                finishCgiLoading(video, target) {
+                    this.updateCgiLoadProgress(video, target);
+
+                    if (target === 'hazard') {
+                        this.cgiHazardLoading = false;
+                    } else {
+                        this.cgiExplanationLoading = false;
+                    }
+                },
+
                 startCgiHazard() {
                     const video = this.$refs.cgiHazardVideo;
                     if (!video) return;
 
-                    video.muted = false;
+                    this.cgiHazardPlayRequested = true;
+                    this.cgiHazardLoading = video.readyState < 3;
+                    video.muted = true;
                     video.volume = 1;
                     const playback = video.play();
+                    this.enterCgiFullscreen('hazard');
                     if (playback) {
                         playback.then(() => {
                             this.cgiHazardStarted = true;
                         }).catch(() => {
+                            this.cgiHazardPlayRequested = false;
                             this.cgiHazardStarted = false;
+                            this.exitCgiFullscreen();
                         });
                     } else {
                         this.cgiHazardStarted = true;
@@ -513,27 +755,142 @@
 
                 startCgiExplanation() {
                     this.cgiStage = 'explanation';
+                    this.cgiExplanationTime = 0;
+                    this.cgiVideoDuration = 0;
+                    this.cgiExplanationLoading = true;
+                    this.cgiExplanationLoadProgress = 0;
+                    this.cgiExplanationPaused = true;
+                    this.cgiScrubbing = false;
                     this.$nextTick(() => {
                         const video = this.$refs.cgiExplanationVideo;
                         if (!video) return;
+
+                        if (video.duration && isFinite(video.duration)) {
+                            this.cgiVideoDuration = video.duration;
+                        }
+
                         video.muted = false;
                         video.volume = 1;
-                        video.play().catch(() => {});
+                        const playback = video.play();
+                        this.enterCgiFullscreen('explanation');
+                        playback.catch(() => {});
                     });
                 },
 
-                async toggleCgiFullscreen() {
-                    if (document.fullscreenElement || this.cgiFullscreenFallback) {
+                syncCgiExplanationVideo(video) {
+                    if (!video) return;
+
+                    this.updateCgiLoadProgress(video, 'explanation');
+
+                    if (Number.isFinite(video.duration) && video.duration > 0) {
+                        this.cgiVideoDuration = video.duration;
+                    }
+
+                    if (!this.cgiScrubbing && Number.isFinite(video.currentTime)) {
+                        this.cgiExplanationTime = video.currentTime;
+                    }
+                },
+
+                toggleCgiExplanationPlayback() {
+                    const video = this.$refs.cgiExplanationVideo;
+                    if (!video) return;
+
+                    if (video.paused || video.ended) {
+                        if (video.ended) {
+                            video.currentTime = 0;
+                            this.cgiExplanationTime = 0;
+                        }
+
+                        this.cgiExplanationLoading = video.readyState < 3;
+                        video.play().catch(() => {
+                            this.cgiExplanationPaused = true;
+                            this.cgiExplanationLoading = false;
+                        });
+                        return;
+                    }
+
+                    video.pause();
+                },
+
+                cgiStartScrub() {
+                    if (this.cgiScrubbing) return;
+
+                    this.cgiScrubbing = true;
+                    const video = this.$refs.cgiExplanationVideo;
+                    this._cgiWasPlaying = Boolean(video && !video.paused && !video.ended);
+                    this.cgiSeekResumePending = false;
+
+                    if (this._cgiWasPlaying) {
+                        video.pause();
+                    }
+                },
+
+                cgiStopScrub() {
+                    if (!this.cgiScrubbing) return;
+
+                    this.cgiScrubbing = false;
+                    const video = this.$refs.cgiExplanationVideo;
+                    if (!video || !this._cgiWasPlaying) return;
+
+                    if (video.seeking) {
+                        this.cgiSeekResumePending = true;
+                    } else {
+                        video.play().catch(() => {});
+                    }
+                },
+
+                seekCgiTimeline(value) {
+                    if (this.cgiStage !== 'explanation') return;
+                    const video = this.$refs.cgiExplanationVideo;
+                    if (!video) return;
+
+                    const duration = (video.duration && isFinite(video.duration)) ? video.duration : this.cgiVideoDuration;
+                    if (!duration || !isFinite(duration)) return;
+
+                    const newTime = Math.max(0, Math.min(Number(value) || 0, duration));
+                    video.currentTime = newTime;
+                    this.cgiExplanationTime = newTime;
+                },
+
+                finishCgiSeek(video) {
+                    this.syncCgiExplanationVideo(video);
+                    this.finishCgiLoading(video, 'explanation');
+
+                    if (!this.cgiSeekResumePending) return;
+                    this.cgiSeekResumePending = false;
+                    video.play().catch(() => {});
+                },
+
+                toggleCgiFullscreen(target = 'hazard') {
+                    const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
+                    if (fullscreenElement || this.cgiFullscreenFallback) {
                         this.exitCgiFullscreen();
                         return;
                     }
 
-                    const player = this.$refs.cgiHazardPlayer;
+                    this.enterCgiFullscreen(target);
+                },
+
+                async enterCgiFullscreen(target = 'hazard') {
+                    if (this.cgiFullscreenTarget === target) return;
+
+                    const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
+                    if (fullscreenElement || this.cgiFullscreenFallback) return;
+
+                    const player = target === 'explanation'
+                        ? this.$refs.cgiExplanationPlayer
+                        : this.$refs.cgiHazardPlayer;
                     if (!player) return;
 
-                    if (player.requestFullscreen) {
+                    this.cgiFullscreenTarget = target;
+                    const requestFullscreen = player.requestFullscreen
+                        ? () => player.requestFullscreen()
+                        : (player.webkitRequestFullscreen ? () => player.webkitRequestFullscreen() : null);
+
+                    if (requestFullscreen) {
                         try {
-                            await player.requestFullscreen();
+                            const request = requestFullscreen();
+                            if (request && typeof request.then === 'function') await request;
                             if (screen.orientation && screen.orientation.lock) {
                                 screen.orientation.lock('landscape').catch(() => {});
                             }
@@ -550,12 +907,24 @@
                 exitCgiFullscreen() {
                     if (document.fullscreenElement && document.exitFullscreen) {
                         document.exitFullscreen().catch(() => {});
+                    } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
                     }
                     if (screen.orientation && screen.orientation.unlock) {
                         try { screen.orientation.unlock(); } catch (error) {}
                     }
                     this.cgiFullscreenFallback = false;
+                    this.cgiFullscreenTarget = null;
                     document.body.style.removeProperty('overflow');
+                },
+
+                handleCgiFullscreenChange() {
+                    if (document.fullscreenElement || document.webkitFullscreenElement) return;
+
+                    this.cgiFullscreenTarget = null;
+                    if (!this.cgiFullscreenFallback) {
+                        document.body.style.removeProperty('overflow');
+                    }
                 },
 
                 get totalQuestions() {
@@ -628,6 +997,12 @@
                     this.cgiScore = 0;
                     this.cgiRangeScores = [];
                     this.cgiHazardStarted = false;
+                    this.cgiHazardPlayRequested = false;
+                    this.cgiHazardLoading = true;
+                    this.cgiHazardLoadProgress = 0;
+                    this.cgiExplanationLoading = true;
+                    this.cgiExplanationLoadProgress = 0;
+                    this.cgiExplanationPaused = true;
                     this.exitCgiFullscreen();
                 },
 
@@ -655,7 +1030,7 @@
 
                 finishPractice() {
                     if (!this.canContinue) return;
-                    window.location.href = `{{ route('theory.result') }}?correct=${this.correctCount}&total=${this.totalQuestions}&category=${encodeURIComponent(this.category.name_en)}`;
+                    window.location.href = `{{ route('theory.result') }}?correct=${this.correctCount}&total=${this.totalQuestions}&topic=${encodeURIComponent(this.topic.name_en)}`;
                 },
 
                 speakCurrentItem() {
