@@ -367,12 +367,12 @@
                                                         </div>
                                                     </template>
 
-                                                    <!-- A flag appears only when the playhead reaches each scoring block. -->
-                                                    <template x-for="marker in cgiHazardTimelineMarkers" :key="marker.id">
-                                                        <template x-if="cgiExplanationTime >= marker.time">
+                                                    <!-- Replay only the flags the learner placed during the hazard video. -->
+                                                    <template x-for="flag in cgiFlags" :key="'review-flag-' + flag.id">
+                                                        <template x-if="cgiExplanationTime >= flag.time">
                                                             <div class="absolute z-20 pointer-events-none"
-                                                                 :style="'left:' + (marker.time / cgiVideoDuration * 100) + '%; top:-8px; transform:translateX(-50%)'"
-                                                                 :aria-label="'Reached ' + marker.points + '-point hazard marker'">
+                                                                 :style="'left:' + (flag.time / cgiVideoDuration * 100) + '%; top:-8px; transform:translateX(-50%)'"
+                                                                 :aria-label="'Your hazard flag at ' + flag.time.toFixed(1) + ' seconds'">
                                                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="#dc2626">
                                                                     <path d="M5 2.5a1 1 0 0 1 2 0V4h11.2a1 1 0 0 1 .9 1.43L17.4 9l1.7 3.57a1 1 0 0 1-.9 1.43H7v7.5a1 1 0 0 1-2 0v-19Z"/>
                                                                 </svg>
@@ -686,21 +686,6 @@
                         (total, range) => total + Math.max(1, Number.parseInt(range.points, 10) || 5),
                         0
                     ) || 5;
-                },
-
-                get cgiHazardTimelineMarkers() {
-                    return this.cgiHazardRanges.flatMap((range, rangeIndex) => {
-                        const start = Number(range.start);
-                        const end = Number(range.end);
-                        const points = Math.max(1, Number.parseInt(range.points, 10) || 5);
-                        const blockDuration = (end - start) / points;
-
-                        return Array.from({ length: points }, (_, blockIndex) => ({
-                            id: `range-${rangeIndex}-block-${blockIndex}`,
-                            time: start + (blockDuration * blockIndex),
-                            points: points - blockIndex,
-                        }));
-                    });
                 },
 
                 startCgiLoading(target) {
