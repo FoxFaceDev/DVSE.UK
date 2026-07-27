@@ -10,6 +10,21 @@
             <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
         </div>
 
+        <a href="{{ route('theory.hazard_mock_info') }}" class="group flex items-center gap-4 rounded-lg border border-purple-100 bg-white p-5 shadow-sm transition-all hover:bg-purple-50">
+            <div class="rounded-md bg-purple-100 p-3 text-purple-800 transition-colors group-hover:bg-purple-200">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M10.3 3.9 2.7 17a2 2 0 0 0 1.73 3h15.14a2 2 0 0 0 1.73-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <p class="font-heading font-bold text-purple-950">Hazard perception mock test</p>
+                <p class="mt-1 text-xs text-gray-500">14 clips · 15 hazards · pass mark 44/75</p>
+            </div>
+            <svg class="h-5 w-5 text-purple-400 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"/>
+            </svg>
+        </a>
+
         <!-- Stacked Action Buttons (Dynamic) -->
         @forelse($sections as $section)
         <a href="{{ route('frontend.section', $section->id) }}" class="flex items-center gap-4 bg-white hover:bg-surface-dim border border-gray-100 p-5 rounded-lg shadow-sm transition-all group">

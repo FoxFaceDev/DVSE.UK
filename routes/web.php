@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\AdController;
 use App\Http\Controllers\Admin\ContentPageController;
 use App\Http\Controllers\Admin\EmailAdvertisementController;
 use App\Http\Controllers\CgiClipMediaController;
+use App\Http\Controllers\HazardMockTestController;
 
 use App\Http\Controllers\Admin\LoginController as AdminLoginController;
 
@@ -68,6 +69,12 @@ Route::get('/media/cgi-clips/{cgiClip}', CgiClipMediaController::class)->name('m
 Route::prefix('theory-test-practice')->name('theory.')->group(function () {
     Route::get('/topic/{topic}', [TheoryTestController::class, 'practice'])->name('practice');
     Route::get('/result', [TheoryTestController::class, 'result'])->name('result');
+
+    // Hazard Perception Mock Test Routes
+    Route::get('/hazard-mock-test', [HazardMockTestController::class, 'info'])->name('hazard_mock_info');
+    Route::get('/hazard-mock-test/start', [HazardMockTestController::class, 'start'])->name('hazard_mock_start');
+    Route::post('/hazard-mock-test/result', [HazardMockTestController::class, 'submit'])->name('hazard_mock_submit');
+    Route::get('/hazard-mock-test/result', [HazardMockTestController::class, 'result'])->name('hazard_mock_result');
 
     // Mock Test Routes
     Route::get('/mock-test/result', [TheoryTestController::class, 'mockTestResult'])->name('mock_test_result');

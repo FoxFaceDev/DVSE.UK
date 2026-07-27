@@ -261,6 +261,7 @@
                                             <p class="text-sm font-bold uppercase tracking-widest text-purple-200">Hazard score</p>
                                             <p class="mt-3 font-heading text-6xl font-bold"><span x-text="cgiScore"></span><span class="text-3xl text-purple-300">/<span x-text="cgiMaxScore"></span></span></p>
                                             <p class="mt-3 text-sm text-purple-100" x-text="cgiResultMessage"></p>
+                                            <p x-show="cgiInvalidResponse && showKurdish" x-cloak class="mt-2 text-sm text-purple-100" dir="rtl">بەردەوام یان بە شێوەیەکی دووبارە کلیکت کرد، بۆیە کلیپەکە وەستێنرا و نمرەکەی سفرە.</p>
                                             <p class="mt-1 text-xs text-purple-300"><span x-text="cgiFlags.length"></span> flags placed</p>
                                             <button type="button" @click="startCgiExplanation()" class="mt-6 min-h-12 rounded-lg bg-white px-6 py-3 font-bold text-purple-900 shadow-sm transition-colors hover:bg-purple-50">See explanation video</button>
                                         </div>
@@ -570,6 +571,8 @@
                 cgiFlagSequence: 0,
                 cgiScore: 0,
                 cgiRangeScores: [],
+                cgiInvalidResponse: false,
+                cgiInvalidResponseReason: null,
                 cgiHazardStarted: false,
                 cgiHazardPlayRequested: false,
                 cgiHazardLoading: true,
@@ -655,6 +658,10 @@
                 },
 
                 get cgiResultMessage() {
+                    if (this.cgiInvalidResponse) {
+                        return 'The clip was stopped because you clicked continuously or in a repeated pattern. Your score is zero.';
+                    }
+
                     const ratio = this.cgiMaxScore > 0 ? this.cgiScore / this.cgiMaxScore : 0;
                     if (ratio === 1) return 'Excellent — you identified every hazard very early.';
                     if (ratio >= 0.6) return 'Good — you identified the developing hazards.';
@@ -761,6 +768,9 @@
                     if (!video) return;
 
                     const time = Number(video.currentTime || 0);
+                    const previousFlag = this.cgiFlags[this.cgiFlags.length - 1];
+                    if (previousFlag && time - previousFlag.time < 0.25) return;
+
                     const clickScores = this.cgiHazardRanges.map(range => this.cgiScoreForRange(time, range));
                     const score = clickScores.length ? Math.max(...clickScores) : 0;
 
@@ -773,6 +783,13 @@
                         time,
                         score,
                     });
+
+                    const invalidReason = this.detectInvalidCgiResponse();
+                    if (invalidReason) {
+                        this.invalidateCgiResponse(invalidReason, video);
+                        return;
+                    }
+
                     this.cgiScore = this.cgiRangeScores.reduce((total, rangeScore) => total + rangeScore, 0);
                 },
 
@@ -789,9 +806,68 @@
                     return maxPoints - zone;
                 },
 
-                finishCgiHazard() {
+                detectInvalidCgiResponse() {
+                    const times = this.cgiFlags
+                        .map(flag => Number(flag.time))
+                        .filter(Number.isFinite)
+                        .sort((a, b) => a - b);
+
+                    if (times.length >= 12) {
+                        return 'excessive';
+                    }
+
+                    // Six clicks inside three seconds is a rapid burst.
+                    for (let index = 0; index <= times.length - 6; index++) {
+                        if (times[index + 5] - times[index] <= 3) {
+                            return 'rapid';
+                        }
+                    }
+
+                    if (times.length < 6) return null;
+
+                    const intervals = times.slice(1).map((time, index) => time - times[index]);
+
+                    // Five similar intervals catch repeated clicking such as once every second.
+                    for (let index = 0; index <= intervals.length - 5; index++) {
+                        const sample = intervals.slice(index, index + 5);
+                        const average = sample.reduce((total, interval) => total + interval, 0) / sample.length;
+                        if (average < 0.5 || average > 3) continue;
+
+                        const tolerance = Math.max(0.2, average * 0.2);
+                        if (sample.every(interval => Math.abs(interval - average) <= tolerance)) {
+                            return 'pattern';
+                        }
+                    }
+
+                    return null;
+                },
+
+                invalidateCgiResponse(reason, video = null) {
+                    const hazardVideo = video || this.$refs.cgiHazardVideo;
+                    if (hazardVideo && !hazardVideo.paused) {
+                        hazardVideo.pause();
+                    }
+
+                    this.cgiInvalidResponseReason = reason;
+                    this.cgiInvalidResponse = true;
+                    this.cgiScore = 0;
+                    this.cgiRangeScores = this.cgiRangeScores.map(() => 0);
+                    this.cgiHazardStarted = false;
                     this.exitCgiFullscreen();
-                    if (this.cgiStage === 'hazard') this.cgiStage = 'result';
+                    this.cgiStage = 'result';
+                },
+
+                finishCgiHazard() {
+                    if (this.cgiStage !== 'hazard') return;
+
+                    const invalidReason = this.detectInvalidCgiResponse();
+                    if (invalidReason) {
+                        this.invalidateCgiResponse(invalidReason);
+                        return;
+                    }
+
+                    this.exitCgiFullscreen();
+                    this.cgiStage = 'result';
                 },
 
                 startCgiExplanation() {
@@ -1038,6 +1114,8 @@
                     this.cgiFlagSequence = 0;
                     this.cgiScore = 0;
                     this.cgiRangeScores = [];
+                    this.cgiInvalidResponse = false;
+                    this.cgiInvalidResponseReason = null;
                     this.cgiHazardStarted = false;
                     this.cgiHazardPlayRequested = false;
                     this.cgiHazardLoading = true;
