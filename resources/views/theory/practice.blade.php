@@ -14,6 +14,7 @@
         x-init="initData({{ Js::from($topic) }}, {{ Js::from($practiceItems) }}, {{ Js::from($ad) }})"
         @fullscreenchange.window="handleCgiFullscreenChange()"
         @webkitfullscreenchange.window="handleCgiFullscreenChange()"
+        @keydown.escape.window="closeAdditionalSignModal()"
         class="space-y-6"
     >
         <template x-if="!initialized">
@@ -385,7 +386,10 @@
 
                                     <template x-if="cgiStage === 'explanation' && (currentItem.text_en || (showKurdish && currentItem.text_ku))">
                                         <div class="mx-auto mt-5 max-w-3xl border-t border-gray-100 pt-5">
-                                            <h3 class="mb-2 font-heading font-bold text-purple-900">Explanation</h3>
+                                            <div class="mb-2 flex items-center justify-between gap-3">
+                                                <h3 class="font-heading font-bold text-purple-900">Explanation</h3>
+                                                <h3 x-show="showKurdish" class="font-heading font-bold text-purple-900" dir="rtl">ڕوونکردنەوە</h3>
+                                            </div>
                                             <p x-show="currentItem.text_en" class="leading-relaxed text-gray-800" x-text="currentItem.text_en"></p>
                                             <template x-if="showKurdish && currentItem.text_ku">
                                                 <p class="mt-3 text-right leading-relaxed text-gray-700" dir="rtl" x-text="currentItem.text_ku"></p>
@@ -428,19 +432,53 @@
 
                                     <template x-if="Array.isArray(currentItem.additional_sign_images) && currentItem.additional_sign_images.length">
                                         <section class="mt-7 border-t border-gray-100 pt-6">
-                                            <h3 class="font-heading text-lg font-bold leading-snug text-gray-950">Additional signs you can expect</h3>
-                                            <p class="mt-1 text-sm text-secondary">These signs may accompany the main road sign.</p>
+                                            <div class="flex items-start justify-between gap-4">
+                                                <div>
+                                                    <h3 class="font-heading text-lg font-bold leading-snug text-gray-950">Additional signs you can expect</h3>
+                                                    <p class="mt-1 text-sm text-secondary">These signs may accompany the main road sign.</p>
+                                                </div>
+                                                <div x-show="showKurdish" x-cloak class="text-right" dir="rtl">
+                                                    <h3 class="font-heading text-lg font-bold leading-snug text-gray-950">نیشانە زیادەکان کە لەوانەیە ببینیت</h3>
+                                                    <p class="mt-1 text-sm text-secondary">لەوانەیە ئەم نیشانانە لەگەڵ نیشانە سەرەکییەکەی ڕێگا بن.</p>
+                                                </div>
+                                            </div>
                                             <div class="mt-4 grid grid-cols-3 gap-3">
                                                 <template x-for="(image, index) in currentItem.additional_sign_images" :key="image">
-                                                    <div class="flex aspect-square items-center justify-center rounded-xl border border-gray-200 bg-white p-2.5 shadow-sm">
+                                                    <button
+                                                        type="button"
+                                                        @click="openAdditionalSignModal(image, index)"
+                                                        class="flex aspect-square cursor-zoom-in items-center justify-center rounded-xl border border-gray-200 bg-white p-2.5 shadow-sm transition hover:border-primary hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                                                        :aria-label="`Open additional road sign ${index + 1}`"
+                                                    >
                                                         <img :src="image" :alt="`Additional road sign ${index + 1}`" class="h-full w-full object-contain">
-                                                    </div>
+                                                    </button>
                                                 </template>
                                             </div>
                                         </section>
                                     </template>
                                 </div>
                             </article>
+                        </template>
+
+                        <template x-if="selectedAdditionalSign">
+                            <div
+                                class="fixed inset-0 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+                                style="z-index: 9999"
+                                role="dialog"
+                                aria-modal="true"
+                                aria-label="Additional road sign image"
+                                @click.self="closeAdditionalSignModal()"
+                            >
+                                <div class="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+                                    <div class="flex min-h-0 flex-1 items-center justify-center bg-slate-50 p-4 sm:p-6">
+                                        <img
+                                            :src="selectedAdditionalSign.src"
+                                            :alt="`Additional road sign ${selectedAdditionalSign.index}`"
+                                            class="max-h-[72vh] max-w-full object-contain"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
                         </template>
 
                         <div class="flex items-center justify-between gap-3 pt-2">
@@ -526,6 +564,7 @@
                 selectedChoiceId: null,
                 showQuestionExplanation: false,
                 signExplanationVisible: false,
+                selectedAdditionalSign: null,
                 cgiStage: 'hazard',
                 cgiFlags: [],
                 cgiFlagSequence: 0,
@@ -596,6 +635,23 @@
                     if (this.cgiStage === 'result') return 'Your score';
                     if (this.cgiStage === 'explanation') return 'Explanation video';
                     return 'Hazard video';
+                },
+
+                openAdditionalSignModal(image, index) {
+                    if (!image) return;
+
+                    this.selectedAdditionalSign = {
+                        src: image,
+                        index: index + 1,
+                    };
+                    document.body.style.overflow = 'hidden';
+                },
+
+                closeAdditionalSignModal() {
+                    if (!this.selectedAdditionalSign) return;
+
+                    this.selectedAdditionalSign = null;
+                    document.body.style.removeProperty('overflow');
                 },
 
                 get cgiResultMessage() {
@@ -991,6 +1047,7 @@
                     this.selectedChoiceId = answer ? answer.choiceId : null;
                     this.showQuestionExplanation = false;
                     this.signExplanationVisible = false;
+                    this.closeAdditionalSignModal();
                     this.cgiStage = 'hazard';
                     this.cgiFlags = [];
                     this.cgiFlagSequence = 0;
