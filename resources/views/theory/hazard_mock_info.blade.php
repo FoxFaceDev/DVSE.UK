@@ -26,29 +26,6 @@
             </div>
         @endif
 
-        @if(!$pool['official_ready'])
-            <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 shadow-sm">
-                <div class="flex items-start gap-3">
-                    <div class="mt-0.5 flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-amber-100 text-amber-700">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="font-bold">Training preview currently available</p>
-                        <p class="mt-1 leading-6">{{ $pool['eligible_count'] }} complete hazard {{ Str::plural('clip', $pool['eligible_count']) }} available. The score and pass mark will be adjusted to the available hazards.</p>
-                    </div>
-                </div>
-            </div>
-        @else
-            <div class="flex items-center gap-3 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm font-medium text-green-800 shadow-sm">
-                <svg class="h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12 4 4L19 6"/>
-                </svg>
-                The complete official-length 14-clip test is available.
-            </div>
-        @endif
-
         <section class="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-[0_8px_30px_-12px_rgba(15,23,42,0.18)]">
             <div class="p-6">
                 <p class="text-sm leading-6 text-gray-700">
@@ -111,7 +88,7 @@
 
         @if($pool['eligible_count'] > 0)
             <a href="{{ route('theory.hazard_mock_start') }}" class="block w-full transform rounded-xl bg-primary py-4 text-center text-lg font-bold text-white shadow-[0_4px_14px_0_rgba(0,118,255,0.39)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-dark">
-                {{ $pool['official_ready'] ? 'Start Hazard Mock Test Now' : 'Start Training Preview' }}
+                Start Hazard Mock Test Now
             </a>
         @else
             <button type="button" disabled class="min-h-14 w-full rounded-xl bg-gray-200 px-6 py-4 text-lg font-bold text-gray-500">

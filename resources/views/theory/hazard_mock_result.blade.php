@@ -15,7 +15,7 @@
                 </div>
                 <h1 class="mt-4 font-heading text-3xl font-bold">{{ $result['passed'] ? 'Test passed' : 'Test failed' }}</h1>
                 <p class="mt-1 text-sm text-white/90">
-                    {{ $result['official_length'] ? 'Official-length hazard perception mock test' : 'Hazard perception training preview' }}
+                    Hazard perception mock test
                 </p>
             </div>
 
@@ -41,11 +41,6 @@
                     <span>Developing hazards</span>
                     <strong class="text-gray-950">{{ $result['hazard_count'] }}</strong>
                 </div>
-                @if(!$result['official_length'])
-                    <p class="mt-4 rounded-xl bg-amber-50 p-3 text-xs leading-5 text-amber-800">
-                        This preview used the available clip library, so its maximum score and pass mark were adjusted proportionally.
-                    </p>
-                @endif
             </div>
         </section>
 

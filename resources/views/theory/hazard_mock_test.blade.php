@@ -11,7 +11,7 @@
                 Clip <span x-text="currentIndex + 1"></span> / <span x-text="clips.length"></span>
             </div>
             <div class="text-center">
-                <p class="text-xs font-bold uppercase tracking-wider text-purple-700">{{ $officialLength ? 'Official-length test' : 'Training preview' }}</p>
+                <p class="text-xs font-bold uppercase tracking-wider text-purple-700">Hazard mock test</p>
                 <div
                     class="mt-1 flex items-center justify-center gap-1.5 rounded-lg border px-3 py-1 text-sm font-bold tabular-nums transition-colors"
                     :class="timeLeft <= 60 ? 'border-red-200 bg-red-50 text-red-700' : 'border-gray-200 bg-white text-gray-800'"

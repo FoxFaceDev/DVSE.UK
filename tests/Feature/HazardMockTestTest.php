@@ -67,7 +67,7 @@ test('the hazard perception page links to the hazard mock test instead of the ho
         ->assertSee(route('frontend.sub_section', $hazardSubSection), false);
 });
 
-test('hazard mock information shows a preview until the official clip pool is ready', function () {
+test('hazard mock remains available when fewer than fourteen clips exist', function () {
     $topic = hazardMockTopic();
     createHazardMockClip($topic, [
         ['start' => 8, 'end' => 13, 'points' => 5],
@@ -75,15 +75,20 @@ test('hazard mock information shows a preview until the official clip pool is re
 
     $this->get(route('theory.hazard_mock_info'))
         ->assertOk()
-        ->assertSee('Training preview currently available')
-        ->assertSee('1 complete hazard clip available')
+        ->assertDontSee('Training preview')
         ->assertSee('In this')
         ->assertSee('Car Hazard Perception Test')
         ->assertSee('44 out of 75 to pass')
         ->assertSee('One developing hazard')
         ->assertSee('Two developing hazards')
         ->assertSee('15 minutes')
-        ->assertSee('Start Training Preview');
+        ->assertSee('Start Hazard Mock Test Now');
+
+    $this->get(route('theory.hazard_mock_start'))
+        ->assertOk()
+        ->assertSee('Hazard mock test')
+        ->assertDontSee('Training preview')
+        ->assertViewHas('clips', fn ($clips) => count($clips) === 1);
 });
 
 test('an official length attempt contains thirteen single hazard clips and one double hazard clip', function () {
@@ -102,7 +107,8 @@ test('an official length attempt contains thirteen single hazard clips and one d
 
     $this->get(route('theory.hazard_mock_start'))
         ->assertOk()
-        ->assertSee('Official-length test')
+        ->assertSee('Hazard mock test')
+        ->assertDontSee('Training preview')
         ->assertSee('One attempt per clip')
         ->assertSee('15:00')
         ->assertSee('this.submitTest()', false)
@@ -155,6 +161,8 @@ test('hazard mock scoring is recalculated on the server from click times', funct
     $this->get(route('theory.hazard_mock_result'))
         ->assertOk()
         ->assertSee('Test passed')
+        ->assertSee('Hazard perception mock test')
+        ->assertDontSee('training preview')
         ->assertSee('Review your clips')
         ->assertSee('5/5', false)
         ->assertSee('Review the developing hazard.');

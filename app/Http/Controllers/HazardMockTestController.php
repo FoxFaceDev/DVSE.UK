@@ -46,8 +46,6 @@ class HazardMockTestController extends Controller
             'clips' => $service->startPayload($clips),
             'attemptToken' => $token,
             'expiresAt' => $expiresAt->timestamp,
-            'officialLength' => $clips->count() === HazardMockTestService::OFFICIAL_CLIP_COUNT
-                && $clips->sum(fn ($page) => count($service->rangesFor($page))) === HazardMockTestService::OFFICIAL_HAZARD_COUNT,
         ]);
     }
 
