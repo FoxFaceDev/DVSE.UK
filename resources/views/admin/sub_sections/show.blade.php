@@ -64,4 +64,11 @@
             </tbody>
         </table>
     </div>
+
+    @if($subSection->topics->isNotEmpty())
+        <section class="mt-8">
+            <h3 class="mb-4 font-heading text-lg font-bold text-gray-800">Topics in {{ $subSection->name }}</h3>
+            @include('admin.topics._table', ['topics' => $subSection->topics])
+        </section>
+    @endif
 </x-layouts.admin>

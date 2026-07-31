@@ -1,7 +1,5 @@
 <x-layouts.app :showBack="true" :backUrl="route('frontend.section', $subSection->section_id)" title="{{ $subSection->name }}">
     <div class="space-y-4">
-        <h2 class="font-heading font-bold text-xl mb-4" style="color: {{ $subSection->color ?? '#1e293b' }}">{{ $subSection->name }} Categories</h2>
-
         @if(Str::lower($subSection->name) === 'hazard perception')
             <a href="{{ route('theory.hazard_mock_info') }}" class="group relative block w-full overflow-hidden rounded-2xl bg-primary p-6 text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-primary-dark hover:shadow-xl">
                 <div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10 blur-2xl transition-transform duration-500 group-hover:scale-150"></div>
@@ -33,53 +31,49 @@
             </a>
         @endif
 
-        <div class="grid grid-cols-1 gap-3">
-            @forelse($subSection->categories as $category)
-                <a href="{{ route('frontend.category', $category->id) }}" class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-primary flex justify-between items-center transition-all group">
-                    <div>
-                        <div class="font-medium text-gray-800">{{ $category->name_en }}</div>
-                        @if($category->name_ku)
-                        <div class="text-sm text-gray-500 font-body" dir="rtl">{{ $category->name_ku }}</div>
-                        @endif
-                        <div class="mt-1 text-xs text-gray-400">
-                            {{ $category->questions_count }} {{ Str::plural('question', $category->questions_count) }}
-                            @if($category->content_pages_count)
-                                <span class="mx-1">&middot;</span>
-                                {{ $category->content_pages_count }} learning {{ Str::plural('page', $category->content_pages_count) }}
-                            @endif
-                        </div>
-                    </div>
-                    <svg class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </a>
-            @empty
-                <div class="p-8 text-center text-gray-500 bg-white rounded-lg border border-gray-100">
-                    No categories available in this section yet.
-                </div>
-            @endforelse
-        </div>
-        
-        @if($subSection->topics->isNotEmpty())
-            <h3 class="font-heading font-bold text-lg mt-6 mb-3 text-gray-700">Topics</h3>
-            <div class="grid grid-cols-1 gap-3">
-                @foreach($subSection->topics as $topic)
-                    <a href="{{ route('theory.practice', $topic->id) }}" class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-primary flex justify-between items-center transition-all group">
-                        <div>
-                            <div class="font-medium text-gray-800">{{ $topic->name_en }}</div>
-                            @if($topic->name_ku)
-                            <div class="text-sm text-gray-500 font-body" dir="rtl">{{ $topic->name_ku }}</div>
-                            @endif
-                            <div class="mt-1 text-xs text-gray-400">
-                                {{ $topic->questions_count }} {{ Str::plural('question', $topic->questions_count) }}
-                                @if($topic->content_pages_count)
-                                    <span class="mx-1">&middot;</span>
-                                    {{ $topic->content_pages_count }} learning {{ Str::plural('page', $topic->content_pages_count) }}
+        @if($subSection->categories->isNotEmpty())
+            <section>
+                <h2 class="mb-4 font-heading text-xl font-bold" style="color: {{ $subSection->color ?? '#1e293b' }}">Categories</h2>
+                <div class="grid grid-cols-1 gap-3">
+                    @foreach($subSection->categories as $category)
+                        <a href="{{ route('frontend.category', $category->id) }}" class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-primary flex justify-between items-center transition-all group">
+                            <div>
+                                <div class="font-medium text-gray-800">{{ $category->name_en }}</div>
+                                @if($category->name_ku)
+                                <div class="text-sm text-gray-500 font-body" dir="rtl">{{ $category->name_ku }}</div>
                                 @endif
                             </div>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </a>
-                @endforeach
-            </div>
+                            <svg class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        @if($subSection->topics->isNotEmpty())
+            <section class="pt-2">
+                <h2 class="mb-4 font-heading text-xl font-bold text-gray-700">Topics</h2>
+                <div class="grid grid-cols-1 gap-3">
+                    @foreach($subSection->topics as $topic)
+                        <a href="{{ route('theory.practice', $topic->id) }}" class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-primary flex justify-between items-center transition-all group">
+                            <div>
+                                <div class="font-medium text-gray-800">{{ $topic->name_en }}</div>
+                                @if($topic->name_ku)
+                                <div class="text-sm text-gray-500 font-body" dir="rtl">{{ $topic->name_ku }}</div>
+                                @endif
+                                <div class="mt-1 text-xs text-gray-400">
+                                    {{ $topic->questions_count }} {{ Str::plural('question', $topic->questions_count) }}
+                                    @if($topic->content_pages_count)
+                                        <span class="mx-1">&middot;</span>
+                                        {{ $topic->content_pages_count }} learning {{ Str::plural('page', $topic->content_pages_count) }}
+                                    @endif
+                                </div>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                    @endforeach
+                </div>
+            </section>
         @endif
     </div>
 </x-layouts.app>

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Section;
 use App\Models\SubSection;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class SubSectionController extends Controller
@@ -18,14 +18,14 @@ class SubSectionController extends Controller
             'icon' => 'nullable|image|max:2048',
         ]);
 
-        $subSection = new SubSection();
+        $subSection = new SubSection;
         $subSection->section_id = $section->id;
         $subSection->name = $validated['name'];
         $subSection->color = $validated['color'] ?? '#3b82f6';
 
         if ($request->hasFile('icon')) {
             $path = $request->file('icon')->store('icons', 'public');
-            $subSection->icon_path = '/storage/' . $path;
+            $subSection->icon_path = '/storage/'.$path;
         }
 
         $subSection->save();
@@ -35,8 +35,11 @@ class SubSectionController extends Controller
 
     public function show(Section $section, SubSection $subSection)
     {
-        $subSection->load('categories');
-        
+        $subSection->load([
+            'categories',
+            'topics' => fn ($query) => $query->orderBy('name_en'),
+        ]);
+
         return view('admin.sub_sections.show', compact('section', 'subSection'));
     }
 
@@ -58,7 +61,7 @@ class SubSectionController extends Controller
                 Storage::disk('public')->delete(str_replace('/storage/', '', $subSection->icon_path));
             }
             $path = $request->file('icon')->store('icons', 'public');
-            $subSection->icon_path = '/storage/' . $path;
+            $subSection->icon_path = '/storage/'.$path;
         }
 
         $subSection->save();
@@ -72,6 +75,7 @@ class SubSectionController extends Controller
             Storage::disk('public')->delete(str_replace('/storage/', '', $subSection->icon_path));
         }
         $subSection->delete();
+
         return redirect()->route('admin.sections.show', $section)->with('success', 'Sub-section deleted successfully.');
     }
 }

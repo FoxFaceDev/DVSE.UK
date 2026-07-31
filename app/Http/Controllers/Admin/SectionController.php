@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Section;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class SectionController extends Controller
@@ -17,13 +17,13 @@ class SectionController extends Controller
             'icon' => 'nullable|image|max:2048',
         ]);
 
-        $section = new Section();
+        $section = new Section;
         $section->name = $validated['name'];
         $section->color = $validated['color'] ?? '#3b82f6'; // default color
 
         if ($request->hasFile('icon')) {
             $path = $request->file('icon')->store('icons', 'public');
-            $section->icon_path = '/storage/' . $path;
+            $section->icon_path = '/storage/'.$path;
         }
 
         $section->save();
@@ -33,7 +33,11 @@ class SectionController extends Controller
 
     public function show(Section $section)
     {
-        $section->load('subSections');
+        $section->load([
+            'subSections',
+            'topics' => fn ($query) => $query->orderBy('name_en'),
+        ]);
+
         return view('admin.sections.show', compact('section'));
     }
 
@@ -56,7 +60,7 @@ class SectionController extends Controller
                 Storage::disk('public')->delete(str_replace('/storage/', '', $section->icon_path));
             }
             $path = $request->file('icon')->store('icons', 'public');
-            $section->icon_path = '/storage/' . $path;
+            $section->icon_path = '/storage/'.$path;
         }
 
         $section->save();
@@ -70,6 +74,7 @@ class SectionController extends Controller
             Storage::disk('public')->delete(str_replace('/storage/', '', $section->icon_path));
         }
         $section->delete();
+
         return redirect()->route('admin.home')->with('success', 'Section deleted successfully.');
     }
 }

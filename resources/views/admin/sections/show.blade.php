@@ -97,6 +97,13 @@
         @endforeach
     </div>
 
+    @if($section->topics->isNotEmpty())
+        <section class="mt-8">
+            <h3 class="mb-4 font-heading text-lg font-bold text-gray-800">Topics in {{ $section->name }}</h3>
+            @include('admin.topics._table', ['topics' => $section->topics])
+        </section>
+    @endif
+
     <!-- Create SubSection Modal -->
     <div id="createSubSectionModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
