@@ -1,7 +1,7 @@
 <x-layouts.app :showBack="false" title="Hazard Perception Mock Test">
     <div
         x-data="hazardMockRunner()"
-        x-init="initData({{ Js::from($clips) }}, @js($attemptToken))"
+        x-init="initData({{ Js::from($clips) }}, @js($attemptToken), @js($expiresAt))"
         @fullscreenchange.window="handleFullscreenChange()"
         @webkitfullscreenchange.window="handleFullscreenChange()"
         class="mx-auto max-w-md"
@@ -12,7 +12,17 @@
             </div>
             <div class="text-center">
                 <p class="text-xs font-bold uppercase tracking-wider text-purple-700">{{ $officialLength ? 'Official-length test' : 'Training preview' }}</p>
-                <p class="mt-0.5 text-xs text-gray-500">One attempt per clip</p>
+                <div
+                    class="mt-1 flex items-center justify-center gap-1.5 rounded-lg border px-3 py-1 text-sm font-bold tabular-nums transition-colors"
+                    :class="timeLeft <= 60 ? 'border-red-200 bg-red-50 text-red-700' : 'border-gray-200 bg-white text-gray-800'"
+                    aria-label="Time remaining"
+                >
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                    </svg>
+                    <span x-text="formattedTime">15:00</span>
+                </div>
+                <p class="mt-1 text-[10px] text-gray-500">One attempt per clip</p>
             </div>
             <button type="button" @click="showExitModal = true" class="rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600" aria-label="Exit hazard mock test">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -85,7 +95,7 @@
                 <h2 class="mt-5 font-heading text-xl font-bold text-gray-950">Clip complete</h2>
                 <p class="mt-2 text-sm text-gray-600">Your responses have been recorded. Scores remain hidden until the end.</p>
                 <button type="button" @click="continueTest()" class="mt-6 min-h-14 w-full rounded-xl bg-primary px-6 py-4 font-bold text-white hover:bg-primary-dark">
-                    <span x-text="currentIndex < clips.length - 1 ? 'Continue to next clip' : 'Finish and view result'"></span>
+                    <span x-text="timeExpired ? 'Retry result submission' : (currentIndex < clips.length - 1 ? 'Continue to next clip' : 'Finish and view result')"></span>
                 </button>
             </section>
         </template>
@@ -108,7 +118,7 @@
         <template x-if="status === 'submitting'">
             <section class="rounded-2xl border border-gray-100 bg-white p-10 text-center shadow-sm">
                 <div class="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-purple-200 border-t-purple-800"></div>
-                <p class="mt-4 font-bold text-gray-800">Calculating your result…</p>
+                <p class="mt-4 font-bold text-gray-800" x-text="timeExpired ? 'Time is up — calculating your result…' : 'Calculating your result…'"></p>
             </section>
         </template>
 
@@ -155,15 +165,46 @@
                 responses: [],
                 status: 'ready',
                 showExitModal: false,
+                timeLeft: 15 * 60,
+                expiresAt: null,
+                timerInterval: null,
+                timeExpired: false,
+                submissionStarted: false,
 
-                initData(clips, attemptToken) {
+                initData(clips, attemptToken, expiresAt) {
                     this.clips = clips;
                     this.attemptToken = attemptToken;
+                    this.expiresAt = Number(expiresAt) * 1000;
+                    this.updateTimer();
+                    if (this.timeLeft > 0 && !this.submissionStarted) {
+                        this.timerInterval = setInterval(() => this.updateTimer(), 1000);
+                    }
                     this.$nextTick(() => this.$refs.video?.load());
                 },
 
                 get currentClip() {
                     return this.clips[this.currentIndex];
+                },
+
+                get formattedTime() {
+                    const minutes = Math.floor(this.timeLeft / 60);
+                    const seconds = this.timeLeft % 60;
+                    return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+                },
+
+                updateTimer() {
+                    this.timeLeft = Math.max(0, Math.ceil((this.expiresAt - Date.now()) / 1000));
+                    if (this.timeLeft > 0) return;
+
+                    this.stopTimer();
+                    this.timeExpired = true;
+                    this.submitTest();
+                },
+
+                stopTimer() {
+                    if (!this.timerInterval) return;
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
                 },
 
                 startClip() {
@@ -251,6 +292,11 @@
                 },
 
                 continueTest() {
+                    if (this.timeExpired) {
+                        this.submitTest();
+                        return;
+                    }
+
                     if (this.currentIndex < this.clips.length - 1) {
                         this.currentIndex++;
                         this.currentFlags = [];
@@ -264,6 +310,22 @@
                 },
 
                 submitTest() {
+                    if (this.submissionStarted) return;
+                    this.submissionStarted = true;
+                    this.stopTimer();
+
+                    const video = this.$refs.video;
+                    if (this.status === 'playing') {
+                        video?.pause();
+                        this.recordResponse(null);
+                        this.exitFullscreen();
+                    }
+
+                    this.responses = this.clips.map((clip, index) => this.responses[index] || {
+                        content_page_id: clip.id,
+                        flags: [],
+                        invalid_reason: null,
+                    });
                     this.status = 'submitting';
                     fetch('{{ route('theory.hazard_mock_submit') }}', {
                         method: 'POST',
@@ -285,6 +347,7 @@
                             window.location.href = data.redirect;
                         })
                         .catch(() => {
+                            this.submissionStarted = false;
                             this.status = 'complete';
                         });
                 },

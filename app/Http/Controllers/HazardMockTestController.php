@@ -13,6 +13,7 @@ class HazardMockTestController extends Controller
     {
         return view('theory.hazard_mock_info', [
             'pool' => $service->poolStatus(),
+            'timeLimitMinutes' => HazardMockTestService::TIME_LIMIT_MINUTES,
         ]);
     }
 
@@ -27,16 +28,20 @@ class HazardMockTestController extends Controller
         }
 
         $token = (string) Str::uuid();
+        $startedAt = now();
+        $expiresAt = $startedAt->copy()->addMinutes(HazardMockTestService::TIME_LIMIT_MINUTES);
         $request->session()->put('hazard_mock_attempt', [
             'token' => $token,
             'content_page_ids' => $clips->pluck('id')->all(),
-            'started_at' => now()->timestamp,
+            'started_at' => $startedAt->timestamp,
+            'expires_at' => $expiresAt->timestamp,
         ]);
         $request->session()->forget('hazard_mock_result');
 
         return view('theory.hazard_mock_test', [
             'clips' => $service->startPayload($clips),
             'attemptToken' => $token,
+            'expiresAt' => $expiresAt->timestamp,
             'officialLength' => $clips->count() === HazardMockTestService::OFFICIAL_CLIP_COUNT
                 && $clips->sum(fn ($page) => count($service->rangesFor($page))) === HazardMockTestService::OFFICIAL_HAZARD_COUNT,
         ]);

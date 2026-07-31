@@ -56,6 +56,10 @@
                     Clips cannot be paused, replayed, reviewed or scrubbed during the test.
                 </li>
                 <li>
+                    <strong class="block text-base text-gray-950">{{ $timeLimitMinutes }} minute time limit</strong>
+                    A countdown runs throughout the test and your responses are submitted automatically when time expires.
+                </li>
+                <li>
                     <strong class="block text-base text-gray-950">Tap when a hazard develops</strong>
                     Tap anywhere on the video when you would need to change speed or direction.
                 </li>

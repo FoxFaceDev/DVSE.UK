@@ -62,6 +62,7 @@ test('hazard mock information shows a preview until the official clip pool is re
         ->assertOk()
         ->assertSee('Training preview currently available')
         ->assertSee('1 complete hazard clip available')
+        ->assertSee('15 minute time limit')
         ->assertSee('Start training preview');
 });
 
@@ -83,6 +84,8 @@ test('an official length attempt contains thirteen single hazard clips and one d
         ->assertOk()
         ->assertSee('Official-length test')
         ->assertSee('One attempt per clip')
+        ->assertSee('15:00')
+        ->assertSee('this.submitTest()', false)
         ->assertSee('detectInvalidResponse(times)', false)
         ->assertSee('x-show="status === \'playing\'"', false)
         ->assertSee('const playback = video.play()', false)
@@ -90,7 +93,8 @@ test('an official length attempt contains thirteen single hazard clips and one d
         ->assertViewHas('clips', fn ($clips) => count($clips) === 14)
         ->assertSessionHas('hazard_mock_attempt', function ($attempt) {
             return count($attempt['content_page_ids']) === 14
-                && is_string($attempt['token']);
+                && is_string($attempt['token'])
+                && 15 * 60 === $attempt['expires_at'] - $attempt['started_at'];
         });
 });
 

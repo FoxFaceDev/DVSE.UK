@@ -7,6 +7,8 @@ use Illuminate\Support\Collection;
 
 class HazardMockTestService
 {
+    public const TIME_LIMIT_MINUTES = 15;
+
     public const OFFICIAL_CLIP_COUNT = 14;
 
     public const OFFICIAL_HAZARD_COUNT = 15;
