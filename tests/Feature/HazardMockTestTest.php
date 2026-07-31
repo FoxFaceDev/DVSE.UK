@@ -45,11 +45,26 @@ function createHazardMockClip(Topic $topic, array $windows): ContentPage
     return $page;
 }
 
-test('the home page links to the hazard perception mock test', function () {
+test('the hazard perception page links to the hazard mock test instead of the home page', function () {
+    $section = Section::create(['name' => 'Theory Test Practice']);
+    $hazardSubSection = SubSection::create([
+        'section_id' => $section->id,
+        'name' => 'Hazard Perception',
+    ]);
+
     $this->get(route('home'))
         ->assertOk()
-        ->assertSee('Hazard perception mock test')
+        ->assertDontSee(route('theory.hazard_mock_info'), false);
+
+    $this->get(route('frontend.sub_section', $hazardSubSection))
+        ->assertOk()
+        ->assertSee('Hazard Mock Test')
+        ->assertSee('Official Mock Test')
         ->assertSee(route('theory.hazard_mock_info'), false);
+
+    $this->get(route('theory.hazard_mock_info'))
+        ->assertOk()
+        ->assertSee(route('frontend.sub_section', $hazardSubSection), false);
 });
 
 test('hazard mock information shows a preview until the official clip pool is ready', function () {
@@ -62,8 +77,13 @@ test('hazard mock information shows a preview until the official clip pool is re
         ->assertOk()
         ->assertSee('Training preview currently available')
         ->assertSee('1 complete hazard clip available')
-        ->assertSee('15 minute time limit')
-        ->assertSee('Start training preview');
+        ->assertSee('In this')
+        ->assertSee('Car Hazard Perception Test')
+        ->assertSee('44 out of 75 to pass')
+        ->assertSee('One developing hazard')
+        ->assertSee('Two developing hazards')
+        ->assertSee('15 minutes')
+        ->assertSee('Start Training Preview');
 });
 
 test('an official length attempt contains thirteen single hazard clips and one double hazard clip', function () {

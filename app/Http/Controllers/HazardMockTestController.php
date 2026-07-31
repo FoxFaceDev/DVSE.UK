@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ContentPage;
+use App\Models\SubSection;
 use App\Services\HazardMockTestService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -14,6 +15,9 @@ class HazardMockTestController extends Controller
         return view('theory.hazard_mock_info', [
             'pool' => $service->poolStatus(),
             'timeLimitMinutes' => HazardMockTestService::TIME_LIMIT_MINUTES,
+            'hazardSubSection' => SubSection::query()
+                ->whereRaw('LOWER(name) = ?', ['hazard perception'])
+                ->first(),
         ]);
     }
 
