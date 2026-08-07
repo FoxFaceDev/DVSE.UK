@@ -189,3 +189,44 @@ test('practice selects ads that match the learners selected language', function 
         ->assertViewHas('ads', fn ($ads) => $ads->pluck('language_id')->sort()->values()->all() === [$english->id, $kurdish->id])
         ->assertSee('const matches = this.availableAds.filter(ad => String(ad.language_id) === String(languageId))', false);
 });
+
+test('admins can search advertisements by title link language or category', function () {
+    [$motorways, $roadSigns] = advertisementCategories();
+    $english = advertisementLanguage('en');
+    $kurdish = advertisementLanguage('ku');
+
+    $motorwayAd = Ad::create([
+        'language_id' => $english->id,
+        'title' => 'Winter driving offer',
+        'media_type' => 'image',
+        'link_url' => 'https://example.com/winter-campaign',
+        'targets_all_categories' => false,
+        'is_active' => true,
+    ]);
+    $motorwayAd->categories()->attach($motorways);
+
+    $roadSignsAd = Ad::create([
+        'language_id' => $kurdish->id,
+        'title' => 'Summer lessons',
+        'media_type' => 'image',
+        'link_url' => 'https://example.com/summer-campaign',
+        'targets_all_categories' => false,
+        'is_active' => true,
+    ]);
+    $roadSignsAd->categories()->attach($roadSigns);
+
+    $admin = advertisementAdmin();
+
+    foreach (['Winter driving', 'winter-campaign', 'Motorways'] as $search) {
+        $this->actingAs($admin, 'admin')->get(route('admin.ads.index', ['q' => $search]))
+            ->assertOk()
+            ->assertSee('Winter driving offer')
+            ->assertDontSee('Summer lessons');
+    }
+
+    $this->actingAs($admin, 'admin')->get(route('admin.ads.index', ['q' => 'Kurdish']))
+        ->assertOk()
+        ->assertSee('Summer lessons')
+        ->assertDontSee('Winter driving offer')
+        ->assertSee('name="q"', false);
+});

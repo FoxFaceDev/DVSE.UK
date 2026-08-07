@@ -12,9 +12,22 @@ use Illuminate\Validation\ValidationException;
 
 class AdController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $ads = Ad::with(['categories', 'language'])->orderBy('id', 'desc')->get();
+        $search = $request->string('q')->trim()->toString();
+        $ads = Ad::query()
+            ->with(['categories', 'language'])
+            ->when($search, function ($query, $term) {
+                $query->where(function ($searchQuery) use ($term) {
+                    $searchQuery->where('title', 'like', "%{$term}%")
+                        ->orWhere('link_url', 'like', "%{$term}%")
+                        ->orWhereHas('language', fn ($languageQuery) => $languageQuery->where('name', 'like', "%{$term}%")->orWhere('code', 'like', "%{$term}%"))
+                        ->orWhereHas('categories', fn ($categoryQuery) => $categoryQuery->where('name_en', 'like', "%{$term}%"));
+                });
+            })
+            ->latest('id')
+            ->paginate(20)
+            ->withQueryString();
 
         return view('admin.ads.index', compact('ads'));
     }

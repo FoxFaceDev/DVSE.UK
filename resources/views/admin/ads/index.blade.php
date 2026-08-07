@@ -1,11 +1,27 @@
 <x-layouts.admin title="Advertisements">
-    <div class="mb-6 flex justify-between items-center">
-        <h3 class="text-lg font-medium text-gray-800">Manage Advertisements</h3>
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <h3 class="text-lg font-bold text-gray-900">Manage Advertisements</h3>
+            <p class="mt-1 text-sm text-gray-500">Search and manage ads by title, link, language or category.</p>
+        </div>
         <a href="{{ route('admin.ads.create') }}" class="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-primary-dark transition flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Create New Ad
         </a>
     </div>
+
+    <form method="GET" class="mb-5 flex w-full max-w-2xl gap-2">
+        <label for="ad-search" class="sr-only">Search advertisements</label>
+        <div class="relative min-w-0 flex-1">
+            <svg class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg>
+            <input id="ad-search" name="q" value="{{ request('q') }}" placeholder="Search title, link, language or category"
+                   class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20">
+        </div>
+        <button class="rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-primary-dark">Search</button>
+        @if(request('q'))
+            <a href="{{ route('admin.ads.index') }}" class="flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Clear</a>
+        @endif
+    </form>
 
     @if(session('success'))
         <div class="mb-4 p-4 bg-green-50 text-green-700 rounded-md border border-green-200">
@@ -13,8 +29,8 @@
         </div>
     @endif
 
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <table class="w-full text-left text-sm">
+    <div class="overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-200">
+        <table class="min-w-[1100px] w-full text-left text-sm">
             <thead class="bg-gray-50 border-b border-gray-200 text-gray-600 font-medium">
                 <tr>
                     <th class="px-6 py-3">ID</th>
@@ -87,10 +103,11 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="px-6 py-8 text-center text-gray-500">No advertisements found. Create your first ad to monetize your platform.</td>
+                    <td colspan="7" class="px-6 py-8 text-center text-gray-500">{{ request('q') ? 'No advertisements matched your search.' : 'No advertisements found. Create your first ad to monetize your platform.' }}</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
+    <div class="mt-4">{{ $ads->links() }}</div>
 </x-layouts.admin>
