@@ -17,7 +17,7 @@
 
             <form action="{{ route('register') }}" method="POST"
                   x-data="registrationForm({{ Js::from(old('country', '')) }}, {{ Js::from(old('city', '')) }})"
-                  x-init="initPhoneInput(); initLocations()" @submit="loading = true">
+                  x-init="initPhoneInput(); initLocations()" @submit="prepareRegistrationSubmission()">
                 @csrf
                 <div class="mb-4">
                     <label for="name" class="block text-sm font-semibold text-gray-700 mb-1.5">Full name</label>
@@ -38,8 +38,9 @@
 
                 <div class="mb-4">
                     <label for="phone_number" class="block text-sm font-semibold text-gray-700 mb-1.5">Phone number</label>
-                    <input id="phone_number" x-ref="phoneNumber" type="tel" name="phone_number" value="{{ old('phone_number') }}" required autocomplete="tel" inputmode="tel"
+                    <input id="phone_number" x-ref="phoneNumber" type="tel" value="{{ old('phone_number') }}" required autocomplete="tel" inputmode="tel"
                            class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none text-gray-800 @error('phone_number') border-red-500 @enderror">
+                    <input x-ref="phoneNumberValue" type="hidden" name="phone_number" value="{{ old('phone_number') }}">
                     @error('phone_number') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
 
@@ -110,10 +111,6 @@
                     </div>
                 </div>
                 <p x-cloak x-show="locationError" x-text="locationError" class="-mt-2 mb-4 text-xs text-amber-700"></p>
-                <p class="-mt-2 mb-4 text-[11px] text-gray-400">
-                    Location data by <a href="https://github.com/dr5hn/countries-states-cities-database" target="_blank" rel="noopener noreferrer" class="underline hover:text-primary">Countries States Cities Database</a>.
-                </p>
-
                 <div class="mb-5">
                     <label for="address" class="block text-sm font-semibold text-gray-700 mb-1.5">Address</label>
                     <textarea id="address" name="address" rows="3" maxlength="500" required autocomplete="street-address" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-y @error('address') border-red-500 @enderror" placeholder="House number and street address">{{ old('address') }}</textarea>

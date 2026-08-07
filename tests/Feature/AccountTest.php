@@ -29,11 +29,30 @@ test('the registration form uses linked country and city dropdowns', function ()
         ->assertSee('Loading countries...');
 });
 
+test('application layouts use the bundled Alpine runtime', function () {
+    $this->get(route('register'))
+        ->assertOk()
+        ->assertDontSee('cdn.jsdelivr.net/npm/alpinejs', false);
+});
+
 test('the registration phone field supports country flags and dial codes', function () {
     $this->get(route('register'))
         ->assertOk()
         ->assertSee('x-ref="phoneNumber"', false)
         ->assertSee('initPhoneInput()', false);
+
+    $phoneScript = file_get_contents(resource_path('js/app.js'));
+
+    expect($phoneScript)
+        ->toContain('setSelectedCountry(')
+        ->toContain('separateDialCode: true')
+        ->toContain('phoneInputInstances')
+        ->toContain('cityDataFiles')
+        ->not->toContain('getSelectedCountryData()')
+        ->not->toContain('setCountry(')
+        ->not->toContain('nationalMode:')
+        ->not->toContain('autoPlaceholder:')
+        ->not->toContain('this.phoneInput');
 });
 
 test('a new account requires email verification', function () {

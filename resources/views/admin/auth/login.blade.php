@@ -6,7 +6,6 @@
     <title>Admin Login - DVSE.UK</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lexend:wght@400;600;700&family=Outfit:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="min-h-screen bg-gray-50 flex items-center justify-center p-4 antialiased font-body relative overflow-hidden">
 

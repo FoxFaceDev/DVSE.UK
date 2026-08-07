@@ -16,6 +16,7 @@
     },
     "dependencies": {
         "@countrystatecity/countries-browser": "^1.0.2",
+        "alpinejs": "^3.15.12",
         "intl-tel-input": "^29.2.1"
     }
 }

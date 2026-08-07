@@ -1,11 +1,15 @@
 import './bootstrap';
 
+import Alpine from 'alpinejs';
 import {
-    getAllCitiesOfCountry,
+    getCitiesOfState,
     getCountries,
 } from '@countrystatecity/countries-browser';
 import intlTelInput from 'intl-tel-input';
 import 'intl-tel-input/styles';
+import cityDataFiles from './location-city-files.json';
+
+const phoneInputInstances = new WeakMap();
 
 window.registrationForm = (savedCountry = '', savedCity = '') => ({
     loading: false,
@@ -22,8 +26,6 @@ window.registrationForm = (savedCountry = '', savedCity = '') => ({
     locationsLoading: true,
     citiesLoading: false,
     locationError: '',
-    phoneInput: null,
-    phoneDialCode: '',
 
     get selectedCountry() {
         return this.countries.find(country => country.name === this.countryName) || null;
@@ -78,50 +80,45 @@ window.registrationForm = (savedCountry = '', savedCity = '') => ({
     },
 
     initPhoneInput() {
-        this.phoneInput = intlTelInput(this.$refs.phoneNumber, {
+        const phoneElement = this.$refs.phoneNumber;
+        const phoneInput = intlTelInput(phoneElement, {
             initialCountry: 'gb',
-            nationalMode: false,
             formatAsYouType: true,
-            autoPlaceholder: 'aggressive',
+            separateDialCode: true,
+            loadUtils: () => import('intl-tel-input/utils'),
         });
+        phoneInputInstances.set(phoneElement, phoneInput);
 
-        this.phoneInput.promise.then(() => {
-            if (this.$refs.phoneNumber.value.trim()) {
-                this.phoneInput.setNumber(this.$refs.phoneNumber.value);
+        phoneInput.promise.then(() => {
+            if (phoneElement.value.trim()) {
+                phoneInput.setNumber(phoneElement.value);
             }
 
-            this.phoneDialCode = this.phoneInput.getSelectedCountryData().dialCode;
-            this.ensurePhoneDialCode();
+            this.updatePhoneNumber();
         });
 
-        this.$refs.phoneNumber.addEventListener('countrychange', () => {
-            const previousDialCode = this.phoneDialCode;
-            const currentValue = this.$refs.phoneNumber.value.trim();
-            this.phoneDialCode = this.phoneInput.getSelectedCountryData().dialCode;
-
-            if (!currentValue || currentValue === `+${previousDialCode}`) {
-                this.$refs.phoneNumber.value = `+${this.phoneDialCode} `;
-            }
-        });
+        phoneElement.addEventListener('countrychange', () => this.updatePhoneNumber());
+        phoneElement.addEventListener('input', () => this.updatePhoneNumber());
     },
 
-    ensurePhoneDialCode() {
-        if (!this.$refs.phoneNumber.value.trim()) {
-            this.$refs.phoneNumber.value = `+${this.phoneDialCode} `;
-        }
+    updatePhoneNumber() {
+        const phoneInput = phoneInputInstances.get(this.$refs.phoneNumber);
+        if (!phoneInput) return;
+
+        this.$refs.phoneNumberValue.value = phoneInput.getNumber() || this.$refs.phoneNumber.value.trim();
+    },
+
+    prepareRegistrationSubmission() {
+        this.updatePhoneNumber();
+        this.loading = true;
     },
 
     syncPhoneCountry(countryCode) {
-        if (!this.phoneInput || !countryCode) return;
+        const phoneInput = phoneInputInstances.get(this.$refs.phoneNumber);
+        if (!phoneInput || !countryCode) return;
 
-        const currentValue = this.$refs.phoneNumber.value.trim();
-        const previousDialCode = this.phoneDialCode;
-        this.phoneInput.setCountry(countryCode.toLocaleLowerCase());
-        this.phoneDialCode = this.phoneInput.getSelectedCountryData().dialCode;
-
-        if (!currentValue || currentValue === `+${previousDialCode}`) {
-            this.$refs.phoneNumber.value = `+${this.phoneDialCode} `;
-        }
+        phoneInput.setSelectedCountry(countryCode.toLocaleLowerCase());
+        this.updatePhoneNumber();
     },
 
     async initLocations() {
@@ -163,7 +160,11 @@ window.registrationForm = (savedCountry = '', savedCity = '') => ({
         if (clearCity) this.cityName = '';
 
         try {
-            const cityNames = (await getAllCitiesOfCountry(countryCode)).map(city => city.name);
+            const stateCodes = cityDataFiles[countryCode.toLocaleUpperCase()] || [];
+            const cityGroups = await Promise.all(
+                stateCodes.map(stateCode => getCitiesOfState(countryCode, stateCode))
+            );
+            const cityNames = cityGroups.flat().map(city => city.name);
             this.cities = [...new Set(cityNames)].sort((first, second) => first.localeCompare(second));
         } catch (error) {
             this.locationError = 'The city list could not be loaded. Please enter your location manually.';
@@ -172,3 +173,6 @@ window.registrationForm = (savedCountry = '', savedCity = '') => ({
         }
     },
 });
+
+window.Alpine = Alpine;
+Alpine.start();
