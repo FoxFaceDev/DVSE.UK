@@ -72,7 +72,12 @@ test('mock test results retain incorrect answers for review', function () {
     $question->choices()->create(['text_en' => 'Right', 'is_correct' => true]);
 
     $this->post(route('theory.mock_test_submit'), ['question_ids' => [$question->id], 'answers' => [$question->id => $wrong->id]])->assertRedirect();
-    $this->get(route('theory.mock_test_result'))->assertOk()->assertSee('Review your mistakes')->assertSee('What is correct?')->assertSee('Right');
+    $this->get(route('theory.mock_test_result'))
+        ->assertOk()
+        ->assertSee('See wrong answers')
+        ->assertSee('x-show="showWrongAnswers"', false)
+        ->assertSee('What is correct?')
+        ->assertSee('Right');
 });
 
 test('motorway additional signs copy is editable per language and explanations replace english', function () {

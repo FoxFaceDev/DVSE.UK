@@ -1,5 +1,5 @@
 <x-layouts.app :showBack="true" :backUrl="route('home')" title="Mock Test Results">
-    <div class="max-w-md mx-auto mb-8">
+    <div x-data="{ showWrongAnswers: false }" class="max-w-md mx-auto mb-8">
         <div class="bg-white rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden relative">
             
             <!-- Dynamic Header Background based on Pass/Fail -->
@@ -23,25 +23,6 @@
                     </p>
                 </div>
             </div>
-
-            @if(count($reviews))
-                <div class="border-t p-6">
-                    <h2 class="mb-4 text-xl font-bold text-gray-900">Review your mistakes</h2>
-                    <div class="space-y-4 text-left">
-                        @foreach($reviews as $review)
-                            <article class="rounded-xl border border-red-100 bg-red-50/40 p-4">
-                                @if($review['question_image'])<img src="{{ $review['question_image'] }}" alt="Question" class="mb-3 max-h-44 w-full rounded bg-white object-contain">@endif
-                                <h3 class="font-bold text-gray-900">{{ $review['question'] }}</h3>
-                                <div class="mt-3 grid gap-3 sm:grid-cols-2">
-                                    <div class="rounded-lg bg-white p-3 text-red-700"><p class="text-xs font-bold uppercase">Your answer</p>@if($review['selected_image'])<img src="{{ $review['selected_image'] }}" class="mt-2 h-24 w-full object-contain">@endif<p>{{ $review['selected'] ?: 'Not answered' }}</p></div>
-                                    <div class="rounded-lg bg-white p-3 text-green-700"><p class="text-xs font-bold uppercase">Correct answer</p>@if($review['correct_image'])<img src="{{ $review['correct_image'] }}" class="mt-2 h-24 w-full object-contain">@endif<p>{{ $review['correct'] }}</p></div>
-                                </div>
-                                @if($review['explanation'])<p class="mt-3 text-sm text-gray-700">{{ $review['explanation'] }}</p>@endif
-                            </article>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
 
             <!-- Score Card (Overlapping) -->
             <div class="px-6 relative -mt-8 z-20">
@@ -87,6 +68,35 @@
                     </div>
                 @endif
             </div>
+
+            @if(count($reviews))
+                <div class="px-6 pb-6">
+                    <button type="button" @click="showWrongAnswers = !showWrongAnswers" :aria-expanded="showWrongAnswers" class="flex w-full items-center justify-between rounded-xl bg-gradient-to-r from-red-600 to-rose-500 px-5 py-4 font-bold text-white shadow-lg shadow-red-200 transition hover:-translate-y-0.5 hover:shadow-xl">
+                        <span class="flex items-center gap-3">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-white/20">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M10.3 3.6 2.5 17.1A2 2 0 0 0 4.2 20h15.6a2 2 0 0 0 1.7-2.9L13.7 3.6a2 2 0 0 0-3.4 0Z"/></svg>
+                            </span>
+                            <span x-text="showWrongAnswers ? 'Hide wrong answers' : 'See wrong answers ({{ count($reviews) }})'"></span>
+                        </span>
+                        <svg class="h-5 w-5 transition-transform" :class="showWrongAnswers && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
+                    </button>
+
+                    <div x-cloak x-show="showWrongAnswers" x-transition class="mt-5 space-y-4 text-left">
+                        <h2 class="text-xl font-bold text-gray-900">Wrong answers</h2>
+                        @foreach($reviews as $review)
+                            <article class="rounded-xl border border-red-100 bg-red-50/40 p-4">
+                                @if($review['question_image'])<img src="{{ $review['question_image'] }}" alt="Question" class="mb-3 max-h-44 w-full rounded bg-white object-contain">@endif
+                                <h3 class="font-bold text-gray-900">{{ $review['question'] }}</h3>
+                                <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                                    <div class="rounded-lg bg-white p-3 text-red-700"><p class="text-xs font-bold uppercase">Your answer</p>@if($review['selected_image'])<img src="{{ $review['selected_image'] }}" class="mt-2 h-24 w-full object-contain">@endif<p>{{ $review['selected'] ?: 'Not answered' }}</p></div>
+                                    <div class="rounded-lg bg-white p-3 text-green-700"><p class="text-xs font-bold uppercase">Correct answer</p>@if($review['correct_image'])<img src="{{ $review['correct_image'] }}" class="mt-2 h-24 w-full object-contain">@endif<p>{{ $review['correct'] }}</p></div>
+                                </div>
+                                @if($review['explanation'])<p class="mt-3 text-sm text-gray-700">{{ $review['explanation'] }}</p>@endif
+                            </article>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             <!-- Actions -->
             <div class="p-6 pt-0 flex gap-3">
