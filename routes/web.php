@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\AdController;
 use App\Http\Controllers\Admin\ContentPageController;
+use App\Http\Controllers\Admin\LanguageController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\EmailAdvertisementController;
 use App\Http\Controllers\CgiClipMediaController;
 use App\Http\Controllers\HazardMockTestController;
@@ -113,6 +115,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('topics', App\Http\Controllers\Admin\TopicController::class)->except(['show']);
         Route::resource('questions', QuestionController::class);
         Route::resource('content-pages', ContentPageController::class)->except('show');
+        Route::resource('languages', LanguageController::class)->except('show');
+        Route::resource('users', AdminUserController::class)->only(['index', 'edit', 'update', 'destroy']);
+        Route::put('users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.reset-password');
+        Route::get('csrf-token', fn () => response()->json(['token' => csrf_token()]))->name('csrf-token');
 
         // Advertisements
         Route::resource('ads', AdController::class);

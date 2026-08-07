@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ContentPageRequest;
 use App\Models\Topic;
 use App\Models\ContentPage;
+use App\Models\Language;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -54,7 +55,8 @@ class ContentPageController extends Controller
         $selectedTopicId = $request->query('topic_id');
         $selectedType = $request->query('type', ContentPage::TYPE_CGI_CLIPS);
 
-        return view('admin.content_pages.create', compact('topics', 'selectedTopicId', 'selectedType'));
+        $languages = Language::active()->get();
+        return view('admin.content_pages.create', compact('topics', 'selectedTopicId', 'selectedType', 'languages'));
     }
 
     public function store(ContentPageRequest $request)
@@ -76,8 +78,9 @@ class ContentPageController extends Controller
     {
         $topics = Topic::with('topicable')->orderBy('name_en')->get();
         $contentPage->load('clips');
+        $languages = Language::active()->get();
 
-        return view('admin.content_pages.edit', compact('contentPage', 'topics'));
+        return view('admin.content_pages.edit', compact('contentPage', 'topics', 'languages'));
     }
 
     public function update(ContentPageRequest $request, ContentPage $contentPage)
@@ -137,32 +140,43 @@ class ContentPageController extends Controller
             : null;
         $firstHazardWindow = $hazardWindows[0] ?? null;
 
+        $translations = collect($request->input('translations', []))->map(fn ($translation) => [
+            'text' => $translation['text'] ?? null,
+            'explanation' => $translation['explanation'] ?? null,
+            'what_to_do' => $translation['what_to_do'] ?? null,
+        ])->all();
+        $existingTranslations = $request->route('content_page') instanceof ContentPage
+            ? ($request->route('content_page')->translations ?? [])
+            : [];
+        $translations = array_replace($existingTranslations, $translations);
+
         return [
             'topic_id' => $request->integer('topic_id'),
             'admin_title' => $request->input('admin_title'),
             'type' => $request->input('type'),
             'text_en' => $request->input('type') === ContentPage::TYPE_CGI_CLIPS
-                ? $request->input('text_en')
+                ? data_get($translations, 'en.text')
                 : null,
             'text_ku' => $request->input('type') === ContentPage::TYPE_CGI_CLIPS
-                ? $request->input('text_ku')
+                ? data_get($translations, 'ku.text')
                 : null,
             // Keep the original columns synchronized for backward compatibility.
             'hazard_window_start' => $firstHazardWindow['start'] ?? null,
             'hazard_window_end' => $firstHazardWindow['end'] ?? null,
             'hazard_windows' => $hazardWindows,
             'explanation_en' => $request->input('type') === ContentPage::TYPE_MOTORWAY_SIGN
-                ? $request->input('explanation_en')
+                ? data_get($translations, 'en.explanation')
                 : null,
             'explanation_ku' => $request->input('type') === ContentPage::TYPE_MOTORWAY_SIGN
-                ? $request->input('explanation_ku')
+                ? data_get($translations, 'ku.explanation')
                 : null,
             'what_to_do_en' => $request->input('type') === ContentPage::TYPE_MOTORWAY_SIGN
-                ? $request->input('what_to_do_en')
+                ? data_get($translations, 'en.what_to_do')
                 : null,
             'what_to_do_ku' => $request->input('type') === ContentPage::TYPE_MOTORWAY_SIGN
-                ? $request->input('what_to_do_ku')
+                ? data_get($translations, 'ku.what_to_do')
                 : null,
+            'translations' => $translations,
         ];
     }
 

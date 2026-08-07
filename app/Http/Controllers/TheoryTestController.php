@@ -8,6 +8,7 @@ use App\Models\Topic;
 use App\Models\MockTestHistory;
 use App\Models\Question;
 use App\Models\SubSection;
+use App\Models\Language;
 use Illuminate\Http\Request;
 
 class TheoryTestController extends Controller
@@ -39,7 +40,8 @@ class TheoryTestController extends Controller
             ->inRandomOrder()
             ->first();
 
-        return view('theory.practice', compact('topic', 'practiceItems', 'ad'));
+        $languages = Language::active()->get();
+        return view('theory.practice', compact('topic', 'practiceItems', 'ad', 'languages'));
     }
 
     public function result()
@@ -74,18 +76,21 @@ class TheoryTestController extends Controller
             ->concat($videoQuestions)
             ->values();
 
-        return view('theory.mock_test', compact('subSection', 'questions'));
+        $languages = Language::active()->get();
+        return view('theory.mock_test', compact('subSection', 'questions', 'languages'));
     }
 
     public function mockTestResult(Request $request)
     {
-        $correct = (int) $request->query('correct', 0);
-        $total = (int) $request->query('total', 50);
+        $result = $request->session()->get('mock_test_result', []);
+        $correct = (int) ($result['correct'] ?? $request->query('correct', 0));
+        $total = (int) ($result['total'] ?? $request->query('total', 50));
+        $reviews = $result['reviews'] ?? [];
 
         // Pass threshold is exactly 43 out of 50.
         $passed = $correct >= 43;
 
-        return view('theory.mock_result', compact('correct', 'total', 'passed'));
+        return view('theory.mock_result', compact('correct', 'total', 'passed', 'reviews'));
     }
 
     public function submitMockTest(Request $request)
@@ -101,6 +106,7 @@ class TheoryTestController extends Controller
         $questions = Question::with('choices')->whereIn('id', $questionIds)->get()->keyBy('id');
         $answers = collect($validated['answers'] ?? []);
         $correct = 0;
+        $reviews = [];
 
         foreach ($questionIds as $questionId) {
             $question = $questions->get($questionId);
@@ -108,11 +114,24 @@ class TheoryTestController extends Controller
 
             if ($question && $question->choices->contains(fn ($choice) => $choice->id === $choiceId && $choice->is_correct)) {
                 $correct++;
+            } elseif ($question) {
+                $selected = $question->choices->firstWhere('id', $choiceId);
+                $right = $question->choices->firstWhere('is_correct', true);
+                $reviews[] = [
+                    'question' => $question->text_en,
+                    'question_image' => $question->media_source,
+                    'selected' => $selected?->text_en,
+                    'selected_image' => $selected?->image_path,
+                    'correct' => $right?->text_en,
+                    'correct_image' => $right?->image_path,
+                    'explanation' => $question->explanation_en,
+                ];
             }
         }
 
         $total = $questionIds->count();
         $passed = $correct >= 43;
+        $request->session()->put('mock_test_result', compact('correct', 'total', 'reviews'));
 
         if (auth('web')->check() && auth('web')->user()->hasVerifiedEmail()) {
             MockTestHistory::create([

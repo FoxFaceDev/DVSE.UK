@@ -1,6 +1,6 @@
 <x-layouts.app :showBack="false" title="Mock Test Theory">
     <!-- Receive data from Laravel -->
-    <div x-data="mockTestRunner()" x-init="initData({{ Js::from($questions) }})" class="space-y-6 max-w-md mx-auto">
+    <div x-data="mockTestRunner()" x-init="initData({{ Js::from($questions) }}, {{ Js::from($languages) }})" class="space-y-6 max-w-md mx-auto">
         
         <!-- Loading state -->
         <template x-if="!initialized">
@@ -26,6 +26,7 @@
                     </div>
 
                     <div class="flex gap-2">
+                        <select x-model="languagePreference" @change="localStorage.setItem('languagePreference', languagePreference)" class="max-w-28 rounded-md border-gray-300 py-1 text-xs"><template x-for="language in languages" :key="language.code"><option :value="language.code" x-text="language.name"></option></template></select>
                         <button @click="confirmExit()" class="p-2 text-gray-400 hover:text-error hover:bg-error-container rounded-full transition-colors" title="Exit Exam">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
@@ -64,10 +65,11 @@
                         </template>
                         
                         <h2 class="font-heading font-medium text-lg text-gray-900 leading-snug" x-text="currentQuestion.text_en"></h2>
+                        <p x-show="languagePreference !== 'en' && translated(currentQuestion, 'text')" class="mt-3 border-t pt-3" :dir="languageDirection" x-text="translated(currentQuestion, 'text')"></p>
                     </div>
 
                     <!-- Choices -->
-                    <div class="space-y-3 mb-6">
+                    <div class="mb-6" :class="currentQuestion.question_type === 'image_answers' ? 'grid grid-cols-2 gap-3' : 'space-y-3'">
                         <template x-for="(choice, index) in currentQuestion.choices" :key="choice.id">
                             <button 
                                 @click="selectChoice(choice)"
@@ -88,7 +90,9 @@
                                 </div>
 
                                 <div class="flex-1">
+                                    <template x-if="choice.image_path"><img :src="choice.image_path" :alt="choice.text_en || 'Image answer'" class="mb-2 aspect-square w-full rounded-lg object-contain bg-gray-50"></template>
                                     <div class="font-medium" x-text="choice.text_en"></div>
+                                    <div x-show="languagePreference !== 'en' && translated(choice, 'text')" class="mt-1 text-sm" :dir="languageDirection" x-text="translated(choice, 'text')"></div>
                                 </div>
                             </button>
                         </template>
@@ -146,6 +150,8 @@
                 hasAnswered: false,
                 selectedChoiceId: null,
                 correctCount: 0,
+                languages: [],
+                languagePreference: 'en',
                 
                 // Answers mapping
                 answers: {}, // map of question_index => choice_id
@@ -154,8 +160,11 @@
                 timeLeft: 57 * 60,
                 timerInterval: null,
                 
-                initData(questions) {
+                initData(questions, languages) {
                     this.questions = questions;
+                    this.languages = languages;
+                    this.languagePreference = localStorage.getItem('languagePreference') || 'en';
+                    if (!languages.some(language => language.code === this.languagePreference)) this.languagePreference = 'en';
                     
                     // Prepare media_source
                     this.questions.forEach(q => {
@@ -169,6 +178,9 @@
                 get currentQuestion() {
                     return this.questions[this.realQuestionIndex];
                 },
+
+                get languageDirection() { return this.languages.find(language => language.code === this.languagePreference)?.direction || 'ltr'; },
+                translated(item, field) { return item?.translations?.[this.languagePreference]?.[field] || (this.languagePreference === 'ku' ? item?.[`${field}_ku`] : null) || ''; },
                 
                 get displayQuestionNumber() {
                     return this.realQuestionIndex + 1;

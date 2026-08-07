@@ -1,5 +1,6 @@
 <x-layouts.app :showBack="false" title="Test Result">
     <div x-data="{
+        reviews: [],
         correct: Number(new URLSearchParams(window.location.search).get('correct') || 0),
         total: Number(new URLSearchParams(window.location.search).get('total') || 0),
         category: new URLSearchParams(window.location.search).get('category') || 'Category',
@@ -11,8 +12,9 @@
         },
         get strokeDashoffset() {
             return this.circumference - (this.percentage / 100) * this.circumference;
-        }
-    }" class="text-center space-y-8 mt-4">
+        },
+        init() { try { this.reviews = JSON.parse(sessionStorage.getItem('practiceMistakeReview') || '[]'); } catch (error) { this.reviews = []; } }
+    }" x-init="init()" class="text-center space-y-8 mt-4">
 
         <div class="inline-block relative w-48 h-48 mx-auto">
             <!-- Circular Chart -->
@@ -47,6 +49,21 @@
                 <span class="text-xs uppercase tracking-wider text-red-700 font-bold mb-1">Wrong</span>
                 <span class="text-2xl font-bold text-red-700" x-text="total - correct"></span>
             </div>
+        </div>
+
+        <div x-cloak x-show="reviews.length" class="mx-auto max-w-2xl space-y-4 text-left">
+            <h2 class="text-xl font-bold text-gray-900">Review your mistakes</h2>
+            <template x-for="review in reviews" :key="review.question">
+                <article class="rounded-xl border border-red-100 bg-white p-5 shadow-sm">
+                    <template x-if="review.media"><img :src="review.media" alt="Question" class="mb-3 max-h-48 w-full rounded bg-gray-50 object-contain"></template>
+                    <h3 class="font-bold" x-text="review.question"></h3>
+                    <div class="mt-3 grid grid-cols-2 gap-3 text-sm">
+                        <div class="rounded bg-red-50 p-3 text-red-700"><strong>Your answer</strong><template x-if="review.selected?.image_path"><img :src="review.selected.image_path" class="my-2 h-24 w-full object-contain"></template><p x-text="review.selected?.text_en || 'Not answered'"></p></div>
+                        <div class="rounded bg-green-50 p-3 text-green-700"><strong>Correct answer</strong><template x-if="review.correct?.image_path"><img :src="review.correct.image_path" class="my-2 h-24 w-full object-contain"></template><p x-text="review.correct?.text_en || ''"></p></div>
+                    </div>
+                    <p x-show="review.explanation" class="mt-3 text-sm text-gray-600" x-text="review.explanation"></p>
+                </article>
+            </template>
         </div>
 
         <div class="pt-8 w-full max-w-xs mx-auto">

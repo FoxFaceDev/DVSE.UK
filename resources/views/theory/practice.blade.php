@@ -11,7 +11,7 @@
 <x-layouts.app :showBack="false" title="Practice">
     <div
         x-data="practiceRunner()"
-        x-init="initData({{ Js::from($topic) }}, {{ Js::from($practiceItems) }}, {{ Js::from($ad) }})"
+        x-init="initData({{ Js::from($topic) }}, {{ Js::from($practiceItems) }}, {{ Js::from($ad) }}, {{ Js::from($languages) }})"
         @fullscreenchange.window="handleCgiFullscreenChange()"
         @webkitfullscreenchange.window="handleCgiFullscreenChange()"
         @keydown.escape.window="closeAdditionalSignModal()"
@@ -43,7 +43,10 @@
                         </template>
                     </div>
 
-                    <div class="flex gap-2">
+                    <div class="flex items-center gap-2">
+                        <select x-model="languagePreference" @change="setLanguage()" class="max-w-36 rounded-md border-gray-300 py-1.5 text-xs" aria-label="Translation language">
+                            <template x-for="language in languages" :key="language.code"><option :value="language.code" x-text="language.name"></option></template>
+                        </select>
                         <template x-if="!showingAd && speechText">
                             <button @click="speakCurrentItem()" class="rounded-full p-2 text-primary transition-colors hover:bg-surface-dim" title="Listen" aria-label="Listen to this content">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
@@ -115,18 +118,18 @@
                                     </template>
 
                                     <div>
-                                        <p x-show="showKurdish" class="mb-1 text-xs font-bold uppercase tracking-wide text-primary">English</p>
+                                        <p x-show="showTranslation" class="mb-1 text-xs font-bold uppercase tracking-wide text-primary">English</p>
                                         <h2 class="font-heading text-lg font-medium leading-snug text-gray-900" x-text="currentItem.text_en || 'English question not provided.'"></h2>
                                     </div>
-                                    <template x-if="showKurdish && currentItem.text_ku">
+                                    <template x-if="showTranslation && translated(currentItem, 'text')">
                                         <div class="mt-4 border-t border-gray-100 pt-3">
-                                            <p class="mb-1 text-right text-xs font-bold text-primary" dir="rtl">کوردی</p>
-                                            <h2 class="text-right font-body text-base text-gray-700" dir="rtl" x-text="currentItem.text_ku"></h2>
+                                            <p class="mb-1 text-xs font-bold text-primary" :dir="languageDirection" x-text="languageName"></p>
+                                            <h2 class="font-body text-base text-gray-700" :dir="languageDirection" x-text="translated(currentItem, 'text')"></h2>
                                         </div>
                                     </template>
                                 </div>
 
-                                <div class="mb-6 space-y-3">
+                                <div class="mb-6" :class="currentItem.question_type === 'image_answers' ? 'grid grid-cols-2 gap-3' : 'space-y-3'">
                                     <template x-for="choice in currentItem.choices" :key="choice.id">
                                         <button
                                             @click="selectChoice(choice)"
@@ -153,9 +156,10 @@
                                             </div>
 
                                             <div class="flex-1">
+                                                <template x-if="choice.image_path"><img :src="choice.image_path" :alt="choice.text_en || 'Image answer'" class="mb-2 aspect-square w-full rounded-lg bg-white object-contain"></template>
                                                 <div class="font-medium" x-text="choice.text_en"></div>
-                                                <template x-if="showKurdish && choice.text_ku">
-                                                    <div class="mt-1 text-right text-sm" dir="rtl" x-text="choice.text_ku"></div>
+                                                <template x-if="showTranslation && translated(choice, 'text')">
+                                                    <div class="mt-1 text-sm" :dir="languageDirection" x-text="translated(choice, 'text')"></div>
                                                 </template>
                                             </div>
                                         </button>
@@ -169,10 +173,10 @@
                                     </h4>
                                     <p class="mb-1 text-xs font-bold uppercase tracking-wide text-primary">English explanation</p>
                                     <p class="text-sm text-gray-800" x-text="currentItem.explanation_en || 'No English explanation provided.'"></p>
-                                    <template x-if="showKurdish && currentItem.explanation_ku">
+                                    <template x-if="showTranslation && translated(currentItem, 'explanation')">
                                         <div class="mt-4 border-t border-blue-200 pt-3">
                                             <p class="mb-1 text-right text-xs font-bold uppercase tracking-wide text-primary" dir="rtl">ڕوونکردنەوەی کوردی</p>
-                                            <p class="text-right text-sm text-gray-800" dir="rtl" x-text="currentItem.explanation_ku"></p>
+                                            <p class="text-sm text-gray-800" :dir="languageDirection" x-text="translated(currentItem, 'explanation')"></p>
                                         </div>
                                     </template>
                                 </div>
@@ -246,7 +250,7 @@
                                                         <span class="text-sm text-gray-400">Your flags will appear here</span>
                                                     </template>
                                                     <template x-for="flag in cgiFlags" :key="flag.id">
-                                                        <svg class="h-11 w-11 flex-none text-red-600 drop-shadow-sm" viewBox="0 0 24 24" fill="currentColor" aria-label="Hazard flag">
+                                                        <svg class="h-7 w-7 flex-none text-red-600 drop-shadow-sm" viewBox="0 0 24 24" fill="currentColor" aria-label="Hazard flag">
                                                             <path d="M5 2.5a1 1 0 0 1 2 0V4h11.2a1 1 0 0 1 .9 1.43L17.4 9l1.7 3.57a1 1 0 0 1-.9 1.43H7v7.5a1 1 0 0 1-2 0v-19Z"/>
                                                         </svg>
                                                     </template>
@@ -374,7 +378,7 @@
                                                             <div class="absolute z-20 pointer-events-none"
                                                                  :style="'left:' + (flag.time / cgiVideoDuration * 100) + '%; top:-8px; transform:translateX(-50%)'"
                                                                  :aria-label="'Your hazard flag at ' + flag.time.toFixed(1) + ' seconds'">
-                                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="#dc2626">
+                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="#dc2626">
                                                                     <path d="M5 2.5a1 1 0 0 1 2 0V4h11.2a1 1 0 0 1 .9 1.43L17.4 9l1.7 3.57a1 1 0 0 1-.9 1.43H7v7.5a1 1 0 0 1-2 0v-19Z"/>
                                                                 </svg>
                                                             </div>
@@ -385,15 +389,15 @@
                                         </div>
                                     </template>
 
-                                    <template x-if="cgiStage === 'explanation' && (currentItem.text_en || (showKurdish && currentItem.text_ku))">
+                                    <template x-if="cgiStage === 'explanation' && (currentItem.text_en || (showTranslation && translated(currentItem, 'text')))">
                                         <div class="mx-auto mt-5 max-w-3xl border-t border-gray-100 pt-5">
                                             <div class="mb-2 flex items-center justify-between gap-3">
                                                 <h3 class="font-heading font-bold text-purple-900">Explanation</h3>
                                                 <h3 x-show="showKurdish" class="font-heading font-bold text-purple-900" dir="rtl">ڕوونکردنەوە</h3>
                                             </div>
                                             <p x-show="currentItem.text_en" class="leading-relaxed text-gray-800" x-text="currentItem.text_en"></p>
-                                            <template x-if="showKurdish && currentItem.text_ku">
-                                                <p class="mt-3 text-right leading-relaxed text-gray-700" dir="rtl" x-text="currentItem.text_ku"></p>
+                                            <template x-if="showTranslation && translated(currentItem, 'text')">
+                                                <p class="mt-3 leading-relaxed text-gray-700" :dir="languageDirection" x-text="translated(currentItem, 'text')"></p>
                                             </template>
                                         </div>
                                     </template>
@@ -418,16 +422,16 @@
                                     <section class="mt-6 border-l-4 border-primary pl-4">
                                         <h3 class="font-heading text-lg font-bold text-gray-950">About this sign</h3>
                                         <p class="mt-2 whitespace-pre-line leading-7 text-gray-700" x-text="currentItem.explanation_en"></p>
-                                        <template x-if="showKurdish && currentItem.explanation_ku">
-                                            <p class="mt-3 text-right leading-relaxed text-gray-700" dir="rtl" x-text="currentItem.explanation_ku"></p>
+                                        <template x-if="showTranslation && translated(currentItem, 'explanation')">
+                                            <p class="mt-3 leading-relaxed text-gray-700" :dir="languageDirection" x-text="translated(currentItem, 'explanation')"></p>
                                         </template>
                                     </section>
 
                                     <section class="mt-6 rounded-xl bg-primary/5 p-4">
                                         <h3 class="font-heading text-lg font-bold text-primary-dark">What to do</h3>
                                         <p class="mt-2 whitespace-pre-line leading-7 text-gray-700" x-text="currentItem.what_to_do_en"></p>
-                                        <template x-if="showKurdish && currentItem.what_to_do_ku">
-                                            <p class="mt-3 border-t border-blue-100 pt-3 text-right leading-relaxed text-gray-700" dir="rtl" x-text="currentItem.what_to_do_ku"></p>
+                                        <template x-if="showTranslation && translated(currentItem, 'what_to_do')">
+                                            <p class="mt-3 border-t border-blue-100 pt-3 leading-relaxed text-gray-700" :dir="languageDirection" x-text="translated(currentItem, 'what_to_do')"></p>
                                         </template>
                                     </section>
 
@@ -471,6 +475,7 @@
                                 @click.self="closeAdditionalSignModal()"
                             >
                                 <div class="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+                                    <button type="button" @click="closeAdditionalSignModal()" class="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-gray-950/85 text-2xl text-white shadow-lg ring-2 ring-white transition hover:scale-105 hover:bg-red-600" aria-label="Close image">&times;</button>
                                     <div class="flex min-h-0 flex-1 items-center justify-center bg-slate-50 p-4 sm:p-6">
                                         <img
                                             :src="selectedAdditionalSign.src"
@@ -587,7 +592,7 @@
                 cgiFullscreenFallback: false,
                 cgiFullscreenTarget: null,
                 languagePreference: 'en',
-                showKurdish: false,
+                languages: [],
                 adData: null,
                 adPosition: -1,
                 showingAd: false,
@@ -595,11 +600,12 @@
                 adTimer: null,
                 adShown: false,
 
-                initData(topic, items, ad) {
+                initData(topic, items, ad, languages) {
                     this.topic = topic;
                     this.items = items;
+                    this.languages = languages;
                     this.languagePreference = localStorage.getItem('languagePreference') || 'en';
-                    this.showKurdish = this.languagePreference === 'en-ku';
+                    if (!languages.some(language => language.code === this.languagePreference)) this.languagePreference = 'en';
 
                     this.items.forEach(item => {
                         if (item.item_type === 'question') {
@@ -607,10 +613,10 @@
                         }
                     });
 
-                    if (ad && items.length > 2) {
+                    if (ad && this.totalQuestions >= 10) {
                         this.adData = ad;
                         this.adData.media_source = ad.media_path || ad.media_url || null;
-                        this.adPosition = Math.floor(items.length / 2);
+                        this.adPosition = 10 + Math.floor(Math.random() * (Math.min(20, this.totalQuestions) - 9));
                     }
 
                     this.initialized = true;
@@ -619,6 +625,17 @@
 
                 get currentItem() {
                     return this.items[this.currentIndex];
+                },
+
+                get showTranslation() { return this.languagePreference !== 'en'; },
+                get showKurdish() { return this.languagePreference === 'ku'; },
+                get languageName() { return this.languages.find(language => language.code === this.languagePreference)?.name || 'Translation'; },
+                get languageDirection() { return this.languages.find(language => language.code === this.languagePreference)?.direction || 'ltr'; },
+                setLanguage() { localStorage.setItem('languagePreference', this.languagePreference); },
+                translated(item, field) {
+                    return item?.translations?.[this.languagePreference]?.[field]
+                        || (this.languagePreference === 'ku' ? item?.[`${field}_ku`] : null)
+                        || '';
                 },
 
                 get currentItemLabel() {
@@ -1089,7 +1106,7 @@
                     this.currentIndex++;
                     this.restoreItemState();
 
-                    if (!this.adShown && this.adData && this.currentIndex === this.adPosition) {
+                    if (!this.adShown && this.adData && Object.keys(this.answers).length >= this.adPosition) {
                         this.triggerAd();
                     }
                 },
@@ -1150,6 +1167,18 @@
 
                 finishPractice() {
                     if (!this.canContinue) return;
+                    if (!this.adShown && this.adData && Object.keys(this.answers).length >= this.adPosition) {
+                        this.triggerAd();
+                        return;
+                    }
+                    const reviews = this.items.filter(item => item.item_type === 'question' && this.answers[item.id] && !this.answers[item.id].isCorrect).map(item => ({
+                        question: item.text_en,
+                        media: item.media_source,
+                        selected: item.choices.find(choice => choice.id === this.answers[item.id].choiceId),
+                        correct: item.choices.find(choice => choice.is_correct),
+                        explanation: item.explanation_en
+                    }));
+                    sessionStorage.setItem('practiceMistakeReview', JSON.stringify(reviews));
                     window.location.href = `{{ route('theory.result') }}?correct=${this.correctCount}&total=${this.totalQuestions}&topic=${encodeURIComponent(this.topic.name_en)}`;
                 },
 

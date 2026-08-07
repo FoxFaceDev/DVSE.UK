@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Section;
 use App\Models\SubSection;
 use App\Models\Category;
+use App\Models\Language;
 
 class FrontendController extends Controller
 {
@@ -14,7 +15,8 @@ class FrontendController extends Controller
         $section->load(['subSections', 'topics' => function($query) {
             $query->withCount(['questions', 'contentPages']);
         }]);
-        return view('frontend.section', compact('section'));
+        $languages = Language::active()->get();
+        return view('frontend.section', compact('section', 'languages'));
     }
 
     public function showSubSection(SubSection $subSection)

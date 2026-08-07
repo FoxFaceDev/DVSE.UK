@@ -9,6 +9,28 @@ use Illuminate\Validation\Validator;
 
 class ContentPageRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $translations = $this->input('translations', []);
+        foreach (['en', 'ku'] as $code) {
+            foreach (['text', 'explanation', 'what_to_do'] as $field) {
+                $legacy = $field.'_'.$code;
+                if (! isset($translations[$code][$field]) && $this->has($legacy)) {
+                    $translations[$code][$field] = $this->input($legacy);
+                }
+            }
+        }
+        $this->merge([
+            'translations' => $translations,
+            'text_en' => data_get($translations, 'en.text', $this->input('text_en')),
+            'text_ku' => data_get($translations, 'ku.text', $this->input('text_ku')),
+            'explanation_en' => data_get($translations, 'en.explanation', $this->input('explanation_en')),
+            'explanation_ku' => data_get($translations, 'ku.explanation', $this->input('explanation_ku')),
+            'what_to_do_en' => data_get($translations, 'en.what_to_do', $this->input('what_to_do_en')),
+            'what_to_do_ku' => data_get($translations, 'ku.what_to_do', $this->input('what_to_do_ku')),
+        ]);
+    }
+
     public function authorize(): bool
     {
         return auth('admin')->check();
@@ -28,6 +50,12 @@ class ContentPageRequest extends FormRequest
             ])],
             'text_en' => ['nullable', 'string', 'max:10000'],
             'text_ku' => ['nullable', 'string', 'max:10000'],
+            'translations' => ['nullable', 'array'],
+            'translations.*.text' => ['nullable', 'string', 'max:10000'],
+            'translations.*.explanation' => ['nullable', 'string', 'max:10000'],
+            'translations.*.what_to_do' => ['nullable', 'string', 'max:10000'],
+            'translations.en.explanation' => $isMotorwaySign ? ['required', 'string', 'max:10000'] : ['nullable'],
+            'translations.en.what_to_do' => $isMotorwaySign ? ['required', 'string', 'max:10000'] : ['nullable'],
             'hazard_windows' => [$isCgiClips ? 'required' : 'nullable', 'array', 'min:1', 'max:20'],
             'hazard_windows.*.start' => $isCgiClips
                 ? ['required', 'numeric', 'min:0']
@@ -54,13 +82,9 @@ class ContentPageRequest extends FormRequest
                 'mimes:jpg,jpeg,png,webp',
                 'max:10240',
             ],
-            'explanation_en' => $isMotorwaySign
-                ? ['required', 'string', 'max:10000']
-                : ['nullable', 'string', 'max:10000'],
+            'explanation_en' => $isMotorwaySign ? ['required', 'string', 'max:10000'] : ['nullable', 'string', 'max:10000'],
             'explanation_ku' => ['nullable', 'string', 'max:10000'],
-            'what_to_do_en' => $isMotorwaySign
-                ? ['required', 'string', 'max:10000']
-                : ['nullable', 'string', 'max:10000'],
+            'what_to_do_en' => $isMotorwaySign ? ['required', 'string', 'max:10000'] : ['nullable', 'string', 'max:10000'],
             'what_to_do_ku' => ['nullable', 'string', 'max:10000'],
             'additional_sign_images' => ['nullable', 'array', 'max:8'],
             'additional_sign_images.*' => [

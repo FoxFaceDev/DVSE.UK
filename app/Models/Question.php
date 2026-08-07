@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Question extends Model
 {
     protected $fillable = [
-        'topic_id', 'text_en', 'text_ku', 'media_path',
+        'topic_id', 'question_type', 'text_en', 'text_ku', 'translations', 'media_path',
         'media_type', 'media_url',
         'explanation_en', 'explanation_ku'
     ];
+
+    protected $casts = ['translations' => 'array'];
 
     protected $appends = ['media_source'];
 

@@ -25,6 +25,7 @@ class ContentPage extends Model
         'what_to_do_en',
         'what_to_do_ku',
         'additional_sign_images',
+        'translations',
     ];
 
     protected function casts(): array
@@ -34,6 +35,7 @@ class ContentPage extends Model
             'hazard_window_end' => 'float',
             'hazard_windows' => 'array',
             'additional_sign_images' => 'array',
+            'translations' => 'array',
         ];
     }
 

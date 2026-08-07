@@ -104,7 +104,7 @@
 
                                 <template x-for="(flag, flagIndex) in flags" :key="'flag-' + flagIndex">
                                     <div x-show="time >= flag" class="pointer-events-none absolute z-20 -translate-x-1/2" :style="'left:' + ((flag / duration) * 100) + '%; top:-8px'">
-                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="#dc2626" aria-label="Your hazard flag">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="#dc2626" aria-label="Your hazard flag">
                                             <path d="M5 2.5a1 1 0 0 1 2 0V4h11.2a1 1 0 0 1 .9 1.43L17.4 9l1.7 3.57a1 1 0 0 1-.9 1.43H7v7.5a1 1 0 0 1-2 0v-19Z"/>
                                         </svg>
                                     </div>

@@ -17,8 +17,9 @@
                     @change="localStorage.setItem('languagePreference', languagePreference)"
                     class="w-full border-gray-200 rounded-md focus:ring-primary focus:border-primary p-2 bg-surface-dim appearance-none"
                 >
-                    <option value="en">English</option>
-                    <option value="en-ku">English & Kurdish</option>
+                    @foreach($languages as $language)
+                        <option value="{{ $language->code }}">{{ $language->code === 'en' ? 'English' : 'English & '.$language->name }}</option>
+                    @endforeach
                 </select>
             </div>
         @endif

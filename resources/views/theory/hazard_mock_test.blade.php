@@ -77,7 +77,7 @@
             <div class="flex min-h-16 items-center gap-1 overflow-x-auto bg-white px-3 py-2" aria-live="polite">
                 <span x-show="currentFlags.length === 0" class="text-sm text-gray-400">Your flags will appear here</span>
                 <template x-for="(time, index) in currentFlags" :key="index">
-                    <svg class="h-10 w-10 flex-none text-red-600" viewBox="0 0 24 24" fill="currentColor" aria-label="Hazard flag">
+                    <svg class="h-6 w-6 flex-none text-red-600" viewBox="0 0 24 24" fill="currentColor" aria-label="Hazard flag">
                         <path d="M5 2.5a1 1 0 0 1 2 0V4h11.2a1 1 0 0 1 .9 1.43L17.4 9l1.7 3.57a1 1 0 0 1-.9 1.43H7v7.5a1 1 0 0 1-2 0v-19Z"/>
                     </svg>
                 </template>

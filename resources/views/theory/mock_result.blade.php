@@ -24,6 +24,25 @@
                 </div>
             </div>
 
+            @if(count($reviews))
+                <div class="border-t p-6">
+                    <h2 class="mb-4 text-xl font-bold text-gray-900">Review your mistakes</h2>
+                    <div class="space-y-4 text-left">
+                        @foreach($reviews as $review)
+                            <article class="rounded-xl border border-red-100 bg-red-50/40 p-4">
+                                @if($review['question_image'])<img src="{{ $review['question_image'] }}" alt="Question" class="mb-3 max-h-44 w-full rounded bg-white object-contain">@endif
+                                <h3 class="font-bold text-gray-900">{{ $review['question'] }}</h3>
+                                <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                                    <div class="rounded-lg bg-white p-3 text-red-700"><p class="text-xs font-bold uppercase">Your answer</p>@if($review['selected_image'])<img src="{{ $review['selected_image'] }}" class="mt-2 h-24 w-full object-contain">@endif<p>{{ $review['selected'] ?: 'Not answered' }}</p></div>
+                                    <div class="rounded-lg bg-white p-3 text-green-700"><p class="text-xs font-bold uppercase">Correct answer</p>@if($review['correct_image'])<img src="{{ $review['correct_image'] }}" class="mt-2 h-24 w-full object-contain">@endif<p>{{ $review['correct'] }}</p></div>
+                                </div>
+                                @if($review['explanation'])<p class="mt-3 text-sm text-gray-700">{{ $review['explanation'] }}</p>@endif
+                            </article>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             <!-- Score Card (Overlapping) -->
             <div class="px-6 relative -mt-8 z-20">
                 <div class="bg-white rounded-xl shadow-lg shadow-black/5 border border-gray-100 p-6 flex justify-between items-center">

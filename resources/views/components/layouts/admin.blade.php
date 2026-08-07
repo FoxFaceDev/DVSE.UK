@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Admin Portal - DVSE.UK</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
@@ -23,6 +24,8 @@
             <a href="{{ route('admin.questions.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.questions.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Questions</a>
             <a href="{{ route('admin.topics.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.topics.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Topics</a>
             <a href="{{ route('admin.content-pages.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.content-pages.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Learning Pages</a>
+            <a href="{{ route('admin.languages.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.languages.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Languages</a>
+            @if(auth('admin')->user()->is_superadmin)<a href="{{ route('admin.users.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.users.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">User Accounts</a>@endif
             <a href="{{ route('admin.ads.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.ads.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Advertisements</a>
             <a href="{{ route('admin.email-advertisements.create') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.email-advertisements.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Email Campaigns</a>
         </nav>
@@ -56,4 +59,16 @@
     </div>
 
 </body>
+<script>
+    // Keep long editing/upload sessions alive and refresh every form's CSRF token.
+    setInterval(async () => {
+        try {
+            const response = await fetch(@js(route('admin.csrf-token')), { credentials: 'same-origin', headers: { Accept: 'application/json' } });
+            if (!response.ok) return;
+            const { token } = await response.json();
+            document.querySelector('meta[name="csrf-token"]')?.setAttribute('content', token);
+            document.querySelectorAll('input[name="_token"]').forEach(input => input.value = token);
+        } catch (error) {}
+    }, 5 * 60 * 1000);
+</script>
 </html>
