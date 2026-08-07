@@ -81,7 +81,9 @@
 
         <div class="grid grid-cols-1 gap-5 xl:grid-cols-2">
             @for($slot = 0; $slot < 2; $slot++)
-                @php($currentClip = $isEditing ? $contentPage->clips->firstWhere('slot', $slot) : null)
+                @php
+                    $currentClip = $isEditing ? $contentPage->clips->firstWhere('slot', $slot) : null;
+                @endphp
                 <div class="admin-subcard rounded-lg border p-5">
                     <div class="mb-4 flex items-center justify-between">
                         <h4 class="font-bold text-gray-800">{{ $slot === 0 ? '1. Hazard video' : '2. Explanation video' }}</h4>
@@ -122,7 +124,7 @@
                     <div class="rounded-lg border border-amber-200 bg-white/80 p-4">
                         <div class="mb-3 flex items-center justify-between">
                             <h5 class="font-bold text-gray-800">Hazard range <span x-text="index + 1"></span></h5>
-                            <button x-show="hazardWindows.length > 1" type="button" @click="hazardWindows.splice(index, 1)" class="text-sm font-medium text-red-600 hover:text-red-700">Remove</button>
+                            <button x-show="hazardWindows.length > 1" type="button" x-on:click="hazardWindows.splice(index, 1)" class="text-sm font-medium text-red-600 hover:text-red-700">Remove</button>
                         </div>
                         <div class="grid grid-cols-1 gap-5 sm:grid-cols-4">
                             <div>
@@ -146,14 +148,26 @@
                 </template>
             </div>
 
-            <button type="button" @click="hazardWindows.push({ key: nextHazardRangeId++, start: '', end: '', points: 5, flag_time: '' })" class="mt-4 inline-flex min-h-11 items-center gap-2 rounded-md border border-amber-400 bg-white px-4 py-2 text-sm font-bold text-amber-900 hover:bg-amber-100">
+            <button type="button" x-on:click="hazardWindows.push({ key: nextHazardRangeId++, start: '', end: '', points: 5, flag_time: '' })" class="mt-4 inline-flex min-h-11 items-center gap-2 rounded-md border border-amber-400 bg-white px-4 py-2 text-sm font-bold text-amber-900 hover:bg-amber-100">
                 <span class="text-lg leading-none">+</span> Add another hazard range
             </button>
         </div>
 
         <div class="mt-7">
-            <div class="mb-4 flex flex-wrap gap-2">@foreach($languages as $language)<button type="button" @click="languageTab='{{ $language->code }}'" :class="languageTab==='{{ $language->code }}' ? 'bg-primary text-white' : 'bg-white text-gray-700'" class="rounded-md border px-4 py-2 text-sm font-bold">{{ $language->name }}</button>@endforeach</div>
-            @foreach($languages as $language)@php($fallback = $language->code === 'en' ? ($contentPage->text_en ?? '') : ($language->code === 'ku' ? ($contentPage->text_ku ?? '') : ''))<div x-cloak x-show="languageTab==='{{ $language->code }}'" dir="{{ $language->direction }}"><label class="mb-1 block text-sm font-medium">Explanation text ({{ $language->name }})</label><textarea name="translations[{{ $language->code }}][text]" rows="4" class="w-full rounded-md border-gray-300">{{ old("translations.{$language->code}.text", data_get($contentPage->translations ?? [], "{$language->code}.text", $fallback)) }}</textarea></div>@endforeach
+            <div class="mb-4 flex flex-wrap gap-2">
+                @foreach($languages as $language)
+                    <button type="button" x-on:click="languageTab='{{ $language->code }}'" :class="languageTab==='{{ $language->code }}' ? 'bg-primary text-white' : 'bg-white text-gray-700'" class="rounded-md border px-4 py-2 text-sm font-bold">{{ $language->name }}</button>
+                @endforeach
+            </div>
+            @foreach($languages as $language)
+                @php
+                    $fallback = $language->code === 'en' ? ($contentPage->text_en ?? '') : ($language->code === 'ku' ? ($contentPage->text_ku ?? '') : '');
+                @endphp
+                <div x-cloak x-show="languageTab==='{{ $language->code }}'" dir="{{ $language->direction }}">
+                    <label class="mb-1 block text-sm font-medium">Explanation text ({{ $language->name }})</label>
+                    <textarea name="translations[{{ $language->code }}][text]" rows="4" class="w-full rounded-md border-gray-300">{{ old("translations.{$language->code}.text", data_get($contentPage->translations ?? [], "{$language->code}.text", $fallback)) }}</textarea>
+                </div>
+            @endforeach
         </div>
     </section>
 
@@ -180,7 +194,26 @@
                 <div><p class="text-sm text-gray-500">The translated guidance is entered in the language tabs below. Images are shared across all languages.</p></div>
             </div>
 
-            <div><div class="mb-4 flex flex-wrap gap-2">@foreach($languages as $language)<button type="button" @click="languageTab='{{ $language->code }}'" :class="languageTab==='{{ $language->code }}' ? 'bg-primary text-white' : 'bg-white text-gray-700'" class="rounded-md border px-4 py-2 text-sm font-bold">{{ $language->name }}</button>@endforeach</div>@foreach($languages as $language)@php($translation = $contentPage->translations ?? [])<div x-cloak x-show="languageTab==='{{ $language->code }}'" dir="{{ $language->direction }}" class="grid gap-5 lg:grid-cols-2"><div><label class="mb-1 block text-sm font-medium">About this sign ({{ $language->name }}) {{ $language->code === 'en' ? '*' : '' }}</label><textarea name="translations[{{ $language->code }}][explanation]" rows="5" class="w-full rounded-md border-gray-300">{{ old("translations.{$language->code}.explanation", data_get($translation, "{$language->code}.explanation", $language->code === 'en' ? ($contentPage->explanation_en ?? '') : ($language->code === 'ku' ? ($contentPage->explanation_ku ?? '') : ''))) }}</textarea></div><div><label class="mb-1 block text-sm font-medium">What to do ({{ $language->name }}) {{ $language->code === 'en' ? '*' : '' }}</label><textarea name="translations[{{ $language->code }}][what_to_do]" rows="5" class="w-full rounded-md border-gray-300">{{ old("translations.{$language->code}.what_to_do", data_get($translation, "{$language->code}.what_to_do", $language->code === 'en' ? ($contentPage->what_to_do_en ?? '') : ($language->code === 'ku' ? ($contentPage->what_to_do_ku ?? '') : ''))) }}</textarea></div></div>@endforeach</div>
+            <div>
+                <div class="mb-4 flex flex-wrap gap-2">
+                    @foreach($languages as $tabLanguage)
+                        <button type="button" x-on:click="languageTab='{{ $tabLanguage->code }}'" :class="languageTab==='{{ $tabLanguage->code }}' ? 'bg-primary text-white' : 'bg-white text-gray-700'" class="rounded-md border px-4 py-2 text-sm font-bold">{{ $tabLanguage->name }}</button>
+                    @endforeach
+                </div>
+                @foreach($languages as $language)
+                    @php
+                        $translation = $contentPage->translations ?? [];
+                        $defaultAdditionalTitle = $language->code === 'en' ? 'Additional signs you can expect' : ($language->code === 'ku' ? 'نیشانە زیادەکان کە لەوانەیە ببینیت' : '');
+                        $defaultAdditionalDescription = $language->code === 'en' ? 'These signs may accompany the main road sign.' : ($language->code === 'ku' ? 'لەوانەیە ئەم نیشانانە لەگەڵ نیشانە سەرەکییەکەی ڕێگا بن.' : '');
+                    @endphp
+                    <div x-cloak x-show="languageTab==='{{ $language->code }}'" dir="{{ $language->direction }}" class="grid gap-5 lg:grid-cols-2">
+                        <div><label class="mb-1 block text-sm font-medium">About this sign ({{ $language->name }}) {{ $language->code === 'en' ? '*' : '' }}</label><textarea name="translations[{{ $language->code }}][explanation]" rows="5" class="w-full rounded-md border-gray-300">{{ old("translations.{$language->code}.explanation", data_get($translation, "{$language->code}.explanation", $language->code === 'en' ? ($contentPage->explanation_en ?? '') : ($language->code === 'ku' ? ($contentPage->explanation_ku ?? '') : ''))) }}</textarea></div>
+                        <div><label class="mb-1 block text-sm font-medium">What to do ({{ $language->name }}) {{ $language->code === 'en' ? '*' : '' }}</label><textarea name="translations[{{ $language->code }}][what_to_do]" rows="5" class="w-full rounded-md border-gray-300">{{ old("translations.{$language->code}.what_to_do", data_get($translation, "{$language->code}.what_to_do", $language->code === 'en' ? ($contentPage->what_to_do_en ?? '') : ($language->code === 'ku' ? ($contentPage->what_to_do_ku ?? '') : ''))) }}</textarea></div>
+                        <div><label class="mb-1 block text-sm font-medium">Additional signs section title ({{ $language->name }})</label><input type="text" maxlength="255" name="translations[{{ $language->code }}][additional_signs_title]" value="{{ old("translations.{$language->code}.additional_signs_title", data_get($translation, "{$language->code}.additional_signs_title", $defaultAdditionalTitle)) }}" class="w-full rounded-md border-gray-300"></div>
+                        <div><label class="mb-1 block text-sm font-medium">Additional signs section description ({{ $language->name }})</label><textarea rows="3" maxlength="1000" name="translations[{{ $language->code }}][additional_signs_description]" class="w-full rounded-md border-gray-300">{{ old("translations.{$language->code}.additional_signs_description", data_get($translation, "{$language->code}.additional_signs_description", $defaultAdditionalDescription)) }}</textarea></div>
+                    </div>
+                @endforeach
+            </div>
 
             <div class="rounded-lg border border-slate-200 bg-slate-50 p-5">
                 <h4 class="font-bold text-gray-900">Additional signs learners can expect</h4>

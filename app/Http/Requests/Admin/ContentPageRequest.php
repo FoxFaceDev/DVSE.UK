@@ -13,7 +13,7 @@ class ContentPageRequest extends FormRequest
     {
         $translations = $this->input('translations', []);
         foreach (['en', 'ku'] as $code) {
-            foreach (['text', 'explanation', 'what_to_do'] as $field) {
+            foreach (['text', 'explanation', 'what_to_do', 'additional_signs_title', 'additional_signs_description'] as $field) {
                 $legacy = $field.'_'.$code;
                 if (! isset($translations[$code][$field]) && $this->has($legacy)) {
                     $translations[$code][$field] = $this->input($legacy);
@@ -54,6 +54,8 @@ class ContentPageRequest extends FormRequest
             'translations.*.text' => ['nullable', 'string', 'max:10000'],
             'translations.*.explanation' => ['nullable', 'string', 'max:10000'],
             'translations.*.what_to_do' => ['nullable', 'string', 'max:10000'],
+            'translations.*.additional_signs_title' => ['nullable', 'string', 'max:255'],
+            'translations.*.additional_signs_description' => ['nullable', 'string', 'max:1000'],
             'translations.en.explanation' => $isMotorwaySign ? ['required', 'string', 'max:10000'] : ['nullable'],
             'translations.en.what_to_do' => $isMotorwaySign ? ['required', 'string', 'max:10000'] : ['nullable'],
             'hazard_windows' => [$isCgiClips ? 'required' : 'nullable', 'array', 'min:1', 'max:20'],

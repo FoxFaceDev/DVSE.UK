@@ -144,6 +144,8 @@ class ContentPageController extends Controller
             'text' => $translation['text'] ?? null,
             'explanation' => $translation['explanation'] ?? null,
             'what_to_do' => $translation['what_to_do'] ?? null,
+            'additional_signs_title' => $translation['additional_signs_title'] ?? null,
+            'additional_signs_description' => $translation['additional_signs_description'] ?? null,
         ])->all();
         $existingTranslations = $request->route('content_page') instanceof ContentPage
             ? ($request->route('content_page')->translations ?? [])

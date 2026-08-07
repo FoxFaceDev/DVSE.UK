@@ -74,3 +74,39 @@ test('mock test results retain incorrect answers for review', function () {
     $this->post(route('theory.mock_test_submit'), ['question_ids' => [$question->id], 'answers' => [$question->id => $wrong->id]])->assertRedirect();
     $this->get(route('theory.mock_test_result'))->assertOk()->assertSee('Review your mistakes')->assertSee('What is correct?')->assertSee('Right');
 });
+
+test('motorway additional signs copy is editable per language and explanations replace english', function () {
+    Storage::fake('public');
+    $admin = enhancementAdmin();
+    $topic = enhancementTopic();
+
+    $this->actingAs($admin, 'admin')->post(route('admin.content-pages.store'), [
+        'admin_title' => 'Translated motorway guide',
+        'topic_id' => $topic->id,
+        'type' => 'motorway_sign',
+        'sign_image' => UploadedFile::fake()->image('sign.png'),
+        'translations' => [
+            'en' => [
+                'explanation' => 'English explanation',
+                'what_to_do' => 'English action',
+                'additional_signs_title' => 'Related signs',
+                'additional_signs_description' => 'Look for these signs.',
+            ],
+            'ku' => [
+                'explanation' => 'Kurdish explanation',
+                'what_to_do' => 'Kurdish action',
+                'additional_signs_title' => 'Kurdish signs title',
+                'additional_signs_description' => 'Kurdish signs description',
+            ],
+        ],
+    ])->assertRedirect(route('admin.content-pages.index'));
+
+    $page = \App\Models\ContentPage::firstOrFail();
+    expect($page->translations['ku']['additional_signs_title'])->toBe('Kurdish signs title');
+
+    $this->get(route('theory.practice', $topic))
+        ->assertOk()
+        ->assertSee('Kurdish signs title')
+        ->assertSee('x-show="!showTranslation"', false)
+        ->assertSee("translated(currentItem, 'additional_signs_description')", false);
+});

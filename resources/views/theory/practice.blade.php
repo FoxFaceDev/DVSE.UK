@@ -169,13 +169,14 @@
                                 <div x-cloak x-show="showQuestionExplanation && hasAnswered" x-transition.opacity class="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
                                     <h4 class="mb-2 flex items-center gap-2 font-bold text-primary">
                                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        Explanation
+                                        <span x-text="showTranslation ? languageName : 'Explanation'"></span>
                                     </h4>
-                                    <p class="mb-1 text-xs font-bold uppercase tracking-wide text-primary">English explanation</p>
-                                    <p class="text-sm text-gray-800" x-text="currentItem.explanation_en || 'No English explanation provided.'"></p>
+                                    <div x-show="!showTranslation">
+                                        <p class="mb-1 text-xs font-bold uppercase tracking-wide text-primary">English explanation</p>
+                                        <p class="text-sm text-gray-800" x-text="currentItem.explanation_en || 'No English explanation provided.'"></p>
+                                    </div>
                                     <template x-if="showTranslation && translated(currentItem, 'explanation')">
-                                        <div class="mt-4 border-t border-blue-200 pt-3">
-                                            <p class="mb-1 text-right text-xs font-bold uppercase tracking-wide text-primary" dir="rtl">ڕوونکردنەوەی کوردی</p>
+                                        <div>
                                             <p class="text-sm text-gray-800" :dir="languageDirection" x-text="translated(currentItem, 'explanation')"></p>
                                         </div>
                                     </template>
@@ -392,10 +393,10 @@
                                     <template x-if="cgiStage === 'explanation' && (currentItem.text_en || (showTranslation && translated(currentItem, 'text')))">
                                         <div class="mx-auto mt-5 max-w-3xl border-t border-gray-100 pt-5">
                                             <div class="mb-2 flex items-center justify-between gap-3">
-                                                <h3 class="font-heading font-bold text-purple-900">Explanation</h3>
-                                                <h3 x-show="showKurdish" class="font-heading font-bold text-purple-900" dir="rtl">ڕوونکردنەوە</h3>
+                                                <!-- Kurdish UI label retained for translation reference: ڕوونکردنەوە -->
+                                                <h3 class="font-heading font-bold text-purple-900" x-text="showTranslation ? languageName : 'Explanation'"></h3>
                                             </div>
-                                            <p x-show="currentItem.text_en" class="leading-relaxed text-gray-800" x-text="currentItem.text_en"></p>
+                                            <p x-show="!showTranslation && currentItem.text_en" class="leading-relaxed text-gray-800" x-text="currentItem.text_en"></p>
                                             <template x-if="showTranslation && translated(currentItem, 'text')">
                                                 <p class="mt-3 leading-relaxed text-gray-700" :dir="languageDirection" x-text="translated(currentItem, 'text')"></p>
                                             </template>
@@ -421,31 +422,26 @@
 
                                     <section class="mt-6 border-l-4 border-primary pl-4">
                                         <h3 class="font-heading text-lg font-bold text-gray-950">About this sign</h3>
-                                        <p class="mt-2 whitespace-pre-line leading-7 text-gray-700" x-text="currentItem.explanation_en"></p>
+                                        <p x-show="!showTranslation" class="mt-2 whitespace-pre-line leading-7 text-gray-700" x-text="currentItem.explanation_en"></p>
                                         <template x-if="showTranslation && translated(currentItem, 'explanation')">
-                                            <p class="mt-3 leading-relaxed text-gray-700" :dir="languageDirection" x-text="translated(currentItem, 'explanation')"></p>
+                                            <p class="mt-2 whitespace-pre-line leading-7 text-gray-700" :dir="languageDirection" x-text="translated(currentItem, 'explanation')"></p>
                                         </template>
                                     </section>
 
                                     <section class="mt-6 rounded-xl bg-primary/5 p-4">
                                         <h3 class="font-heading text-lg font-bold text-primary-dark">What to do</h3>
-                                        <p class="mt-2 whitespace-pre-line leading-7 text-gray-700" x-text="currentItem.what_to_do_en"></p>
+                                        <p x-show="!showTranslation" class="mt-2 whitespace-pre-line leading-7 text-gray-700" x-text="currentItem.what_to_do_en"></p>
                                         <template x-if="showTranslation && translated(currentItem, 'what_to_do')">
-                                            <p class="mt-3 border-t border-blue-100 pt-3 leading-relaxed text-gray-700" :dir="languageDirection" x-text="translated(currentItem, 'what_to_do')"></p>
+                                            <p class="mt-2 whitespace-pre-line leading-7 text-gray-700" :dir="languageDirection" x-text="translated(currentItem, 'what_to_do')"></p>
                                         </template>
                                     </section>
 
                                     <template x-if="Array.isArray(currentItem.additional_sign_images) && currentItem.additional_sign_images.length">
                                         <section class="mt-7 border-t border-gray-100 pt-6">
-                                            <div class="flex items-start justify-between gap-4">
-                                                <div>
-                                                    <h3 class="font-heading text-lg font-bold leading-snug text-gray-950">Additional signs you can expect</h3>
-                                                    <p class="mt-1 text-sm text-secondary">These signs may accompany the main road sign.</p>
-                                                </div>
-                                                <div x-show="showKurdish" x-cloak class="text-right" dir="rtl">
-                                                    <h3 class="font-heading text-lg font-bold leading-snug text-gray-950">نیشانە زیادەکان کە لەوانەیە ببینیت</h3>
-                                                    <p class="mt-1 text-sm text-secondary">لەوانەیە ئەم نیشانانە لەگەڵ نیشانە سەرەکییەکەی ڕێگا بن.</p>
-                                                </div>
+                                            <div :dir="languageDirection">
+                                                <!-- Kurdish default retained for existing content: نیشانە زیادەکان کە لەوانەیە ببینیت -->
+                                                <h3 class="font-heading text-lg font-bold leading-snug text-gray-950" x-text="showTranslation ? translated(currentItem, 'additional_signs_title') : (translated(currentItem, 'additional_signs_title') || 'Additional signs you can expect')"></h3>
+                                                <p class="mt-1 text-sm text-secondary" x-text="showTranslation ? translated(currentItem, 'additional_signs_description') : (translated(currentItem, 'additional_signs_description') || 'These signs may accompany the main road sign.')"></p>
                                             </div>
                                             <div class="mt-4 grid grid-cols-3 gap-3">
                                                 <template x-for="(image, index) in currentItem.additional_sign_images" :key="image">
