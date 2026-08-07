@@ -115,3 +115,13 @@ test('motorway additional signs copy is editable per language and explanations r
         ->assertSee('x-show="!showTranslation"', false)
         ->assertSee("translated(currentItem, 'additional_signs_description')", false);
 });
+
+test('video advertisements request autoplay with sound', function () {
+    $topic = enhancementTopic();
+
+    $this->get(route('theory.practice', $topic))
+        ->assertOk()
+        ->assertSee('youtubeEmbedUrl(adData.media_source, true, false)', false)
+        ->assertSee('<video x-ref="adVideo" :src="adData.media_source" autoplay controls playsinline preload="auto"', false)
+        ->assertSee('video.muted = false', false);
+});

@@ -67,11 +67,11 @@
                                 <div class="mb-4 w-full">
                                     <template x-if="getYoutubeId(adData.media_source)">
                                         <div class="aspect-video">
-                                            <iframe class="h-full w-full rounded-lg" :src="youtubeEmbedUrl(adData.media_source, false)" title="Advertisement video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                            <iframe class="h-full w-full rounded-lg" :src="youtubeEmbedUrl(adData.media_source, true, false)" title="Advertisement video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                                         </div>
                                     </template>
                                     <template x-if="!getYoutubeId(adData.media_source)">
-                                        <video :src="adData.media_source" controls playsinline preload="metadata" class="max-h-64 w-full rounded-lg bg-gray-100 object-contain"></video>
+                                        <video x-ref="adVideo" :src="adData.media_source" autoplay controls playsinline preload="auto" class="max-h-64 w-full rounded-lg bg-gray-100 object-contain"></video>
                                     </template>
                                 </div>
                             </template>
@@ -1143,6 +1143,14 @@
                     this.showingAd = true;
                     this.adCountdown = 5;
                     this.adShown = true;
+                    this.$nextTick(() => {
+                        const video = this.$refs.adVideo;
+                        if (video) {
+                            video.muted = false;
+                            video.volume = 1;
+                            video.play().catch(() => {});
+                        }
+                    });
                     this.adTimer = setInterval(() => {
                         this.adCountdown--;
                         if (this.adCountdown <= 0) {
@@ -1193,9 +1201,9 @@
                     return match && match[2].length === 11 ? match[2] : null;
                 },
 
-                youtubeEmbedUrl(url, autoplay) {
+                youtubeEmbedUrl(url, autoplay, muted = true) {
                     const id = this.getYoutubeId(url);
-                    return id ? `https://www.youtube.com/embed/${id}?autoplay=${autoplay ? 1 : 0}&mute=1&playsinline=1` : '';
+                    return id ? `https://www.youtube.com/embed/${id}?autoplay=${autoplay ? 1 : 0}&mute=${muted ? 1 : 0}&playsinline=1` : '';
                 },
 
                 isGif(url) {
