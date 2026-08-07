@@ -20,6 +20,22 @@ function registrationContactFields(): array
     ];
 }
 
+test('the registration form uses linked country and city dropdowns', function () {
+    $this->get(route('register'))
+        ->assertOk()
+        ->assertSee('name="country"', false)
+        ->assertSee('name="city"', false)
+        ->assertSee('countryChanged()', false)
+        ->assertSee('Loading countries...');
+});
+
+test('the registration phone field supports country flags and dial codes', function () {
+    $this->get(route('register'))
+        ->assertOk()
+        ->assertSee('x-ref="phoneNumber"', false)
+        ->assertSee('initPhoneInput()', false);
+});
+
 test('a new account requires email verification', function () {
     Notification::fake();
 

@@ -15,7 +15,9 @@
                 </div>
             @endif
 
-            <form action="{{ route('register') }}" method="POST" x-data="{ loading: false, showPassword: false, showConfirmation: false }" @submit="loading = true">
+            <form action="{{ route('register') }}" method="POST"
+                  x-data="registrationForm({{ Js::from(old('country', '')) }}, {{ Js::from(old('city', '')) }})"
+                  x-init="initPhoneInput(); initLocations()" @submit="loading = true">
                 @csrf
                 <div class="mb-4">
                     <label for="name" class="block text-sm font-semibold text-gray-700 mb-1.5">Full name</label>
@@ -36,22 +38,45 @@
 
                 <div class="mb-4">
                     <label for="phone_number" class="block text-sm font-semibold text-gray-700 mb-1.5">Phone number</label>
-                    <input id="phone_number" type="tel" name="phone_number" value="{{ old('phone_number') }}" required autocomplete="tel" inputmode="tel" class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none text-gray-800 @error('phone_number') border-red-500 @enderror" placeholder="+44 7700 900000">
+                    <input id="phone_number" x-ref="phoneNumber" type="tel" name="phone_number" value="{{ old('phone_number') }}" required autocomplete="tel" inputmode="tel"
+                           class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none text-gray-800 @error('phone_number') border-red-500 @enderror">
                     @error('phone_number') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <label for="country" class="block text-sm font-semibold text-gray-700 mb-1.5">Country</label>
-                        <input id="country" type="text" name="country" value="{{ old('country') }}" required autocomplete="country-name" class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('country') border-red-500 @enderror" placeholder="United Kingdom">
+                        <select id="country" name="country" x-model="countryName" @change="countryChanged()" required autocomplete="country-name"
+                                :disabled="locationsLoading || !!locationError"
+                                class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('country') border-red-500 @enderror">
+                            <option value="" x-text="locationsLoading ? 'Loading countries...' : 'Select a country'"></option>
+                            <template x-for="country in countries" :key="country.iso2">
+                                <option :value="country.name" x-text="`${country.emoji || ''} ${country.name}`.trim()"></option>
+                            </template>
+                        </select>
+                        <input x-cloak x-show="locationError" :disabled="!locationError" type="text" name="country" x-model="countryName" required autocomplete="country-name"
+                               class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('country') border-red-500 @enderror" placeholder="Enter your country">
                         @error('country') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label for="city" class="block text-sm font-semibold text-gray-700 mb-1.5">City</label>
-                        <input id="city" type="text" name="city" value="{{ old('city') }}" required autocomplete="address-level2" class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('city') border-red-500 @enderror" placeholder="London">
+                        <select id="city" name="city" x-model="cityName" required autocomplete="address-level2"
+                                :disabled="!countryName || citiesLoading || !!locationError"
+                                class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('city') border-red-500 @enderror">
+                            <option value="" x-text="citiesLoading ? 'Loading cities...' : (countryName ? 'Select a city' : 'Select a country first')"></option>
+                            <template x-for="city in cities" :key="city">
+                                <option :value="city" x-text="city"></option>
+                            </template>
+                        </select>
+                        <input x-cloak x-show="locationError" :disabled="!locationError" type="text" name="city" x-model="cityName" required autocomplete="address-level2"
+                               class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('city') border-red-500 @enderror" placeholder="Enter your city">
                         @error('city') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                 </div>
+                <p x-cloak x-show="locationError" x-text="locationError" class="-mt-2 mb-4 text-xs text-amber-700"></p>
+                <p class="-mt-2 mb-4 text-[11px] text-gray-400">
+                    Location data by <a href="https://github.com/dr5hn/countries-states-cities-database" target="_blank" rel="noopener noreferrer" class="underline hover:text-primary">Countries States Cities Database</a>.
+                </p>
 
                 <div class="mb-5">
                     <label for="address" class="block text-sm font-semibold text-gray-700 mb-1.5">Address</label>
