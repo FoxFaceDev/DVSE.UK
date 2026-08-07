@@ -10,10 +10,21 @@ use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 
+function registrationContactFields(): array
+{
+    return [
+        'phone_number' => '+44 7700 900123',
+        'country' => 'United Kingdom',
+        'city' => 'London',
+        'address' => '10 Test Street',
+    ];
+}
+
 test('a new account requires email verification', function () {
     Notification::fake();
 
     $response = $this->post(route('register'), [
+        ...registrationContactFields(),
         'name' => 'Test Driver',
         'email' => 'driver@example.com',
         'is_instructor' => 'no',
@@ -27,13 +38,28 @@ test('a new account requires email verification', function () {
     $this->assertAuthenticatedAs($user, 'web');
     expect($user->email_verified_at)->toBeNull();
     expect($user->account_type)->toBe(User::ACCOUNT_TYPE_USER);
+    expect($user->phone_number)->toBe('+44 7700 900123')
+        ->and($user->country)->toBe('United Kingdom')
+        ->and($user->city)->toBe('London')
+        ->and($user->address)->toBe('10 Test Street');
     Notification::assertSentTo($user, VerifyEmail::class);
+});
+
+test('registration requires contact and address details', function () {
+    $this->post(route('register'), [
+        'name' => 'Incomplete Driver',
+        'email' => 'incomplete@example.com',
+        'is_instructor' => 'no',
+        'password' => 'safe-password1',
+        'password_confirmation' => 'safe-password1',
+    ])->assertSessionHasErrors(['phone_number', 'country', 'city', 'address']);
 });
 
 test('a new account can register as an instructor', function () {
     Notification::fake();
 
     $this->post(route('register'), [
+        ...registrationContactFields(),
         'name' => 'Driving Instructor',
         'email' => 'instructor@example.com',
         'is_instructor' => 'yes',
@@ -50,6 +76,7 @@ test('a user can explicitly consent to marketing during registration', function 
     Notification::fake();
 
     $this->post(route('register'), [
+        ...registrationContactFields(),
         'name' => 'Marketing Subscriber',
         'email' => 'subscriber@example.com',
         'is_instructor' => 'no',
@@ -66,6 +93,7 @@ test('a user can explicitly consent to marketing during registration', function 
 
 test('registration requires an instructor choice', function () {
     $this->post(route('register'), [
+        ...registrationContactFields(),
         'name' => 'Test Driver',
         'email' => 'missing-choice@example.com',
         'password' => 'safe-password1',

@@ -61,6 +61,10 @@ class AuthController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'phone_number' => ['required', 'string', 'max:30', 'regex:/^[0-9+()\-\s]+$/'],
+            'country' => ['required', 'string', 'max:100'],
+            'city' => ['required', 'string', 'max:100'],
+            'address' => ['required', 'string', 'max:500'],
             'is_instructor' => ['required', Rule::in(['yes', 'no'])],
             'marketing_email_opt_in' => ['nullable', 'boolean'],
             'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
@@ -71,6 +75,10 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'phone_number' => $request->phone_number,
+            'country' => $request->country,
+            'city' => $request->city,
+            'address' => $request->address,
             'account_type' => $request->input('is_instructor') === 'yes'
                 ? User::ACCOUNT_TYPE_INSTRUCTOR
                 : User::ACCOUNT_TYPE_USER,

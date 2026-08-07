@@ -34,6 +34,31 @@
                     <p class="mt-1.5 text-xs text-gray-500">We’ll send a verification link to this address.</p>
                 </div>
 
+                <div class="mb-4">
+                    <label for="phone_number" class="block text-sm font-semibold text-gray-700 mb-1.5">Phone number</label>
+                    <input id="phone_number" type="tel" name="phone_number" value="{{ old('phone_number') }}" required autocomplete="tel" inputmode="tel" class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none text-gray-800 @error('phone_number') border-red-500 @enderror" placeholder="+44 7700 900000">
+                    @error('phone_number') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="country" class="block text-sm font-semibold text-gray-700 mb-1.5">Country</label>
+                        <input id="country" type="text" name="country" value="{{ old('country') }}" required autocomplete="country-name" class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('country') border-red-500 @enderror" placeholder="United Kingdom">
+                        @error('country') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label for="city" class="block text-sm font-semibold text-gray-700 mb-1.5">City</label>
+                        <input id="city" type="text" name="city" value="{{ old('city') }}" required autocomplete="address-level2" class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('city') border-red-500 @enderror" placeholder="London">
+                        @error('city') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label for="address" class="block text-sm font-semibold text-gray-700 mb-1.5">Address</label>
+                    <textarea id="address" name="address" rows="3" maxlength="500" required autocomplete="street-address" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-y @error('address') border-red-500 @enderror" placeholder="House number and street address">{{ old('address') }}</textarea>
+                    @error('address') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
+
                 <fieldset class="mb-5">
                     <legend class="block text-sm font-semibold text-gray-700">Are you an instructor?</legend>
                     <p class="mb-2.5 mt-1 text-xs text-gray-500">Choose Yes if you teach or train other drivers.</p>

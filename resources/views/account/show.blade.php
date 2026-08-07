@@ -56,6 +56,16 @@
                     @error('email') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
                 <div>
+                    <label for="account-phone" class="block text-sm font-semibold text-gray-700 mb-1.5">Phone number</label>
+                    <input id="account-phone" type="tel" name="phone_number" value="{{ old('phone_number', $user->phone_number) }}" required autocomplete="tel" inputmode="tel" class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('phone_number') border-red-500 @enderror">
+                    @error('phone_number') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div><label for="account-country" class="block text-sm font-semibold text-gray-700 mb-1.5">Country</label><input id="account-country" type="text" name="country" value="{{ old('country', $user->country) }}" required autocomplete="country-name" class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('country') border-red-500 @enderror">@error('country') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror</div>
+                    <div><label for="account-city" class="block text-sm font-semibold text-gray-700 mb-1.5">City</label><input id="account-city" type="text" name="city" value="{{ old('city', $user->city) }}" required autocomplete="address-level2" class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('city') border-red-500 @enderror">@error('city') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror</div>
+                </div>
+                <div><label for="account-address" class="block text-sm font-semibold text-gray-700 mb-1.5">Address</label><textarea id="account-address" name="address" rows="3" maxlength="500" required autocomplete="street-address" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('address') border-red-500 @enderror">{{ old('address', $user->address) }}</textarea>@error('address') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror</div>
+                <div>
                     <label for="profile-current-password" class="block text-sm font-semibold text-gray-700 mb-1.5">Current password <span class="font-normal text-gray-500">(only needed when changing email)</span></label>
                     <input id="profile-current-password" type="password" name="current_password" autocomplete="current-password" class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('current_password') border-red-500 @enderror">
                     @error('current_password') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror

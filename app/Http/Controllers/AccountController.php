@@ -38,6 +38,10 @@ class AccountController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'phone_number' => ['nullable', 'string', 'max:30', 'regex:/^[0-9+()\-\s]+$/'],
+            'country' => ['nullable', 'string', 'max:100'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'address' => ['nullable', 'string', 'max:500'],
             'current_password' => [Rule::requiredIf(fn () => $request->input('email') !== $user->email), 'current_password:web'],
         ]);
 
