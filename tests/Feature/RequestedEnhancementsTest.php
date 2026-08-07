@@ -3,7 +3,9 @@
 use App\Models\Admin;
 use App\Models\Category;
 use App\Models\Choice;
+use App\Models\ContentPage;
 use App\Models\Language;
+use App\Models\MockTestHistory;
 use App\Models\Question;
 use App\Models\Section;
 use App\Models\SubSection;
@@ -22,6 +24,7 @@ function enhancementTopic(): Topic
     $section = Section::create(['name' => 'Theory']);
     $subSection = SubSection::create(['section_id' => $section->id, 'name' => 'Practice']);
     $category = Category::create(['sub_section_id' => $subSection->id, 'name_en' => 'Rules']);
+
     return Topic::create(['topicable_type' => Category::class, 'topicable_id' => $category->id, 'name_en' => 'Signs']);
 }
 
@@ -48,7 +51,9 @@ test('image answer questions store four shared answer images', function () {
     $admin = enhancementAdmin();
     $topic = enhancementTopic();
     $choices = [];
-    foreach (range(0, 3) as $index) $choices[$index] = ['image' => UploadedFile::fake()->image("$index.png")];
+    foreach (range(0, 3) as $index) {
+        $choices[$index] = ['image' => UploadedFile::fake()->image("$index.png")];
+    }
 
     $this->actingAs($admin, 'admin')->post(route('admin.questions.store'), [
         'topic_id' => $topic->id, 'question_type' => 'image_answers', 'correct_choice' => 1,
@@ -63,6 +68,35 @@ test('only superadmins can manage users and reset their passwords', function () 
     $this->actingAs(enhancementAdmin(), 'admin')->get(route('admin.users.index'))->assertForbidden();
     $this->actingAs(enhancementAdmin(true), 'admin')->put(route('admin.users.reset-password', $user), ['password' => 'new-password', 'password_confirmation' => 'new-password'])->assertRedirect();
     expect(password_verify('new-password', $user->fresh()->password))->toBeTrue();
+});
+
+test('the user accounts page shows contact location status and test activity details', function () {
+    $user = User::factory()->subscribedToMarketing()->create([
+        'name' => 'Detailed Driver',
+        'email' => 'detailed@example.com',
+        'phone_number' => '+9647700000000',
+        'country' => 'Iraq',
+        'city' => 'Erbil',
+        'address' => 'Test address',
+    ]);
+    MockTestHistory::create([
+        'user_id' => $user->id,
+        'score' => 45,
+        'total_questions' => 50,
+        'passed' => true,
+    ]);
+
+    $this->actingAs(enhancementAdmin(true), 'admin')
+        ->get(route('admin.users.index'))
+        ->assertOk()
+        ->assertSee('Detailed Driver')
+        ->assertSee('+9647700000000')
+        ->assertSee('Erbil, Iraq')
+        ->assertSee('Email verified')
+        ->assertSee('Marketing: Subscribed')
+        ->assertSee('1 mock tests')
+        ->assertSee('1 passed')
+        ->assertSee('border border-slate-300 bg-white', false);
 });
 
 test('mock test results retain incorrect answers for review', function () {
@@ -106,7 +140,7 @@ test('motorway additional signs copy is editable per language and explanations r
         ],
     ])->assertRedirect(route('admin.content-pages.index'));
 
-    $page = \App\Models\ContentPage::firstOrFail();
+    $page = ContentPage::firstOrFail();
     expect($page->translations['ku']['additional_signs_title'])->toBe('Kurdish signs title');
 
     $this->get(route('theory.practice', $topic))
