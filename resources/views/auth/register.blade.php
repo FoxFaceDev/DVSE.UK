@@ -44,30 +44,66 @@
                 </div>
 
                 <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                        <label for="country" class="block text-sm font-semibold text-gray-700 mb-1.5">Country</label>
-                        <select id="country" name="country" x-model="countryName" @change="countryChanged()" required autocomplete="country-name"
-                                :disabled="locationsLoading || !!locationError"
-                                class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('country') border-red-500 @enderror">
-                            <option value="" x-text="locationsLoading ? 'Loading countries...' : 'Select a country'"></option>
-                            <template x-for="country in countries" :key="country.iso2">
-                                <option :value="country.name" x-text="`${country.emoji || ''} ${country.name}`.trim()"></option>
-                            </template>
-                        </select>
+                    <div class="relative" @click.away="countryOpen = false">
+                        <label id="country-label" class="block text-sm font-semibold text-gray-700 mb-1.5">Country</label>
+                        <input type="hidden" name="country" :value="countryName" :disabled="!!locationError">
+                        <button type="button" @click="openCountryDropdown()" :disabled="locationsLoading || !!locationError"
+                                aria-labelledby="country-label" :aria-expanded="countryOpen.toString()"
+                                class="flex w-full min-h-12 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-left text-gray-800 outline-none transition-all hover:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60 @error('country') border-red-500 @enderror">
+                            <span class="text-xl leading-none" x-text="selectedCountry?.emoji || '🌍'"></span>
+                            <span class="min-w-0 flex-1 truncate" x-text="locationsLoading ? 'Loading countries...' : (countryName || 'Select a country')"></span>
+                            <svg class="h-4 w-4 shrink-0 text-gray-400 transition-transform" :class="countryOpen && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
+                        </button>
+                        <div x-cloak x-show="countryOpen" x-transition.origin.top class="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl shadow-gray-900/10">
+                            <div class="border-b border-gray-100 p-2">
+                                <div class="flex items-center gap-2 rounded-lg bg-gray-50 px-3 focus-within:ring-2 focus-within:ring-primary/20">
+                                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg>
+                                    <input x-ref="countrySearch" x-model="countrySearch" type="search" placeholder="Search countries..." class="min-w-0 flex-1 border-0 bg-transparent px-0 py-2.5 text-sm outline-none focus:ring-0">
+                                </div>
+                            </div>
+                            <div class="max-h-60 overflow-y-auto p-1.5">
+                                <template x-for="country in filteredCountries" :key="country.iso2">
+                                    <button type="button" @click="selectCountry(country)" class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-primary/10 focus:bg-primary/10 focus:outline-none">
+                                        <span class="text-xl leading-none" x-text="country.emoji || '🌍'"></span>
+                                        <span class="flex-1" x-text="country.name"></span>
+                                        <svg x-show="country.name === countryName" class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m5 13 4 4L19 7"/></svg>
+                                    </button>
+                                </template>
+                                <p x-show="filteredCountries.length === 0" class="px-3 py-6 text-center text-sm text-gray-500">No countries found</p>
+                            </div>
+                        </div>
                         <input x-cloak x-show="locationError" :disabled="!locationError" type="text" name="country" x-model="countryName" required autocomplete="country-name"
                                class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('country') border-red-500 @enderror" placeholder="Enter your country">
                         @error('country') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
-                    <div>
-                        <label for="city" class="block text-sm font-semibold text-gray-700 mb-1.5">City</label>
-                        <select id="city" name="city" x-model="cityName" required autocomplete="address-level2"
-                                :disabled="!countryName || citiesLoading || !!locationError"
-                                class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('city') border-red-500 @enderror">
-                            <option value="" x-text="citiesLoading ? 'Loading cities...' : (countryName ? 'Select a city' : 'Select a country first')"></option>
-                            <template x-for="city in cities" :key="city">
-                                <option :value="city" x-text="city"></option>
-                            </template>
-                        </select>
+                    <div class="relative" @click.away="cityOpen = false">
+                        <label id="city-label" class="block text-sm font-semibold text-gray-700 mb-1.5">City</label>
+                        <input type="hidden" name="city" :value="cityName" :disabled="!!locationError">
+                        <button type="button" @click="openCityDropdown()" :disabled="!countryName || citiesLoading || !!locationError"
+                                aria-labelledby="city-label" :aria-expanded="cityOpen.toString()"
+                                class="flex w-full min-h-12 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-left text-gray-800 outline-none transition-all hover:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60 @error('city') border-red-500 @enderror">
+                            <svg class="h-5 w-5 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"/><circle cx="12" cy="10" r="2"/></svg>
+                            <span class="min-w-0 flex-1 truncate" x-text="citiesLoading ? 'Loading cities...' : (cityName || (countryName ? 'Select a city' : 'Select country first'))"></span>
+                            <svg class="h-4 w-4 shrink-0 text-gray-400 transition-transform" :class="cityOpen && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
+                        </button>
+                        <div x-cloak x-show="cityOpen" x-transition.origin.top class="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl shadow-gray-900/10">
+                            <div class="border-b border-gray-100 p-2">
+                                <div class="flex items-center gap-2 rounded-lg bg-gray-50 px-3 focus-within:ring-2 focus-within:ring-primary/20">
+                                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg>
+                                    <input x-ref="citySearch" x-model="citySearch" type="search" placeholder="Search cities..." class="min-w-0 flex-1 border-0 bg-transparent px-0 py-2.5 text-sm outline-none focus:ring-0">
+                                </div>
+                            </div>
+                            <div class="max-h-60 overflow-y-auto p-1.5">
+                                <template x-for="city in filteredCities" :key="city">
+                                    <button type="button" @click="selectCity(city)" class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-primary/10 focus:bg-primary/10 focus:outline-none">
+                                        <span class="flex-1" x-text="city"></span>
+                                        <svg x-show="city === cityName" class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m5 13 4 4L19 7"/></svg>
+                                    </button>
+                                </template>
+                                <p x-show="filteredCities.length === 0" class="px-3 py-6 text-center text-sm text-gray-500">No cities found</p>
+                                <p x-show="filteredCities.length === 100" class="px-3 py-2 text-center text-xs text-gray-400">Type to narrow the results</p>
+                            </div>
+                        </div>
                         <input x-cloak x-show="locationError" :disabled="!locationError" type="text" name="city" x-model="cityName" required autocomplete="address-level2"
                                class="w-full min-h-12 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none @error('city') border-red-500 @enderror" placeholder="Enter your city">
                         @error('city') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror

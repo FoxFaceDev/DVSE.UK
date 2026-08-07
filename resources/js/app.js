@@ -15,11 +15,67 @@ window.registrationForm = (savedCountry = '', savedCity = '') => ({
     cities: [],
     countryName: savedCountry,
     cityName: savedCity,
+    countryOpen: false,
+    cityOpen: false,
+    countrySearch: '',
+    citySearch: '',
     locationsLoading: true,
     citiesLoading: false,
     locationError: '',
     phoneInput: null,
     phoneDialCode: '',
+
+    get selectedCountry() {
+        return this.countries.find(country => country.name === this.countryName) || null;
+    },
+
+    get filteredCountries() {
+        const search = this.countrySearch.trim().toLocaleLowerCase();
+        if (!search) return this.countries;
+
+        return this.countries.filter(country =>
+            country.name.toLocaleLowerCase().includes(search)
+            || country.iso2.toLocaleLowerCase().includes(search)
+        );
+    },
+
+    get filteredCities() {
+        const search = this.citySearch.trim().toLocaleLowerCase();
+        const matches = search
+            ? this.cities.filter(city => city.toLocaleLowerCase().includes(search))
+            : this.cities;
+
+        return matches.slice(0, 100);
+    },
+
+    openCountryDropdown() {
+        if (this.locationsLoading || this.locationError) return;
+
+        this.cityOpen = false;
+        this.countryOpen = !this.countryOpen;
+        this.countrySearch = '';
+        if (this.countryOpen) this.$nextTick(() => this.$refs.countrySearch.focus());
+    },
+
+    openCityDropdown() {
+        if (!this.countryName || this.citiesLoading || this.locationError) return;
+
+        this.countryOpen = false;
+        this.cityOpen = !this.cityOpen;
+        this.citySearch = '';
+        if (this.cityOpen) this.$nextTick(() => this.$refs.citySearch.focus());
+    },
+
+    async selectCountry(country) {
+        this.countryName = country.name;
+        this.countryOpen = false;
+        await this.countryChanged(country.name);
+    },
+
+    selectCity(city) {
+        this.cityName = city;
+        this.cityOpen = false;
+    },
 
     initPhoneInput() {
         this.phoneInput = intlTelInput(this.$refs.phoneNumber, {
@@ -90,7 +146,8 @@ window.registrationForm = (savedCountry = '', savedCity = '') => ({
         }
     },
 
-    async countryChanged() {
+    async countryChanged(selectedCountryName = this.countryName) {
+        this.countryName = selectedCountryName;
         this.cityName = '';
         const selectedCountry = this.countries.find(country => country.name === this.countryName);
         this.cities = [];

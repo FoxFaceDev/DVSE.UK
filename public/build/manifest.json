@@ -8,7 +8,7 @@
     "src": "node_modules/intl-tel-input/dist/img/flags@2x.webp"
   },
   "resources/css/app.css": {
-    "file": "assets/app-C8dCJQJw.css",
+    "file": "assets/app-CYlvLBJK.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -17,7 +17,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-B4AApBYu.js",
+    "file": "assets/app-cZFDf1M0.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

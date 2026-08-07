@@ -25,7 +25,7 @@ test('the registration form uses linked country and city dropdowns', function ()
         ->assertOk()
         ->assertSee('name="country"', false)
         ->assertSee('name="city"', false)
-        ->assertSee('countryChanged()', false)
+        ->assertSee('selectCountry(country)', false)
         ->assertSee('Loading countries...');
 });
 
