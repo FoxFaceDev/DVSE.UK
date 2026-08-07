@@ -20,6 +20,7 @@
                     <th class="px-6 py-3">ID</th>
                     <th class="px-6 py-3">Title</th>
                     <th class="px-6 py-3">Media</th>
+                    <th class="px-6 py-3">Language</th>
                     <th class="px-6 py-3">Target Categories</th>
                     <th class="px-6 py-3">Status</th>
                     <th class="px-6 py-3 text-right">Actions</th>
@@ -42,6 +43,13 @@
                             @endif
                             {{ ucfirst($ad->media_type) }}
                         </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        @if($ad->language)
+                            <span class="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800">{{ $ad->language->name }}</span>
+                        @else
+                            <span class="text-xs font-medium text-red-600">Language removed</span>
+                        @endif
                     </td>
                     <td class="max-w-sm px-6 py-4">
                         @if($ad->targets_all_categories)
@@ -79,7 +87,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-8 text-center text-gray-500">No advertisements found. Create your first ad to monetize your platform.</td>
+                    <td colspan="7" class="px-6 py-8 text-center text-gray-500">No advertisements found. Create your first ad to monetize your platform.</td>
                 </tr>
                 @endforelse
             </tbody>

@@ -18,6 +18,19 @@
                     class="w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
             </div>
 
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Ad Language *</label>
+                <select name="language_id" required class="w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                    <option value="">Select the language this ad is made for</option>
+                    @foreach($languages as $language)
+                        <option value="{{ $language->id }}" @selected((string) old('language_id', $ad->language_id) === (string) $language->id)>
+                            {{ $language->name }}{{ $language->is_active ? '' : ' (Inactive)' }}
+                        </option>
+                    @endforeach
+                </select>
+                <p class="text-xs text-gray-500 mt-1">The ad is shown only when the learner selects this language.</p>
+            </div>
+
             @include('admin.ads._category_targets')
 
             <div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Ad;
 use App\Models\Category;
+use App\Models\Language;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -13,7 +14,7 @@ class AdController extends Controller
 {
     public function index()
     {
-        $ads = Ad::with('categories')->orderBy('id', 'desc')->get();
+        $ads = Ad::with(['categories', 'language'])->orderBy('id', 'desc')->get();
 
         return view('admin.ads.index', compact('ads'));
     }
@@ -21,14 +22,16 @@ class AdController extends Controller
     public function create()
     {
         $categories = Category::with('subSection')->orderBy('name_en')->get();
+        $languages = Language::orderBy('sort_order')->orderBy('name')->get();
 
-        return view('admin.ads.create', compact('categories'));
+        return view('admin.ads.create', compact('categories', 'languages'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'language_id' => 'required|integer|exists:languages,id',
             'media_type' => 'required|in:image,video',
             'media' => 'nullable|file|max:102400', // 100MB
             'media_url' => 'nullable|url',
@@ -41,7 +44,7 @@ class AdController extends Controller
 
         $this->ensureCategoriesSelected($request);
 
-        $data = $request->only('title', 'media_type', 'link_url');
+        $data = $request->only('title', 'language_id', 'media_type', 'link_url');
         $data['targets_all_categories'] = $request->boolean('target_all_categories');
         $data['is_active'] = $request->boolean('is_active', true);
 
@@ -61,15 +64,17 @@ class AdController extends Controller
     public function edit(Ad $ad)
     {
         $categories = Category::with('subSection')->orderBy('name_en')->get();
-        $ad->load('categories');
+        $languages = Language::orderBy('sort_order')->orderBy('name')->get();
+        $ad->load(['categories', 'language']);
 
-        return view('admin.ads.edit', compact('ad', 'categories'));
+        return view('admin.ads.edit', compact('ad', 'categories', 'languages'));
     }
 
     public function update(Request $request, Ad $ad)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'language_id' => 'required|integer|exists:languages,id',
             'media_type' => 'required|in:image,video',
             'media' => 'nullable|file|max:102400',
             'media_url' => 'nullable|url',
@@ -82,7 +87,7 @@ class AdController extends Controller
 
         $this->ensureCategoriesSelected($request);
 
-        $data = $request->only('title', 'media_type', 'link_url');
+        $data = $request->only('title', 'language_id', 'media_type', 'link_url');
         $data['targets_all_categories'] = $request->boolean('target_all_categories');
         $data['is_active'] = $request->boolean('is_active', true);
 

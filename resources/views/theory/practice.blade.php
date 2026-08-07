@@ -11,7 +11,7 @@
 <x-layouts.app :showBack="false" title="Practice">
     <div
         x-data="practiceRunner()"
-        x-init="initData({{ Js::from($topic) }}, {{ Js::from($practiceItems) }}, {{ Js::from($ad) }}, {{ Js::from($languages) }})"
+        x-init="initData({{ Js::from($topic) }}, {{ Js::from($practiceItems) }}, {{ Js::from($ads) }}, {{ Js::from($languages) }})"
         @fullscreenchange.window="handleCgiFullscreenChange()"
         @webkitfullscreenchange.window="handleCgiFullscreenChange()"
         @keydown.escape.window="closeAdditionalSignModal()"
@@ -589,6 +589,7 @@
                 cgiFullscreenTarget: null,
                 languagePreference: 'en',
                 languages: [],
+                availableAds: [],
                 adData: null,
                 adPosition: -1,
                 showingAd: false,
@@ -596,10 +597,11 @@
                 adTimer: null,
                 adShown: false,
 
-                initData(topic, items, ad, languages) {
+                initData(topic, items, ads, languages) {
                     this.topic = topic;
                     this.items = items;
                     this.languages = languages;
+                    this.availableAds = Array.isArray(ads) ? ads : [];
                     this.languagePreference = localStorage.getItem('languagePreference') || 'en';
                     if (!languages.some(language => language.code === this.languagePreference)) this.languagePreference = 'en';
 
@@ -609,11 +611,7 @@
                         }
                     });
 
-                    if (ad && this.totalQuestions >= 10) {
-                        this.adData = ad;
-                        this.adData.media_source = ad.media_path || ad.media_url || null;
-                        this.adPosition = 10 + Math.floor(Math.random() * (Math.min(20, this.totalQuestions) - 9));
-                    }
+                    this.selectAdForLanguage();
 
                     this.initialized = true;
                     this.restoreItemState();
@@ -627,7 +625,23 @@
                 get showKurdish() { return this.languagePreference === 'ku'; },
                 get languageName() { return this.languages.find(language => language.code === this.languagePreference)?.name || 'Translation'; },
                 get languageDirection() { return this.languages.find(language => language.code === this.languagePreference)?.direction || 'ltr'; },
-                setLanguage() { localStorage.setItem('languagePreference', this.languagePreference); },
+                setLanguage() {
+                    localStorage.setItem('languagePreference', this.languagePreference);
+                    if (!this.adShown && !this.showingAd) this.selectAdForLanguage();
+                },
+                selectAdForLanguage() {
+                    this.adData = null;
+                    this.adPosition = -1;
+                    if (this.totalQuestions < 10) return;
+
+                    const languageId = this.languages.find(language => language.code === this.languagePreference)?.id;
+                    const matches = this.availableAds.filter(ad => String(ad.language_id) === String(languageId));
+                    if (!matches.length) return;
+
+                    const ad = matches[Math.floor(Math.random() * matches.length)];
+                    this.adData = { ...ad, media_source: ad.media_path || ad.media_url || null };
+                    this.adPosition = 10 + Math.floor(Math.random() * (Math.min(20, this.totalQuestions) - 9));
+                },
                 translated(item, field) {
                     return item?.translations?.[this.languagePreference]?.[field]
                         || (this.languagePreference === 'ku' ? item?.[`${field}_ku`] : null)

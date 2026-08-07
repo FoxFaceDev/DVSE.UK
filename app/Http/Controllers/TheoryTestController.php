@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Ad;
 use App\Models\Category;
-use App\Models\Topic;
+use App\Models\Language;
 use App\Models\MockTestHistory;
 use App\Models\Question;
 use App\Models\SubSection;
-use App\Models\Language;
+use App\Models\Topic;
 use Illuminate\Http\Request;
 
 class TheoryTestController extends Controller
@@ -28,9 +28,10 @@ class TheoryTestController extends Controller
             ->shuffle()
             ->values();
 
-        // If the topic belongs to a category, we might want to fetch an ad for it
-        // We can just fetch global ads or ads targeting this specific category (if applicable)
-        $ad = Ad::where('is_active', true)
+        // The browser selects one of these category-eligible ads after reading the
+        // learner's locally stored language preference.
+        $ads = Ad::where('is_active', true)
+            ->whereNotNull('language_id')
             ->where(function ($query) use ($topic) {
                 $query->where('targets_all_categories', true);
                 if ($topic->topicable_type === 'App\Models\Category') {
@@ -38,10 +39,11 @@ class TheoryTestController extends Controller
                 }
             })
             ->inRandomOrder()
-            ->first();
+            ->get();
 
         $languages = Language::active()->get();
-        return view('theory.practice', compact('topic', 'practiceItems', 'ad', 'languages'));
+
+        return view('theory.practice', compact('topic', 'practiceItems', 'ads', 'languages'));
     }
 
     public function result()
@@ -77,6 +79,7 @@ class TheoryTestController extends Controller
             ->values();
 
         $languages = Language::active()->get();
+
         return view('theory.mock_test', compact('subSection', 'questions', 'languages'));
     }
 

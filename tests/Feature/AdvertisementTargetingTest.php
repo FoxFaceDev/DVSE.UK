@@ -3,8 +3,10 @@
 use App\Models\Ad;
 use App\Models\Admin;
 use App\Models\Category;
+use App\Models\Language;
 use App\Models\Section;
 use App\Models\SubSection;
+use App\Models\Topic;
 
 function advertisementAdmin(): Admin
 {
@@ -30,11 +32,17 @@ function advertisementCategories(): array
     ];
 }
 
+function advertisementLanguage(string $code = 'en'): Language
+{
+    return Language::where('code', $code)->firstOrFail();
+}
+
 test('an advertisement can target multiple selected categories', function () {
     [$motorways, $roadSigns, $vehicleSafety] = advertisementCategories();
 
     $response = $this->actingAs(advertisementAdmin(), 'admin')->post(route('admin.ads.store'), [
         'title' => 'Selected categories ad',
+        'language_id' => advertisementLanguage()->id,
         'media_type' => 'image',
         'link_url' => 'https://example.com/offer',
         'target_all_categories' => '0',
@@ -58,6 +66,7 @@ test('select all stores an advertisement as a global category target', function 
 
     $this->actingAs(advertisementAdmin(), 'admin')->post(route('admin.ads.store'), [
         'title' => 'All categories ad',
+        'language_id' => advertisementLanguage()->id,
         'media_type' => 'image',
         'link_url' => 'https://example.com/global-offer',
         'target_all_categories' => '1',
@@ -73,6 +82,7 @@ test('select all stores an advertisement as a global category target', function 
 test('an advertisement can update its selected categories', function () {
     [$motorways, $roadSigns, $vehicleSafety] = advertisementCategories();
     $ad = Ad::create([
+        'language_id' => advertisementLanguage()->id,
         'title' => 'Editable targeting ad',
         'media_type' => 'image',
         'link_url' => 'https://example.com/editable-offer',
@@ -88,6 +98,7 @@ test('an advertisement can update its selected categories', function () {
 
     $this->put(route('admin.ads.update', $ad), [
         'title' => 'Editable targeting ad',
+        'language_id' => advertisementLanguage()->id,
         'media_type' => 'image',
         'link_url' => 'https://example.com/editable-offer',
         'target_all_categories' => '0',
@@ -104,6 +115,7 @@ test('at least one category is required when select all is off', function () {
 
     $this->actingAs(advertisementAdmin(), 'admin')->post(route('admin.ads.store'), [
         'title' => 'Invalid targeting ad',
+        'language_id' => advertisementLanguage()->id,
         'media_type' => 'image',
         'link_url' => 'https://example.com/invalid-offer',
         'target_all_categories' => '0',
@@ -116,6 +128,7 @@ test('at least one category is required when select all is off', function () {
 test('practice only receives ads that target its category or all categories', function () {
     [$motorways, $roadSigns] = advertisementCategories();
     $targetedAd = Ad::create([
+        'language_id' => advertisementLanguage()->id,
         'title' => 'Road signs only',
         'media_type' => 'image',
         'link_url' => 'https://example.com/road-signs',
@@ -124,18 +137,19 @@ test('practice only receives ads that target its category or all categories', fu
     ]);
     $targetedAd->categories()->attach($roadSigns);
 
-    $topicMotorways = \App\Models\Topic::create(['topicable_type' => 'App\Models\Category', 'topicable_id' => $motorways->id, 'name_en' => 'Motorways Topic']);
-    $topicRoadSigns = \App\Models\Topic::create(['topicable_type' => 'App\Models\Category', 'topicable_id' => $roadSigns->id, 'name_en' => 'Road Signs Topic']);
+    $topicMotorways = Topic::create(['topicable_type' => 'App\Models\Category', 'topicable_id' => $motorways->id, 'name_en' => 'Motorways Topic']);
+    $topicRoadSigns = Topic::create(['topicable_type' => 'App\Models\Category', 'topicable_id' => $roadSigns->id, 'name_en' => 'Road Signs Topic']);
 
     $this->get(route('theory.practice', $topicMotorways))
         ->assertOk()
-        ->assertViewHas('ad', fn ($ad) => $ad === null);
+        ->assertViewHas('ads', fn ($ads) => $ads->isEmpty());
 
     $this->get(route('theory.practice', $topicRoadSigns))
         ->assertOk()
-        ->assertViewHas('ad', fn ($ad) => $ad?->is($targetedAd));
+        ->assertViewHas('ads', fn ($ads) => $ads->contains(fn ($ad) => $ad->is($targetedAd)));
 
     $globalAd = Ad::create([
+        'language_id' => advertisementLanguage()->id,
         'title' => 'Every category',
         'media_type' => 'image',
         'link_url' => 'https://example.com/every-category',
@@ -145,5 +159,33 @@ test('practice only receives ads that target its category or all categories', fu
 
     $this->get(route('theory.practice', $topicMotorways))
         ->assertOk()
-        ->assertViewHas('ad', fn ($ad) => $ad?->is($globalAd));
+        ->assertViewHas('ads', fn ($ads) => $ads->contains(fn ($ad) => $ad->is($globalAd)));
+});
+
+test('practice selects ads that match the learners selected language', function () {
+    [$category] = advertisementCategories();
+    $english = advertisementLanguage('en');
+    $kurdish = advertisementLanguage('ku');
+
+    foreach ([$english, $kurdish] as $language) {
+        Ad::create([
+            'language_id' => $language->id,
+            'title' => $language->name.' advertisement',
+            'media_type' => 'image',
+            'link_url' => 'https://example.com/'.$language->code,
+            'targets_all_categories' => true,
+            'is_active' => true,
+        ]);
+    }
+
+    $topic = Topic::create([
+        'topicable_type' => 'App\\Models\\Category',
+        'topicable_id' => $category->id,
+        'name_en' => 'Language ad topic',
+    ]);
+
+    $this->get(route('theory.practice', $topic))
+        ->assertOk()
+        ->assertViewHas('ads', fn ($ads) => $ads->pluck('language_id')->sort()->values()->all() === [$english->id, $kurdish->id])
+        ->assertSee('const matches = this.availableAds.filter(ad => String(ad.language_id) === String(languageId))', false);
 });

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Ad extends Model
 {
     protected $fillable = [
-        'title', 'media_type', 'media_path', 'media_url',
+        'language_id', 'title', 'media_type', 'media_path', 'media_url',
         'link_url', 'targets_all_categories', 'is_active',
     ];
 
@@ -21,6 +21,11 @@ class Ad extends Model
     public function categories()
     {
         return $this->belongsToMany(Category::class)->withTimestamps();
+    }
+
+    public function language()
+    {
+        return $this->belongsTo(Language::class);
     }
 
     public function getMediaPathAttribute($value)
