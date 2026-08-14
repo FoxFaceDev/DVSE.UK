@@ -1,33 +1,15 @@
 <x-layouts.app :showBack="true" :backUrl="route('home')" title="{{ $section->name }}">
-    <div
-        class="space-y-6"
-        x-data="{ languagePreference: localStorage.getItem('languagePreference') || 'en' }"
-        x-init="localStorage.setItem('languagePreference', languagePreference)"
-    >
+    <div class="space-y-6">
         <div class="text-center">
             <h1 class="font-heading font-bold text-2xl mb-2" style="color: {{ $section->color ?? '#3b82f6' }}">{{ $section->name }}</h1>
             <p class="text-secondary text-sm">Select a sub-section below to continue.</p>
         </div>
-
-        @if($section->name === 'Theory Test Practice')
-            <div class="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Choose Language</label>
-                <select
-                    x-model="languagePreference"
-                    @change="localStorage.setItem('languagePreference', languagePreference)"
-                    class="w-full border-gray-200 rounded-md focus:ring-primary focus:border-primary p-2 bg-surface-dim appearance-none"
-                >
-                    @foreach($languages as $language)
-                        <option value="{{ $language->code }}">{{ $language->code === 'en' ? 'English' : 'English & '.$language->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-        @endif
+        @if($whatsappNumber)<a href="https://wa.me/{{ preg_replace('/\D+/', '', $whatsappNumber) }}" target="_blank" rel="noopener" aria-label="Chat with DVSE on WhatsApp" class="fixed bottom-5 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white shadow-xl hover:bg-green-700"><svg class="h-7 w-7" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L.2 24l6.5-1.7a11.8 11.8 0 0 0 5.4 1.4h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.2-1.2-6.1-3.5-8.4Zm-8.4 18.2c-1.7 0-3.4-.5-4.9-1.3l-.4-.2-3.9 1 1-3.8-.2-.4a9.8 9.8 0 1 1 8.4 4.7Zm5.4-7.3c-.3-.1-1.8-.9-2.1-1-.3-.1-.5-.1-.7.2l-.9 1.1c-.2.3-.5.3-.8.1-2-.9-3.3-1.7-4.6-4-.3-.6.3-.6.9-1.6.1-.2.1-.4 0-.6l-.9-2.2c-.2-.5-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.9s1.2 3.3 1.4 3.6c.2.2 2.5 3.8 6 5.3 2.2.9 3.1 1 4.2.8.7-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.3-.6-.4Z"/></svg></a>@endif
 
         <div class="space-y-4">
             @forelse($section->subSections as $subSection)
                 @if($subSection->name === 'Mock Test Theory')
-                    <a href="{{ route('theory.mock_test_info', $subSection->id) }}" class="relative block w-full bg-primary hover:bg-primary-dark text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 group overflow-hidden">
+                    <a href="{{ route('frontend.sub_section', $subSection) }}" class="relative block w-full bg-primary hover:bg-primary-dark text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 group overflow-hidden">
                         
                         <!-- Subtle Background Glow -->
                         <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-500"></div>
@@ -87,7 +69,7 @@
             <h3 class="font-heading font-bold text-lg mt-6 mb-3 text-gray-700">Topics</h3>
             <div class="grid grid-cols-1 gap-3">
                 @foreach($section->topics as $topic)
-                    <a href="{{ route('theory.practice', $topic->id) }}" class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-primary flex justify-between items-center transition-all group">
+                    <a href="{{ $topic->cgi_content_pages_count ? route('theory.hazard_library', $topic) : route('theory.practice', $topic) }}" class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-primary flex justify-between items-center transition-all group">
                         <div>
                             <div class="font-medium text-gray-800">{{ $topic->name_en }}</div>
                             @if($topic->name_ku)

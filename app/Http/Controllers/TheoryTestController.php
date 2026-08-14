@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Ad;
 use App\Models\Category;
 use App\Models\Language;
+use App\Models\MockTest;
 use App\Models\MockTestHistory;
 use App\Models\Question;
 use App\Models\SubSection;
@@ -16,6 +17,7 @@ class TheoryTestController extends Controller
     public function practice(Topic $topic)
     {
         $questions = $topic->questions()->with('choices')->get();
+        $questions->each(fn ($question) => $question->setRelation('choices', $question->choices->shuffle()->values()));
         $contentPages = $topic->contentPages()->with('clips')->get();
 
         $practiceItems = $questions
@@ -30,8 +32,10 @@ class TheoryTestController extends Controller
 
         // The browser selects one of these category-eligible ads after reading the
         // learner's locally stored language preference.
-        $ads = Ad::where('is_active', true)
-            ->whereNotNull('language_id')
+        $preferredLanguage = auth('web')->user()?->preferredLanguage ?: Language::query()->where('code', 'en')->first();
+        $ads = Ad::currentlyRunning()
+            ->where('display_type', 'question')
+            ->forLanguage($preferredLanguage?->id)
             ->where(function ($query) use ($topic) {
                 $query->where('targets_all_categories', true);
                 if ($topic->topicable_type === 'App\Models\Category') {
@@ -43,12 +47,19 @@ class TheoryTestController extends Controller
 
         $languages = Language::active()->get();
 
-        return view('theory.practice', compact('topic', 'practiceItems', 'ads', 'languages'));
+        return view('theory.practice', compact('topic', 'practiceItems', 'ads', 'languages', 'preferredLanguage'));
     }
 
     public function result()
     {
         return view('theory.result');
+    }
+
+    public function hazardLibrary(Topic $topic)
+    {
+        $pages = $topic->contentPages()->where('type', 'cgi_clips')->with('clips')->latest()->get();
+
+        return view('theory.hazard_library', compact('topic', 'pages'));
     }
 
     public function mockTestInfo(SubSection $subSection)
@@ -78,9 +89,34 @@ class TheoryTestController extends Controller
             ->concat($videoQuestions)
             ->values();
 
-        $languages = Language::active()->get();
+        $questions->each(fn ($question) => $question->setRelation('choices', $question->choices->shuffle()->values()));
+        session(['mock_test_pass_mark' => 43, 'mock_test_duration' => 57]);
 
-        return view('theory.mock_test', compact('subSection', 'questions', 'languages'));
+        return view('theory.mock_test', compact('subSection', 'questions') + ['mockTest' => null, 'durationMinutes' => 57]);
+    }
+
+    public function dynamicMockInfo(MockTest $mockTest)
+    {
+        abort_unless($mockTest->is_active, 404);
+        if ($mockTest->type === 'hazard') {
+            return redirect()->route('theory.hazard_mock_info');
+        }
+
+        return view('theory.mock_info', ['subSection' => $mockTest->subSection, 'mockTest' => $mockTest]);
+    }
+
+    public function dynamicMockStart(MockTest $mockTest)
+    {
+        abort_unless($mockTest->is_active && $mockTest->type === 'theory', 404);
+        $topicIds = $mockTest->topics()->pluck('topics.id');
+        $base = Question::with('choices')->when($topicIds->isNotEmpty(), fn ($q) => $q->whereIn('topic_id', $topicIds));
+        $videoQuestions = (clone $base)->where('media_type', 'video')->inRandomOrder()->limit($mockTest->video_question_count)->get();
+        $nonVideoQuestions = (clone $base)->where(fn ($q) => $q->whereNull('media_type')->orWhere('media_type', '!=', 'video'))->inRandomOrder()->limit(max(0, $mockTest->question_count - $videoQuestions->count()))->get();
+        $questions = $nonVideoQuestions->concat($videoQuestions)->values();
+        $questions->each(fn ($question) => $question->setRelation('choices', $question->choices->shuffle()->values()));
+        session(['mock_test_pass_mark' => $mockTest->pass_mark, 'mock_test_duration' => $mockTest->duration_minutes]);
+
+        return view('theory.mock_test', ['subSection' => $mockTest->subSection, 'questions' => $questions, 'mockTest' => $mockTest, 'durationMinutes' => $mockTest->duration_minutes]);
     }
 
     public function mockTestResult(Request $request)
@@ -91,9 +127,10 @@ class TheoryTestController extends Controller
         $reviews = $result['reviews'] ?? [];
 
         // Pass threshold is exactly 43 out of 50.
-        $passed = $correct >= 43;
+        $passMark = (int) ($result['pass_mark'] ?? $request->session()->get('mock_test_pass_mark', 43));
+        $passed = $correct >= $passMark;
 
-        return view('theory.mock_result', compact('correct', 'total', 'passed', 'reviews'));
+        return view('theory.mock_result', compact('correct', 'total', 'passed', 'reviews', 'passMark'));
     }
 
     public function submitMockTest(Request $request)
@@ -128,13 +165,20 @@ class TheoryTestController extends Controller
                     'correct' => $right?->text_en,
                     'correct_image' => $right?->image_path,
                     'explanation' => $question->explanation_en,
+                    'choices' => $question->choices->map(fn ($choice) => [
+                        'text' => $choice->text_en,
+                        'image' => $choice->image_path,
+                        'is_correct' => (bool) $choice->is_correct,
+                        'is_selected' => $choice->id === $choiceId,
+                    ])->values()->all(),
                 ];
             }
         }
 
         $total = $questionIds->count();
-        $passed = $correct >= 43;
-        $request->session()->put('mock_test_result', compact('correct', 'total', 'reviews'));
+        $passMark = (int) $request->session()->get('mock_test_pass_mark', 43);
+        $passed = $correct >= $passMark;
+        $request->session()->put('mock_test_result', ['correct' => $correct, 'total' => $total, 'reviews' => $reviews, 'pass_mark' => $passMark]);
 
         if (auth('web')->check() && auth('web')->user()->hasVerifiedEmail()) {
             MockTestHistory::create([

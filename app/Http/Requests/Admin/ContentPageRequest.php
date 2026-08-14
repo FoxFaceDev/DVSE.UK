@@ -44,6 +44,7 @@ class ContentPageRequest extends FormRequest
         return [
             'topic_id' => ['required', 'integer', 'exists:topics,id'],
             'admin_title' => ['required', 'string', 'max:150'],
+            'library_category' => ['nullable', 'string', 'max:100'],
             'type' => ['required', Rule::in([
                 ContentPage::TYPE_CGI_CLIPS,
                 ContentPage::TYPE_MOTORWAY_SIGN,
@@ -78,6 +79,7 @@ class ContentPageRequest extends FormRequest
             ],
             'clips.*.media_url' => ['prohibited'],
             'clips.*.remove' => ['nullable', 'boolean'],
+            'clips.*.thumbnail' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
             'sign_image' => [
                 $isMotorwaySign && $this->signImageIsRequired() ? 'required' : 'nullable',
                 'image',

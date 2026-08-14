@@ -64,7 +64,7 @@
                         @if($ad->language)
                             <span class="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800">{{ $ad->language->name }}</span>
                         @else
-                            <span class="text-xs font-medium text-red-600">Language removed</span>
+                            <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">All languages</span>
                         @endif
                     </td>
                     <td class="max-w-sm px-6 py-4">
@@ -87,7 +87,7 @@
                             <button type="submit" class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full transition-colors
                                 {{ $ad->is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200' }}">
                                 <span class="w-2 h-2 rounded-full {{ $ad->is_active ? 'bg-green-500' : 'bg-gray-400' }}"></span>
-                                {{ $ad->is_active ? 'Active' : 'Inactive' }}
+                                {{ ! $ad->is_active ? 'Inactive' : ($ad->starts_at?->isFuture() ? 'Scheduled' : ($ad->expires_at?->isPast() ? 'Expired' : 'Active')) }}
                             </button>
                         </form>
                     </td>

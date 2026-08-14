@@ -82,7 +82,8 @@
             @endguest
             
             <hr class="my-2 border-gray-100">
-            <a href="mailto:support@dvse.uk" class="px-6 py-3 min-h-12 flex items-center hover:bg-surface-dim hover:text-primary transition-colors">Contact support</a>
+            <a href="{{ route('about') }}" class="px-6 py-3 min-h-12 flex items-center hover:bg-surface-dim hover:text-primary transition-colors">About us</a>
+            <a href="{{ route('contact') }}" class="px-6 py-3 min-h-12 flex items-center hover:bg-surface-dim hover:text-primary transition-colors">Contact us</a>
 
             @auth('web')
             <div class="mt-auto px-6 py-4">
@@ -114,6 +115,21 @@
                 @endswitch
             </div>
         @endif
+        @if($siteAd ?? null)
+            <aside class="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg" aria-label="Sponsored advertisement">
+                <a href="{{ $siteAd->link_url }}" target="_blank" rel="noopener sponsored" class="block">
+                    <div class="relative bg-slate-950">
+                        @if($siteAd->media_type === 'video')
+                            <video src="{{ $siteAd->media_source }}" autoplay muted loop playsinline class="max-h-64 w-full object-cover"></video>
+                        @elseif($siteAd->media_source)
+                            <img src="{{ $siteAd->media_source }}" alt="{{ $siteAd->title }}" class="max-h-64 w-full object-cover">
+                        @endif
+                        <span class="absolute right-2 top-2 rounded-full bg-black/65 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-white">Sponsored</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-3 p-4"><div><p class="font-bold text-slate-900">{{ $siteAd->title }}</p><p class="mt-1 text-xs text-slate-500">Visit advertiser website</p></div><span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-xl text-white">&rarr;</span></div>
+                </a>
+            </aside>
+        @endif
         {{ $slot }}
     </main>
 
@@ -125,7 +141,8 @@
             </div>
             <h3 class="font-heading font-bold text-lg text-primary-dark mb-4">DVSE.UK</h3>
             <div class="flex justify-center gap-6 text-sm text-secondary mb-4">
-                <a href="mailto:support@dvse.uk" class="hover:text-primary transition-colors">Contact support</a>
+                <a href="{{ route('about') }}" class="hover:text-primary transition-colors">About us</a>
+                <a href="{{ route('contact') }}" class="hover:text-primary transition-colors">Contact us</a>
                 <a href="{{ route('home') }}" class="hover:text-primary transition-colors">Back to home</a>
             </div>
             <p class="text-xs text-gray-400 flex items-center justify-center gap-1">

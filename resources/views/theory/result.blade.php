@@ -63,11 +63,8 @@
                     <article class="rounded-xl border border-red-100 bg-white p-5 shadow-sm">
                         <template x-if="review.media"><img :src="review.media" alt="Question" class="mb-3 max-h-48 w-full rounded bg-gray-50 object-contain"></template>
                         <h3 class="font-bold" x-text="review.question"></h3>
-                        <div class="mt-3 grid grid-cols-2 gap-3 text-sm">
-                            <div class="rounded bg-red-50 p-3 text-red-700"><strong>Your answer</strong><template x-if="review.selected?.image_path"><img :src="review.selected.image_path" class="my-2 h-24 w-full object-contain"></template><p x-text="review.selected?.text_en || 'Not answered'"></p></div>
-                            <div class="rounded bg-green-50 p-3 text-green-700"><strong>Correct answer</strong><template x-if="review.correct?.image_path"><img :src="review.correct.image_path" class="my-2 h-24 w-full object-contain"></template><p x-text="review.correct?.text_en || ''"></p></div>
-                        </div>
-                        <p x-show="review.explanation" class="mt-3 text-sm text-gray-600" x-text="review.explanation"></p>
+                        <div class="mt-3 space-y-2 text-sm"><template x-for="(choice,index) in review.choices || []" :key="choice.id"><div class="rounded-lg border p-3" :class="choice.is_correct ? 'border-green-300 bg-green-50 text-green-800' : (choice.is_selected ? 'border-red-300 bg-red-50 text-red-800' : 'border-gray-200 bg-white')"><div class="flex justify-between gap-2"><span x-text="String.fromCharCode(65+index)+'. '+choice.text_en"></span><strong class="text-xs uppercase" x-text="choice.is_correct ? 'Correct answer' : (choice.is_selected ? 'Your wrong answer' : '')"></strong></div><template x-if="choice.image_path"><img :src="choice.image_path" class="my-2 h-24 w-full object-contain"></template></div></template></div>
+                        <div x-show="review.explanation" class="mt-3 rounded-lg border border-blue-100 bg-blue-50 p-3"><strong class="text-xs uppercase text-primary">Explanation</strong><p class="mt-1 text-sm text-gray-600" x-text="review.explanation"></p></div>
                     </article>
                 </template>
             </div>

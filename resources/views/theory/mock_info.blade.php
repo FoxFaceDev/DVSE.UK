@@ -19,8 +19,8 @@
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </div>
                         <div>
-                            <strong class="block text-gray-900 text-base mb-0.5">50 Questions</strong>
-                            You must answer all 50 multiple-choice questions.
+                            <strong class="block text-gray-900 text-base mb-0.5">{{ $mockTest->question_count ?? 50 }} Questions</strong>
+                            You must answer all {{ $mockTest->question_count ?? 50 }} multiple-choice questions in English.
                         </div>
                     </li>
                     <li class="flex items-start gap-3">
@@ -28,7 +28,7 @@
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
                         <div>
-                            <strong class="block text-gray-900 text-base mb-0.5">57 Minutes Time Limit</strong>
+                            <strong class="block text-gray-900 text-base mb-0.5">{{ $mockTest->duration_minutes ?? 57 }} Minutes Time Limit</strong>
                             A countdown timer will run during the test. When time expires, your test will submit automatically.
                         </div>
                     </li>
@@ -37,8 +37,8 @@
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
                         <div>
-                            <strong class="block text-gray-900 text-base mb-0.5">Pass Mark: 43 out of 50</strong>
-                            You must score at least 43 correct answers to pass the mock test.
+                            <strong class="block text-gray-900 text-base mb-0.5">Pass Mark: {{ $mockTest->pass_mark ?? 43 }} out of {{ $mockTest->question_count ?? 50 }}</strong>
+                            You must score at least {{ $mockTest->pass_mark ?? 43 }} correct answers to pass the mock test.
                         </div>
                     </li>
                     <li class="flex items-start gap-3">
@@ -54,7 +54,7 @@
             </div>
         </div>
 
-        <a href="{{ route('theory.mock_test_start', $subSection->id) }}" class="mt-8 w-full block text-center py-4 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold text-lg shadow-[0_4px_14px_0_rgba(0,118,255,0.39)] transform hover:-translate-y-0.5 transition-all duration-200">
+        <a href="{{ isset($mockTest) ? route('theory.dynamic_mock_start', $mockTest) : route('theory.mock_test_start', $subSection->id) }}" class="mt-8 w-full block text-center py-4 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold text-lg shadow-[0_4px_14px_0_rgba(0,118,255,0.39)] transform hover:-translate-y-0.5 transition-all duration-200">
             Start Mock Test Now
         </a>
     </div>

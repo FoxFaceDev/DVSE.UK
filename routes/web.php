@@ -1,30 +1,36 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\TheoryTestController;
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\AdController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\QuestionController;
-use App\Http\Controllers\Admin\AdController;
 use App\Http\Controllers\Admin\ContentPageController;
-use App\Http\Controllers\Admin\LanguageController;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\EmailAdvertisementController;
-use App\Http\Controllers\CgiClipMediaController;
-use App\Http\Controllers\HazardMockTestController;
-
+use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\LoginController as AdminLoginController;
-
-use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\Admin\MockTestController as AdminMockTestController;
+use App\Http\Controllers\Admin\QuestionController;
+use App\Http\Controllers\Admin\SectionController;
+use App\Http\Controllers\Admin\SiteSettingController;
+use App\Http\Controllers\Admin\SubSectionController;
+use App\Http\Controllers\Admin\TopicController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AccountController;
+use App\Http\Controllers\CgiClipMediaController;
 use App\Http\Controllers\EmailVerificationController;
-use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\HazardMockTestController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MarketingEmailPreferenceController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\TheoryTestController;
+use Illuminate\Support\Facades\Route;
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/about-us', [PageController::class, 'about'])->name('about');
+Route::get('/contact-us', [PageController::class, 'contact'])->name('contact');
 Route::get('/email/unsubscribe/{user}', [MarketingEmailPreferenceController::class, 'show'])
     ->middleware('signed')
     ->name('marketing.unsubscribe.show');
@@ -67,6 +73,7 @@ Route::get('/section/{section}', [FrontendController::class, 'showSection'])->na
 Route::get('/sub-section/{subSection}', [FrontendController::class, 'showSubSection'])->name('frontend.sub_section');
 Route::get('/category/{category}', [FrontendController::class, 'showCategory'])->name('frontend.category');
 Route::get('/media/cgi-clips/{cgiClip}', CgiClipMediaController::class)->name('media.cgi-clips.stream');
+Route::get('/hazard-learning/{topic}', [TheoryTestController::class, 'hazardLibrary'])->name('theory.hazard_library');
 
 Route::prefix('theory-test-practice')->name('theory.')->group(function () {
     Route::get('/topic/{topic}', [TheoryTestController::class, 'practice'])->name('practice');
@@ -83,6 +90,8 @@ Route::prefix('theory-test-practice')->name('theory.')->group(function () {
     Route::post('/mock-test/result', [TheoryTestController::class, 'submitMockTest'])->name('mock_test_submit');
     Route::get('/mock-test/{subSection}', [TheoryTestController::class, 'mockTestInfo'])->name('mock_test_info');
     Route::get('/mock-test/{subSection}/start', [TheoryTestController::class, 'mockTestStart'])->name('mock_test_start');
+    Route::get('/dynamic-mock-test/{mockTest}', [TheoryTestController::class, 'dynamicMockInfo'])->name('dynamic_mock_info');
+    Route::get('/dynamic-mock-test/{mockTest}/start', [TheoryTestController::class, 'dynamicMockStart'])->name('dynamic_mock_start');
 });
 
 Route::middleware(['auth:web', 'verified'])->group(function () {
@@ -101,21 +110,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('auth:admin')->group(function () {
         Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
         Route::get('/', [AdminController::class, 'index'])->name('home');
-        
+
         // Sections
-        Route::resource('sections', App\Http\Controllers\Admin\SectionController::class);
-        
+        Route::resource('sections', SectionController::class);
+
         // SubSections
-        Route::resource('sections.sub_sections', App\Http\Controllers\Admin\SubSectionController::class);
-        
+        Route::resource('sections.sub_sections', SubSectionController::class);
+
         // Categories (nested under sub_sections)
         Route::resource('sections.sub_sections.categories', CategoryController::class)->except(['index']);
-        
+
         // Topics (flat route to handle polymorphic creation/editing)
-        Route::resource('topics', App\Http\Controllers\Admin\TopicController::class)->except(['show']);
+        Route::resource('topics', TopicController::class)->except(['show']);
         Route::resource('questions', QuestionController::class);
         Route::resource('content-pages', ContentPageController::class)->except('show');
         Route::resource('languages', LanguageController::class)->except('show');
+        Route::resource('mock-tests', AdminMockTestController::class)->except('show');
+        Route::get('site-settings', [SiteSettingController::class, 'edit'])->name('site-settings.edit');
+        Route::put('site-settings', [SiteSettingController::class, 'update'])->name('site-settings.update');
         Route::resource('users', AdminUserController::class)->only(['index', 'edit', 'update', 'destroy']);
         Route::put('users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.reset-password');
         Route::get('csrf-token', fn () => response()->json(['token' => csrf_token()]))->name('csrf-token');

@@ -10,8 +10,13 @@ class SubSection extends Model
 
     public function getIconPathAttribute($value)
     {
-        if (!$value) return null;
-        if (str_starts_with($value, 'http')) return $value;
+        if (! $value) {
+            return null;
+        }
+        if (str_starts_with($value, 'http')) {
+            return $value;
+        }
+
         return asset($value);
     }
 
@@ -28,5 +33,10 @@ class SubSection extends Model
     public function topics()
     {
         return $this->morphMany(Topic::class, 'topicable');
+    }
+
+    public function mockTests()
+    {
+        return $this->hasMany(MockTest::class);
     }
 }

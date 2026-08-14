@@ -37,10 +37,21 @@ function advertisementLanguage(string $code = 'en'): Language
     return Language::where('code', $code)->firstOrFail();
 }
 
+function advertisementLifecycleFields(): array
+{
+    return [
+        'display_type' => 'question',
+        'advertiser_email' => 'owner@example.com',
+        'starts_at' => now()->subMinute()->format('Y-m-d H:i:s'),
+        'expires_at' => now()->addMonth()->format('Y-m-d H:i:s'),
+    ];
+}
+
 test('an advertisement can target multiple selected categories', function () {
     [$motorways, $roadSigns, $vehicleSafety] = advertisementCategories();
 
     $response = $this->actingAs(advertisementAdmin(), 'admin')->post(route('admin.ads.store'), [
+        ...advertisementLifecycleFields(),
         'title' => 'Selected categories ad',
         'language_id' => advertisementLanguage()->id,
         'media_type' => 'image',
@@ -65,6 +76,7 @@ test('select all stores an advertisement as a global category target', function 
     $categories = advertisementCategories();
 
     $this->actingAs(advertisementAdmin(), 'admin')->post(route('admin.ads.store'), [
+        ...advertisementLifecycleFields(),
         'title' => 'All categories ad',
         'language_id' => advertisementLanguage()->id,
         'media_type' => 'image',
@@ -97,6 +109,7 @@ test('an advertisement can update its selected categories', function () {
         ->assertSee('Select all categories');
 
     $this->put(route('admin.ads.update', $ad), [
+        ...advertisementLifecycleFields(),
         'title' => 'Editable targeting ad',
         'language_id' => advertisementLanguage()->id,
         'media_type' => 'image',
@@ -114,6 +127,7 @@ test('at least one category is required when select all is off', function () {
     advertisementCategories();
 
     $this->actingAs(advertisementAdmin(), 'admin')->post(route('admin.ads.store'), [
+        ...advertisementLifecycleFields(),
         'title' => 'Invalid targeting ad',
         'language_id' => advertisementLanguage()->id,
         'media_type' => 'image',
@@ -162,7 +176,7 @@ test('practice only receives ads that target its category or all categories', fu
         ->assertViewHas('ads', fn ($ads) => $ads->contains(fn ($ad) => $ad->is($globalAd)));
 });
 
-test('practice selects ads that match the learners selected language', function () {
+test('practice receives ads matching the learners account language', function () {
     [$category] = advertisementCategories();
     $english = advertisementLanguage('en');
     $kurdish = advertisementLanguage('ku');
@@ -186,8 +200,8 @@ test('practice selects ads that match the learners selected language', function 
 
     $this->get(route('theory.practice', $topic))
         ->assertOk()
-        ->assertViewHas('ads', fn ($ads) => $ads->pluck('language_id')->sort()->values()->all() === [$english->id, $kurdish->id])
-        ->assertSee('const matches = this.availableAds.filter(ad => String(ad.language_id) === String(languageId))', false);
+        ->assertViewHas('ads', fn ($ads) => $ads->pluck('language_id')->values()->all() === [$english->id])
+        ->assertSee('ad.language_id === null || String(ad.language_id) === String(languageId)', false);
 });
 
 test('admins can search advertisements by title link language or category', function () {

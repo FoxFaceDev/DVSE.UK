@@ -7,13 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 class Ad extends Model
 {
     protected $fillable = [
-        'language_id', 'title', 'media_type', 'media_path', 'media_url',
-        'link_url', 'targets_all_categories', 'is_active',
+        'language_id', 'title', 'display_type', 'placements', 'media_type', 'media_path', 'media_url',
+        'link_url', 'advertiser_email', 'starts_at', 'expires_at', 'activation_notified_at',
+        'expiry_warning_notified_at', 'targets_all_categories', 'is_active',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'targets_all_categories' => 'boolean',
+        'placements' => 'array',
+        'starts_at' => 'datetime',
+        'expires_at' => 'datetime',
+        'activation_notified_at' => 'datetime',
+        'expiry_warning_notified_at' => 'datetime',
     ];
 
     protected $appends = ['media_source'];
@@ -26,6 +32,18 @@ class Ad extends Model
     public function language()
     {
         return $this->belongsTo(Language::class);
+    }
+
+    public function scopeCurrentlyRunning($query)
+    {
+        return $query->where('is_active', true)
+            ->where(fn ($q) => $q->whereNull('starts_at')->orWhere('starts_at', '<=', now()))
+            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>=', now()));
+    }
+
+    public function scopeForLanguage($query, ?int $languageId)
+    {
+        return $query->where(fn ($q) => $q->whereNull('language_id')->when($languageId, fn ($language) => $language->orWhere('language_id', $languageId)));
     }
 
     public function getMediaPathAttribute($value)

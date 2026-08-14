@@ -11,6 +11,7 @@ class CgiClip extends Model
         'slot',
         'media_path',
         'media_url',
+        'thumbnail_path',
     ];
 
     protected $appends = ['source'];
@@ -40,5 +41,14 @@ class CgiClip extends Model
         }
 
         return $this->media_url;
+    }
+
+    public function getThumbnailPathAttribute($value)
+    {
+        if (! $value || str_starts_with($value, 'http')) {
+            return $value;
+        }
+
+        return '/storage/'.ltrim(str_replace('/storage/', '', $value), '/');
     }
 }

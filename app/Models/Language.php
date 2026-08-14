@@ -14,4 +14,9 @@ class Language extends Model
     {
         return $query->where('is_active', true)->orderBy('sort_order')->orderBy('name');
     }
+
+    public function users()
+    {
+        return $this->hasMany(User::class, 'preferred_language_id');
+    }
 }

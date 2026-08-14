@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Language;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -50,7 +52,10 @@ class AuthController extends Controller
      */
     public function showRegistrationForm()
     {
-        return view('auth.register');
+        return view('auth.register', [
+            'languages' => Language::active()->get(),
+            'privacyPolicy' => SiteSetting::valueFor('privacy_policy', 'Please review and accept our privacy policy.'),
+        ]);
     }
 
     /**
@@ -62,10 +67,9 @@ class AuthController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'phone_number' => ['required', 'string', 'max:30', 'regex:/^[0-9+()\-\s]+$/'],
-            'country' => ['required', 'string', 'max:100'],
-            'city' => ['required', 'string', 'max:100'],
-            'address' => ['required', 'string', 'max:500'],
             'is_instructor' => ['required', Rule::in(['yes', 'no'])],
+            'preferred_language_id' => [Rule::requiredIf(fn () => $request->input('is_instructor') === 'no'), 'nullable', 'integer', Rule::exists('languages', 'id')->where('is_active', true)],
+            'privacy_policy' => ['accepted'],
             'marketing_email_opt_in' => ['nullable', 'boolean'],
             'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
         ]);
@@ -76,9 +80,8 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'phone_number' => $request->phone_number,
-            'country' => $request->country,
-            'city' => $request->city,
-            'address' => $request->address,
+            'preferred_language_id' => $request->input('is_instructor') === 'no' ? $request->integer('preferred_language_id') : null,
+            'privacy_accepted_at' => now(),
             'account_type' => $request->input('is_instructor') === 'yes'
                 ? User::ACCOUNT_TYPE_INSTRUCTOR
                 : User::ACCOUNT_TYPE_USER,

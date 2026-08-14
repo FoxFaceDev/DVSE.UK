@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Language;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,7 @@ class AccountController extends Controller
             'user' => $user,
             'stats' => $stats,
             'recentHistories' => $histories->take(3),
+            'languages' => Language::active()->get(),
         ]);
     }
 
@@ -39,9 +41,7 @@ class AccountController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'phone_number' => ['nullable', 'string', 'max:30', 'regex:/^[0-9+()\-\s]+$/'],
-            'country' => ['nullable', 'string', 'max:100'],
-            'city' => ['nullable', 'string', 'max:100'],
-            'address' => ['nullable', 'string', 'max:500'],
+            'preferred_language_id' => ['nullable', 'integer', Rule::exists('languages', 'id')->where('is_active', true)],
             'current_password' => [Rule::requiredIf(fn () => $request->input('email') !== $user->email), 'current_password:web'],
         ]);
 

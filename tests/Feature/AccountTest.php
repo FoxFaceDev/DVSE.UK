@@ -3,8 +3,10 @@
 use App\Models\Admin;
 use App\Models\Category;
 use App\Models\Choice;
+use App\Models\Language;
 use App\Models\MockTestHistory;
 use App\Models\Question;
+use App\Models\Topic;
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Notification;
@@ -14,19 +16,19 @@ function registrationContactFields(): array
 {
     return [
         'phone_number' => '+44 7700 900123',
-        'country' => 'United Kingdom',
-        'city' => 'London',
-        'address' => '10 Test Street',
+        'preferred_language_id' => Language::where('code', 'ku')->value('id'),
+        'privacy_policy' => '1',
     ];
 }
 
-test('the registration form uses linked country and city dropdowns', function () {
+test('the registration form replaces address fields with a study language', function () {
     $this->get(route('register'))
         ->assertOk()
-        ->assertSee('name="country"', false)
-        ->assertSee('name="city"', false)
-        ->assertSee('selectCountry(country)', false)
-        ->assertSee('Loading countries...');
+        ->assertDontSee('name="country"', false)
+        ->assertDontSee('name="city"', false)
+        ->assertDontSee('name="address"', false)
+        ->assertSee('name="preferred_language_id"', false)
+        ->assertSee('name="privacy_policy"', false);
 });
 
 test('application layouts use the bundled Alpine runtime', function () {
@@ -74,20 +76,19 @@ test('a new account requires email verification', function () {
     expect($user->email_verified_at)->toBeNull();
     expect($user->account_type)->toBe(User::ACCOUNT_TYPE_USER);
     expect($user->phone_number)->toBe('+44 7700 900123')
-        ->and($user->country)->toBe('United Kingdom')
-        ->and($user->city)->toBe('London')
-        ->and($user->address)->toBe('10 Test Street');
+        ->and($user->preferred_language_id)->toBe(Language::where('code', 'ku')->value('id'))
+        ->and($user->privacy_accepted_at)->not->toBeNull();
     Notification::assertSentTo($user, VerifyEmail::class);
 });
 
-test('registration requires contact and address details', function () {
+test('registration requires phone study language and privacy consent', function () {
     $this->post(route('register'), [
         'name' => 'Incomplete Driver',
         'email' => 'incomplete@example.com',
         'is_instructor' => 'no',
         'password' => 'safe-password1',
         'password_confirmation' => 'safe-password1',
-    ])->assertSessionHasErrors(['phone_number', 'country', 'city', 'address']);
+    ])->assertSessionHasErrors(['phone_number', 'preferred_language_id', 'privacy_policy']);
 });
 
 test('a new account can register as an instructor', function () {
@@ -252,7 +253,7 @@ test('a user can change their password and delete their account', function () {
 test('mock test scores are calculated on the server before history is saved', function () {
     $user = User::factory()->create();
     $category = Category::create(['name_en' => 'Safe Driving', 'name_ku' => null]);
-    $topic = \App\Models\Topic::create(['topicable_type' => Category::class, 'topicable_id' => $category->id, 'name_en' => 'Safe Driving Topic']);
+    $topic = Topic::create(['topicable_type' => Category::class, 'topicable_id' => $category->id, 'name_en' => 'Safe Driving Topic']);
     $question = Question::create([
         'topic_id' => $topic->id,
         'text_en' => 'Which choice is correct?',

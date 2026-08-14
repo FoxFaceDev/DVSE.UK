@@ -36,7 +36,7 @@
                     <div class="w-px h-16 bg-gray-200"></div>
                     <div class="text-center w-full">
                         <p class="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">Pass Mark</p>
-                        <div class="text-3xl font-bold text-gray-800">43</div>
+                        <div class="text-3xl font-bold text-gray-800">{{ $passMark }}</div>
                     </div>
                 </div>
             </div>
@@ -87,11 +87,15 @@
                             <article class="rounded-xl border border-red-100 bg-red-50/40 p-4">
                                 @if($review['question_image'])<img src="{{ $review['question_image'] }}" alt="Question" class="mb-3 max-h-44 w-full rounded bg-white object-contain">@endif
                                 <h3 class="font-bold text-gray-900">{{ $review['question'] }}</h3>
-                                <div class="mt-3 grid gap-3 sm:grid-cols-2">
-                                    <div class="rounded-lg bg-white p-3 text-red-700"><p class="text-xs font-bold uppercase">Your answer</p>@if($review['selected_image'])<img src="{{ $review['selected_image'] }}" class="mt-2 h-24 w-full object-contain">@endif<p>{{ $review['selected'] ?: 'Not answered' }}</p></div>
-                                    <div class="rounded-lg bg-white p-3 text-green-700"><p class="text-xs font-bold uppercase">Correct answer</p>@if($review['correct_image'])<img src="{{ $review['correct_image'] }}" class="mt-2 h-24 w-full object-contain">@endif<p>{{ $review['correct'] }}</p></div>
+                                <div class="mt-3 space-y-2">
+                                    @foreach($review['choices'] ?? [] as $index => $choice)
+                                        <div class="rounded-lg border p-3 {{ $choice['is_correct'] ? 'border-green-300 bg-green-50 text-green-800' : ($choice['is_selected'] ? 'border-red-300 bg-red-50 text-red-800' : 'border-gray-200 bg-white text-gray-700') }}">
+                                            <div class="flex items-center justify-between gap-2"><span class="font-medium">{{ chr(65 + $index) }}. {{ $choice['text'] }}</span><span class="text-xs font-bold uppercase">{{ $choice['is_correct'] ? 'Correct answer' : ($choice['is_selected'] ? 'Your wrong answer' : '') }}</span></div>
+                                            @if($choice['image'])<img src="{{ $choice['image'] }}" class="mt-2 h-24 w-full object-contain" alt="Answer image">@endif
+                                        </div>
+                                    @endforeach
                                 </div>
-                                @if($review['explanation'])<p class="mt-3 text-sm text-gray-700">{{ $review['explanation'] }}</p>@endif
+                                @if($review['explanation'])<div class="mt-3 rounded-lg border border-blue-100 bg-blue-50 p-3"><p class="text-xs font-bold uppercase text-primary">Explanation</p><p class="mt-1 text-sm text-gray-700">{{ $review['explanation'] }}</p></div>@endif
                             </article>
                         @endforeach
                     </div>

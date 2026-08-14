@@ -11,7 +11,7 @@
 <x-layouts.app :showBack="false" title="Practice">
     <div
         x-data="practiceRunner()"
-        x-init="initData({{ Js::from($topic) }}, {{ Js::from($practiceItems) }}, {{ Js::from($ads) }}, {{ Js::from($languages) }})"
+        x-init="initData({{ Js::from($topic) }}, {{ Js::from($practiceItems) }}, {{ Js::from($ads) }}, {{ Js::from($languages) }}, {{ Js::from($preferredLanguage?->code ?? 'en') }})"
         @fullscreenchange.window="handleCgiFullscreenChange()"
         @webkitfullscreenchange.window="handleCgiFullscreenChange()"
         @keydown.escape.window="closeAdditionalSignModal()"
@@ -44,11 +44,8 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <select x-model="languagePreference" @change="setLanguage()" class="max-w-36 rounded-md border-gray-300 py-1.5 text-xs" aria-label="Translation language">
-                            <template x-for="language in languages" :key="language.code"><option :value="language.code" x-text="language.name"></option></template>
-                        </select>
                         <template x-if="!showingAd && speechText">
-                            <button @click="speakCurrentItem()" class="rounded-full p-2 text-primary transition-colors hover:bg-surface-dim" title="Listen" aria-label="Listen to this content">
+                            <button @click="toggleSpeech()" class="rounded-full p-2 transition-colors hover:bg-surface-dim" :class="isSpeaking ? 'bg-red-50 text-red-600' : 'text-primary'" :title="isSpeaking ? 'Stop reading' : 'Listen'" :aria-label="isSpeaking ? 'Stop reading this content' : 'Listen to this content'">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
                             </button>
                         </template>
@@ -166,12 +163,14 @@
                                     </template>
                                 </div>
 
-                                <div x-cloak x-show="showQuestionExplanation && hasAnswered" x-transition.opacity class="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
-                                    <h4 class="mb-2 flex items-center gap-2 font-bold text-primary">
+                                <div x-cloak x-show="showQuestionExplanation" x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-4" @click.self="showQuestionExplanation = false">
+                                  <div class="relative max-h-[85vh] w-full max-w-md overflow-y-auto rounded-2xl border border-blue-200 bg-white p-6 shadow-2xl">
+                                    <button type="button" @click="showQuestionExplanation = false" class="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-2xl text-gray-700 hover:bg-red-50 hover:text-red-600" aria-label="Close explanation">&times;</button>
+                                    <h4 class="mb-2 flex items-center gap-2 pr-10 font-bold text-primary">
                                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                         <span x-text="showTranslation ? languageName : 'Explanation'"></span>
                                     </h4>
-                                    <div x-show="!showTranslation">
+                                    <div x-show="!showTranslation || !translated(currentItem, 'explanation')">
                                         <p class="mb-1 text-xs font-bold uppercase tracking-wide text-primary">English explanation</p>
                                         <p class="text-sm text-gray-800" x-text="currentItem.explanation_en || 'No English explanation provided.'"></p>
                                     </div>
@@ -180,6 +179,7 @@
                                             <p class="text-sm text-gray-800" :dir="languageDirection" x-text="translated(currentItem, 'explanation')"></p>
                                         </div>
                                     </template>
+                                  </div>
                                 </div>
                             </div>
                         </template>
@@ -486,10 +486,10 @@
                         <div class="flex items-center justify-between gap-3 pt-2">
                             <button @click="previousItem()" :disabled="currentIndex === 0" class="min-h-12 rounded-md bg-gray-100 px-5 py-3 font-medium text-secondary transition-colors hover:bg-gray-200 disabled:opacity-50">Back</button>
 
-                            <template x-if="currentItem.item_type === 'question' && hasAnswered">
+                            <template x-if="currentItem.item_type === 'question'">
                                 <button @click="showQuestionExplanation = !showQuestionExplanation" class="min-h-12 rounded-md px-3 py-3 font-medium text-primary transition-colors hover:bg-surface-dim">Explain</button>
                             </template>
-                            <template x-if="currentItem.item_type !== 'question' || !hasAnswered">
+                            <template x-if="currentItem.item_type !== 'question'">
                                 <div class="w-16"></div>
                             </template>
 
@@ -565,6 +565,7 @@
                 hasAnswered: false,
                 selectedChoiceId: null,
                 showQuestionExplanation: false,
+                isSpeaking: false,
                 signExplanationVisible: false,
                 selectedAdditionalSign: null,
                 cgiStage: 'hazard',
@@ -597,12 +598,12 @@
                 adTimer: null,
                 adShown: false,
 
-                initData(topic, items, ads, languages) {
+                initData(topic, items, ads, languages, preferredLanguageCode) {
                     this.topic = topic;
                     this.items = items;
                     this.languages = languages;
                     this.availableAds = Array.isArray(ads) ? ads : [];
-                    this.languagePreference = localStorage.getItem('languagePreference') || 'en';
+                    this.languagePreference = preferredLanguageCode || 'en';
                     if (!languages.some(language => language.code === this.languagePreference)) this.languagePreference = 'en';
 
                     this.items.forEach(item => {
@@ -635,7 +636,7 @@
                     if (this.totalQuestions < 10) return;
 
                     const languageId = this.languages.find(language => language.code === this.languagePreference)?.id;
-                    const matches = this.availableAds.filter(ad => String(ad.language_id) === String(languageId));
+                    const matches = this.availableAds.filter(ad => ad.language_id === null || String(ad.language_id) === String(languageId));
                     if (!matches.length) return;
 
                     const ad = matches[Math.floor(Math.random() * matches.length)];
@@ -1128,6 +1129,8 @@
                 },
 
                 restoreItemState() {
+                    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                    this.isSpeaking = false;
                     const answer = this.currentItem && this.currentItem.item_type === 'question'
                         ? this.answers[this.currentItem.id]
                         : null;
@@ -1194,18 +1197,27 @@
                         media: item.media_source,
                         selected: item.choices.find(choice => choice.id === this.answers[item.id].choiceId),
                         correct: item.choices.find(choice => choice.is_correct),
-                        explanation: item.explanation_en
+                        explanation: item.explanation_en,
+                        choices: item.choices.map(choice => ({ ...choice, is_selected: choice.id === this.answers[item.id].choiceId }))
                     }));
                     sessionStorage.setItem('practiceMistakeReview', JSON.stringify(reviews));
                     window.location.href = `{{ route('theory.result') }}?correct=${this.correctCount}&total=${this.totalQuestions}&topic=${encodeURIComponent(this.topic.name_en)}`;
                 },
 
-                speakCurrentItem() {
+                toggleSpeech() {
                     if (!this.speechText || !('speechSynthesis' in window)) return;
+                    if (this.isSpeaking) {
+                        window.speechSynthesis.cancel();
+                        this.isSpeaking = false;
+                        return;
+                    }
                     window.speechSynthesis.cancel();
                     const utterance = new SpeechSynthesisUtterance(this.speechText);
                     utterance.lang = 'en-GB';
                     utterance.rate = 0.9;
+                    utterance.onend = () => this.isSpeaking = false;
+                    utterance.onerror = () => this.isSpeaking = false;
+                    this.isSpeaking = true;
                     window.speechSynthesis.speak(utterance);
                 },
 

@@ -4,7 +4,7 @@
         
         <div class="grid grid-cols-1 gap-3">
             @forelse($category->topics as $topic)
-                <a href="{{ route('theory.practice', $topic->id) }}" class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-primary flex justify-between items-center transition-all group">
+                <a href="{{ $topic->cgi_content_pages_count ? route('theory.hazard_library', $topic) : route('theory.practice', $topic) }}" class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-primary flex justify-between items-center transition-all group">
                     <div>
                         <div class="font-medium text-gray-800">{{ $topic->name_en }}</div>
                         @if($topic->name_ku)

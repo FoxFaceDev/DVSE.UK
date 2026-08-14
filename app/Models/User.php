@@ -4,9 +4,10 @@ namespace App\Models;
 
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -32,6 +33,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'city',
         'address',
         'account_type',
+        'preferred_language_id',
+        'privacy_accepted_at',
         'password',
         'marketing_email_opt_in',
         'marketing_email_opted_in_at',
@@ -62,12 +65,18 @@ class User extends Authenticatable implements MustVerifyEmail
             'marketing_email_opt_in' => 'boolean',
             'marketing_email_opted_in_at' => 'datetime',
             'marketing_email_unsubscribed_at' => 'datetime',
+            'privacy_accepted_at' => 'datetime',
         ];
     }
 
     public function mockTestHistories(): HasMany
     {
         return $this->hasMany(MockTestHistory::class);
+    }
+
+    public function preferredLanguage(): BelongsTo
+    {
+        return $this->belongsTo(Language::class, 'preferred_language_id');
     }
 
     public function isInstructor(): bool

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Ad;
 use App\Models\Category;
 use App\Models\Language;
+use App\Services\AdLifecycleNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -37,18 +38,24 @@ class AdController extends Controller
         $categories = Category::with('subSection')->orderBy('name_en')->get();
         $languages = Language::orderBy('sort_order')->orderBy('name')->get();
 
-        return view('admin.ads.create', compact('categories', 'languages'));
+        return view('admin.ads.create', compact('categories', 'languages') + ['placementOptions' => $this->placementOptions()]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'language_id' => 'required|integer|exists:languages,id',
+            'language_id' => 'nullable|integer|exists:languages,id',
+            'display_type' => 'required|in:question,site',
+            'placements' => 'nullable|array',
+            'placements.*' => 'string|in:home,sections,subsections,categories,about,contact,account,mock_tests',
             'media_type' => 'required|in:image,video',
             'media' => 'nullable|file|max:102400', // 100MB
             'media_url' => 'nullable|url',
             'link_url' => 'required|url',
+            'advertiser_email' => 'required|email|max:255',
+            'starts_at' => 'required|date',
+            'expires_at' => 'required|date|after:starts_at',
             'target_all_categories' => 'required|boolean',
             'category_ids' => 'nullable|array',
             'category_ids.*' => 'integer|distinct|exists:categories,id',
@@ -57,7 +64,8 @@ class AdController extends Controller
 
         $this->ensureCategoriesSelected($request);
 
-        $data = $request->only('title', 'language_id', 'media_type', 'link_url');
+        $data = $request->only('title', 'language_id', 'display_type', 'placements', 'media_type', 'link_url', 'advertiser_email', 'starts_at', 'expires_at');
+        $data['placements'] = $request->input('display_type') === 'site' ? array_values($validated['placements'] ?? []) : null;
         $data['targets_all_categories'] = $request->boolean('target_all_categories');
         $data['is_active'] = $request->boolean('is_active', true);
 
@@ -70,6 +78,7 @@ class AdController extends Controller
 
         $ad = Ad::create($data);
         $this->syncCategories($ad, $validated['category_ids'] ?? []);
+        app(AdLifecycleNotifier::class)->notifyActivationIfDue($ad);
 
         return redirect()->route('admin.ads.index')->with('success', 'Advertisement created successfully');
     }
@@ -80,18 +89,24 @@ class AdController extends Controller
         $languages = Language::orderBy('sort_order')->orderBy('name')->get();
         $ad->load(['categories', 'language']);
 
-        return view('admin.ads.edit', compact('ad', 'categories', 'languages'));
+        return view('admin.ads.edit', compact('ad', 'categories', 'languages') + ['placementOptions' => $this->placementOptions()]);
     }
 
     public function update(Request $request, Ad $ad)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'language_id' => 'required|integer|exists:languages,id',
+            'language_id' => 'nullable|integer|exists:languages,id',
+            'display_type' => 'required|in:question,site',
+            'placements' => 'nullable|array',
+            'placements.*' => 'string|in:home,sections,subsections,categories,about,contact,account,mock_tests',
             'media_type' => 'required|in:image,video',
             'media' => 'nullable|file|max:102400',
             'media_url' => 'nullable|url',
             'link_url' => 'required|url',
+            'advertiser_email' => 'required|email|max:255',
+            'starts_at' => 'required|date',
+            'expires_at' => 'required|date|after:starts_at',
             'target_all_categories' => 'required|boolean',
             'category_ids' => 'nullable|array',
             'category_ids.*' => 'integer|distinct|exists:categories,id',
@@ -100,7 +115,8 @@ class AdController extends Controller
 
         $this->ensureCategoriesSelected($request);
 
-        $data = $request->only('title', 'language_id', 'media_type', 'link_url');
+        $data = $request->only('title', 'language_id', 'display_type', 'placements', 'media_type', 'link_url', 'advertiser_email', 'starts_at', 'expires_at');
+        $data['placements'] = $request->input('display_type') === 'site' ? array_values($validated['placements'] ?? []) : null;
         $data['targets_all_categories'] = $request->boolean('target_all_categories');
         $data['is_active'] = $request->boolean('is_active', true);
 
@@ -128,6 +144,7 @@ class AdController extends Controller
 
         $ad->update($data);
         $this->syncCategories($ad, $validated['category_ids'] ?? []);
+        app(AdLifecycleNotifier::class)->notifyActivationIfDue($ad);
 
         return redirect()->route('admin.ads.index')->with('success', 'Advertisement updated successfully');
     }
@@ -148,13 +165,19 @@ class AdController extends Controller
     public function toggleStatus(Ad $ad)
     {
         $ad->update(['is_active' => ! $ad->is_active]);
+        if ($ad->is_active) {
+            app(AdLifecycleNotifier::class)->notifyActivationIfDue($ad);
+        }
 
         return redirect()->route('admin.ads.index')->with('success', 'Advertisement status updated');
     }
 
     private function ensureCategoriesSelected(Request $request): void
     {
-        if (! $request->boolean('target_all_categories') && empty($request->input('category_ids', []))) {
+        if ($request->input('display_type') === 'site' && empty($request->input('placements', []))) {
+            throw ValidationException::withMessages(['placements' => 'Select at least one website placement.']);
+        }
+        if ($request->input('display_type', 'question') === 'question' && ! $request->boolean('target_all_categories') && empty($request->input('category_ids', []))) {
             throw ValidationException::withMessages([
                 'category_ids' => 'Select at least one category or choose Select all categories.',
             ]);
@@ -164,7 +187,12 @@ class AdController extends Controller
     private function syncCategories(Ad $ad, array $categoryIds): void
     {
         $ad->categories()->sync(
-            $ad->targets_all_categories ? [] : collect($categoryIds)->map(fn ($id) => (int) $id)->unique()->all()
+            $ad->display_type === 'site' || $ad->targets_all_categories ? [] : collect($categoryIds)->map(fn ($id) => (int) $id)->unique()->all()
         );
+    }
+
+    private function placementOptions(): array
+    {
+        return ['home' => 'Home page', 'sections' => 'Section pages', 'subsections' => 'Subsection pages', 'categories' => 'Category pages', 'about' => 'About us', 'contact' => 'Contact us', 'account' => 'Account pages', 'mock_tests' => 'Mock-test information and results'];
     }
 }

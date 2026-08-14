@@ -13,6 +13,7 @@ class ContentPage extends Model
     protected $fillable = [
         'topic_id',
         'admin_title',
+        'library_category',
         'type',
         'text_en',
         'text_ku',

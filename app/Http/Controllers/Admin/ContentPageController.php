@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ContentPageRequest;
-use App\Models\Topic;
 use App\Models\ContentPage;
 use App\Models\Language;
+use App\Models\Topic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -56,6 +56,7 @@ class ContentPageController extends Controller
         $selectedType = $request->query('type', ContentPage::TYPE_CGI_CLIPS);
 
         $languages = Language::active()->get();
+
         return view('admin.content_pages.create', compact('topics', 'selectedTopicId', 'selectedType', 'languages'));
     }
 
@@ -155,6 +156,7 @@ class ContentPageController extends Controller
         return [
             'topic_id' => $request->integer('topic_id'),
             'admin_title' => $request->input('admin_title'),
+            'library_category' => $isCgiClips ? $request->input('library_category') : null,
             'type' => $request->input('type'),
             'text_en' => $request->input('type') === ContentPage::TYPE_CGI_CLIPS
                 ? data_get($translations, 'en.text')
@@ -190,6 +192,7 @@ class ContentPageController extends Controller
             $existingClip = $existingClips->get($slot);
             $uploadedClip = $request->file("clips.$slot.media");
             $removeClip = $request->boolean("clips.$slot.remove");
+            $uploadedThumbnail = $request->file("clips.$slot.thumbnail");
 
             if ($uploadedClip) {
                 if ($existingClip) {
@@ -202,11 +205,18 @@ class ContentPageController extends Controller
                     ['media_path' => '/storage/'.$path, 'media_url' => null]
                 );
 
-                continue;
+                $existingClip = $contentPage->clips()->where('slot', $slot)->first();
             }
 
-            if ($removeClip && $existingClip) {
+            if ($uploadedThumbnail && $existingClip) {
+                $this->deleteStoredFile($existingClip->getRawOriginal('thumbnail_path'));
+                $thumbnailPath = $uploadedThumbnail->store('content-pages/thumbnails', 'public');
+                $existingClip->update(['thumbnail_path' => '/storage/'.$thumbnailPath]);
+            }
+
+            if ($removeClip && ! $uploadedClip && $existingClip) {
                 $this->deleteStoredFile($existingClip->getRawOriginal('media_path'));
+                $this->deleteStoredFile($existingClip->getRawOriginal('thumbnail_path'));
                 $existingClip->delete();
             }
         }
@@ -266,6 +276,7 @@ class ContentPageController extends Controller
     {
         $contentPage->clips()->get()->each(function ($clip) {
             $this->deleteStoredFile($clip->getRawOriginal('media_path'));
+            $this->deleteStoredFile($clip->getRawOriginal('thumbnail_path'));
             $clip->delete();
         });
     }

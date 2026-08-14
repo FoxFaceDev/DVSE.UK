@@ -2,36 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Section;
-use App\Models\SubSection;
 use App\Models\Category;
-use App\Models\Language;
+use App\Models\Section;
+use App\Models\SiteSetting;
+use App\Models\SubSection;
 
 class FrontendController extends Controller
 {
     public function showSection(Section $section)
     {
-        $section->load(['subSections', 'topics' => function($query) {
-            $query->withCount(['questions', 'contentPages']);
+        $section->load(['subSections', 'topics' => function ($query) {
+            $query->withCount(['questions', 'contentPages', 'contentPages as cgi_content_pages_count' => fn ($q) => $q->where('type', 'cgi_clips')]);
         }]);
-        $languages = Language::active()->get();
-        return view('frontend.section', compact('section', 'languages'));
+        $whatsappNumber = SiteSetting::valueFor('whatsapp_number', '');
+
+        return view('frontend.section', compact('section', 'whatsappNumber'));
     }
 
     public function showSubSection(SubSection $subSection)
     {
-        $subSection->load(['categories', 'topics' => function($query) {
-            $query->withCount(['questions', 'contentPages']);
+        $subSection->load(['categories', 'mockTests' => fn ($query) => $query->where('is_active', true), 'topics' => function ($query) {
+            $query->withCount(['questions', 'contentPages', 'contentPages as cgi_content_pages_count' => fn ($q) => $q->where('type', 'cgi_clips')]);
         }]);
-        return view('frontend.subsection', compact('subSection'));
+        $whatsappNumber = SiteSetting::valueFor('whatsapp_number', '');
+
+        return view('frontend.subsection', compact('subSection', 'whatsappNumber'));
     }
 
     public function showCategory(Category $category)
     {
-        $category->load(['topics' => function($query) {
-            $query->withCount(['questions', 'contentPages']);
+        $category->load(['topics' => function ($query) {
+            $query->withCount(['questions', 'contentPages', 'contentPages as cgi_content_pages_count' => fn ($q) => $q->where('type', 'cgi_clips')]);
         }]);
+
         return view('frontend.category', compact('category'));
     }
 }
