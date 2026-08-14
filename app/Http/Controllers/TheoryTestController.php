@@ -109,6 +109,37 @@ class TheoryTestController extends Controller
         return response()->noContent();
     }
 
+    public function syncHazardProgress(Request $request)
+    {
+        $validated = $request->validate([
+            'content_page_ids' => ['required', 'array', 'max:500'],
+            'content_page_ids.*' => ['integer', 'distinct'],
+        ]);
+        $contentPageIds = ContentPage::query()
+            ->where('type', ContentPage::TYPE_CGI_CLIPS)
+            ->whereIn('id', $validated['content_page_ids'])
+            ->pluck('id');
+        $timestamp = now();
+
+        HazardLearningProgress::query()->upsert(
+            $contentPageIds->map(fn ($contentPageId) => [
+                'user_id' => auth('web')->id(),
+                'content_page_id' => $contentPageId,
+                'watched_at' => $timestamp,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ])->all(),
+            ['user_id', 'content_page_id'],
+            ['watched_at', 'updated_at'],
+        );
+
+        return response()->json([
+            'watched_page_ids' => HazardLearningProgress::query()
+                ->where('user_id', auth('web')->id())
+                ->pluck('content_page_id'),
+        ]);
+    }
+
     public function mockTestInfo(SubSection $subSection)
     {
         return view('theory.mock_info', compact('subSection'));

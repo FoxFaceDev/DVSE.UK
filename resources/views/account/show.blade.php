@@ -46,7 +46,7 @@
                 <div>
                     <p class="text-xs font-bold uppercase tracking-[0.16em] text-primary">Hazard learning</p>
                     <h2 class="mt-1 font-heading text-lg font-bold text-primary-dark">{{ $hazardProgress['completed'] }} of {{ $hazardProgress['total'] }} clips completed</h2>
-                    <p class="mt-1 text-xs text-gray-500">Your watched clips are synced across every device where you sign in.</p>
+                    <p class="mt-1 text-xs text-gray-500">Complete more hazard clips to increase your progress.</p>
                 </div>
                 <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 font-heading text-sm font-bold text-primary">{{ $hazardProgress['percent'] }}%</span>
             </div>

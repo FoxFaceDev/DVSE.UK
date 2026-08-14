@@ -78,6 +78,9 @@ Route::get('/hazard-learning/{topic}', [TheoryTestController::class, 'hazardLibr
 Route::post('/hazard-learning/clips/{contentPage}/watched', [TheoryTestController::class, 'markHazardWatched'])
     ->middleware('auth:web')
     ->name('theory.hazard_watched');
+Route::post('/hazard-learning/progress/sync', [TheoryTestController::class, 'syncHazardProgress'])
+    ->middleware('auth:web')
+    ->name('theory.hazard_progress.sync');
 
 Route::prefix('theory-test-practice')->name('theory.')->group(function () {
     Route::get('/topic/{topic}', [TheoryTestController::class, 'practice'])->name('practice');

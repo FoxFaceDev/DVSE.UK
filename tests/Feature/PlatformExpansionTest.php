@@ -129,11 +129,33 @@ test('hazard learning progress is saved to the user account', function () {
     $this->get(route('theory.hazard_library', $topic))
         ->assertOk()
         ->assertSee('Your progress')
+        ->assertDontSee('Synced to your DVSE.UK account across your devices.')
         ->assertSee('data-account-watched="true"', false);
 
     $this->get(route('account.show'))
         ->assertOk()
         ->assertSee('1 of 1 clips completed');
+});
+
+test('browser-only hazard progress can be imported into the user account', function () {
+    $user = User::factory()->create();
+    $category = Category::create(['name_en' => 'Imported hazards']);
+    $topic = Topic::create(['topicable_type' => Category::class, 'topicable_id' => $category->id, 'name_en' => 'Imported hazard videos']);
+    $page = ContentPage::create([
+        'topic_id' => $topic->id,
+        'admin_title' => 'Previously watched clip',
+        'library_category' => 'Urban',
+        'type' => 'cgi_clips',
+    ]);
+
+    $this->actingAs($user)->postJson(route('theory.hazard_progress.sync'), [
+        'content_page_ids' => [$page->id],
+    ])->assertOk()->assertJsonPath('watched_page_ids.0', $page->id);
+
+    $this->assertDatabaseHas('hazard_learning_progress', [
+        'user_id' => $user->id,
+        'content_page_id' => $page->id,
+    ]);
 });
 
 test('contact page only shows active social networks with branded controls', function () {

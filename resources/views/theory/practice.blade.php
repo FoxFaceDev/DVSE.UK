@@ -1199,10 +1199,13 @@
                             try {
                                 await fetch(this.hazardStudy.progressUrl, {
                                     method: 'POST',
+                                    credentials: 'same-origin',
                                     headers: {
                                         'Accept': 'application/json',
                                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                                     },
+                                }).then(response => {
+                                    if (!response.ok) throw new Error('Progress could not be saved.');
                                 });
                             } catch (error) {
                                 // Local progress remains available if the device is temporarily offline.
