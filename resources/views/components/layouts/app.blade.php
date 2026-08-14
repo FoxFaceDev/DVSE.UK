@@ -82,8 +82,8 @@
             @endguest
             
             <hr class="my-2 border-gray-100">
-            <a href="{{ route('about') }}" class="px-6 py-3 min-h-12 flex items-center hover:bg-surface-dim hover:text-primary transition-colors">About us</a>
-            <a href="{{ route('contact') }}" class="px-6 py-3 min-h-12 flex items-center hover:bg-surface-dim hover:text-primary transition-colors">Contact us</a>
+            <a href="{{ url('/about-us') }}" class="px-6 py-3 min-h-12 flex items-center hover:bg-surface-dim hover:text-primary transition-colors">About us</a>
+            <a href="{{ url('/contact-us') }}" class="px-6 py-3 min-h-12 flex items-center hover:bg-surface-dim hover:text-primary transition-colors">Contact us</a>
 
             @auth('web')
             <div class="mt-auto px-6 py-4">
@@ -141,8 +141,8 @@
             </div>
             <h3 class="font-heading font-bold text-lg text-primary-dark mb-4">DVSE.UK</h3>
             <div class="flex justify-center gap-6 text-sm text-secondary mb-4">
-                <a href="{{ route('about') }}" class="hover:text-primary transition-colors">About us</a>
-                <a href="{{ route('contact') }}" class="hover:text-primary transition-colors">Contact us</a>
+                <a href="{{ url('/about-us') }}" class="hover:text-primary transition-colors">About us</a>
+                <a href="{{ url('/contact-us') }}" class="hover:text-primary transition-colors">Contact us</a>
                 <a href="{{ route('home') }}" class="hover:text-primary transition-colors">Back to home</a>
             </div>
             <p class="text-xs text-gray-400 flex items-center justify-center gap-1">
