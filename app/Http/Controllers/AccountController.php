@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ContentPage;
 use App\Models\Language;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,10 +26,18 @@ class AccountController extends Controller
                 ? (int) round(($history->score / $history->total_questions) * 100)
                 : 0)->max() ?? 0,
         ];
+        $hazardTotal = ContentPage::query()->where('type', ContentPage::TYPE_CGI_CLIPS)->count();
+        $hazardCompleted = $user->hazardLearningProgress()->count();
+        $hazardProgress = [
+            'completed' => $hazardCompleted,
+            'total' => $hazardTotal,
+            'percent' => $hazardTotal > 0 ? min(100, (int) round(($hazardCompleted / $hazardTotal) * 100)) : 0,
+        ];
 
         return view('account.show', [
             'user' => $user,
             'stats' => $stats,
+            'hazardProgress' => $hazardProgress,
             'recentHistories' => $histories->take(3),
             'languages' => Language::active()->get(),
         ]);

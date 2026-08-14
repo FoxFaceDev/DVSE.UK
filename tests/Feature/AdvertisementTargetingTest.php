@@ -7,6 +7,7 @@ use App\Models\Language;
 use App\Models\Section;
 use App\Models\SubSection;
 use App\Models\Topic;
+use Illuminate\Support\Facades\Mail;
 
 function advertisementAdmin(): Admin
 {
@@ -243,4 +244,31 @@ test('admins can search advertisements by title link language or category', func
         ->assertSee('Summer lessons')
         ->assertDontSee('Winter driving offer')
         ->assertSee('name="q"', false);
+});
+
+test('an SMTP failure does not undo a successfully created advertisement', function () {
+    Mail::shouldReceive('to')->once()->with('owner@example.com')->andReturnSelf();
+    Mail::shouldReceive('send')->once()->andThrow(new RuntimeException('SMTP certificate verification failed'));
+
+    $response = $this->actingAs(advertisementAdmin(), 'admin')->post(route('admin.ads.store'), [
+        'title' => 'Resilient website advertisement',
+        'display_type' => 'site',
+        'placements' => ['home'],
+        'media_type' => 'image',
+        'link_url' => 'https://example.com/campaign',
+        'advertiser_email' => 'owner@example.com',
+        'starts_at' => now()->subMinute()->format('Y-m-d H:i:s'),
+        'expires_at' => now()->addMonth()->format('Y-m-d H:i:s'),
+        'target_all_categories' => '1',
+        'is_active' => '1',
+    ]);
+
+    $response->assertRedirect(route('admin.ads.index'))
+        ->assertSessionHas('success')
+        ->assertSessionHas('warning');
+
+    $this->assertDatabaseHas('ads', [
+        'title' => 'Resilient website advertisement',
+        'activation_notified_at' => null,
+    ]);
 });

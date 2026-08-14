@@ -74,6 +74,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(MockTestHistory::class);
     }
 
+    public function hazardLearningProgress(): HasMany
+    {
+        return $this->hasMany(HazardLearningProgress::class);
+    }
+
     public function preferredLanguage(): BelongsTo
     {
         return $this->belongsTo(Language::class, 'preferred_language_id');

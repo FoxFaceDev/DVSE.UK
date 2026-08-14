@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Ad;
 use App\Models\Category;
 use App\Models\ContentPage;
+use App\Models\HazardLearningProgress;
 use App\Models\Language;
 use App\Models\MockTest;
 use App\Models\MockTestHistory;
@@ -63,8 +64,16 @@ class TheoryTestController extends Controller
         $categoryGroups = $pages
             ->sortBy(fn ($page) => mb_strtolower(($page->library_category ?: 'Other hazards').'|'.($page->admin_title ?: '')))
             ->groupBy(fn ($page) => $page->library_category ?: 'Other hazards');
+        $watchedPageIds = auth('web')->check()
+            ? HazardLearningProgress::query()
+                ->where('user_id', auth('web')->id())
+                ->whereIn('content_page_id', $pages->pluck('id'))
+                ->pluck('content_page_id')
+                ->map(fn ($id) => (int) $id)
+                ->values()
+            : collect();
 
-        return view('theory.hazard_library', compact('topic', 'pages', 'latestPages', 'categoryGroups'));
+        return view('theory.hazard_library', compact('topic', 'pages', 'latestPages', 'categoryGroups', 'watchedPageIds'));
     }
 
     public function hazardStudy(ContentPage $contentPage)
@@ -81,10 +90,23 @@ class TheoryTestController extends Controller
         $preferredLanguage = auth('web')->user()?->preferredLanguage ?: Language::query()->where('code', 'en')->first();
         $backUrlOverride = route('theory.hazard_library', $topic);
         $hazardStudyPage = $contentPage;
+        $hazardProgressUrl = auth('web')->check() ? route('theory.hazard_watched', $contentPage) : null;
 
         return view('theory.practice', compact(
-            'topic', 'practiceItems', 'ads', 'languages', 'preferredLanguage', 'backUrlOverride', 'hazardStudyPage'
+            'topic', 'practiceItems', 'ads', 'languages', 'preferredLanguage', 'backUrlOverride', 'hazardStudyPage', 'hazardProgressUrl'
         ));
+    }
+
+    public function markHazardWatched(ContentPage $contentPage)
+    {
+        abort_unless($contentPage->type === ContentPage::TYPE_CGI_CLIPS, 404);
+
+        HazardLearningProgress::query()->updateOrCreate(
+            ['user_id' => auth('web')->id(), 'content_page_id' => $contentPage->id],
+            ['watched_at' => now()],
+        );
+
+        return response()->noContent();
     }
 
     public function mockTestInfo(SubSection $subSection)

@@ -28,6 +28,11 @@
             {{ session('success') }}
         </div>
     @endif
+    @if(session('warning'))
+        <div class="mb-4 rounded-md border border-amber-200 bg-amber-50 p-4 text-amber-800" role="alert">
+            {{ session('warning') }}
+        </div>
+    @endif
 
     <div class="overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-200">
         <table class="min-w-[1100px] w-full text-left text-sm">

@@ -1,5 +1,5 @@
 @php($hazardClip = $page->clips->firstWhere('slot', 0))
-<article x-show="matches({{ $page->id }})" x-transition class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_8px_24px_-14px_rgba(15,23,42,0.35)] transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg">
+<article x-show="matches({{ $page->id }})" x-transition data-hazard-card="{{ $page->id }}" data-account-watched="{{ $watchedPageIds->contains($page->id) ? 'true' : 'false' }}" class="w-[82vw] max-w-80 shrink-0 snap-start overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_8px_24px_-14px_rgba(15,23,42,0.35)] transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg sm:w-[calc(50%-0.5rem)]">
     <a href="{{ route('theory.hazard_study', $page) }}" class="group block">
         <div class="relative aspect-video overflow-hidden bg-slate-900">
             @if($hazardClip?->thumbnail_path)

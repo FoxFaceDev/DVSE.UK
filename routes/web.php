@@ -75,6 +75,9 @@ Route::get('/category/{category}', [FrontendController::class, 'showCategory'])-
 Route::get('/media/cgi-clips/{cgiClip}', CgiClipMediaController::class)->name('media.cgi-clips.stream');
 Route::get('/hazard-learning/clips/{contentPage}', [TheoryTestController::class, 'hazardStudy'])->name('theory.hazard_study');
 Route::get('/hazard-learning/{topic}', [TheoryTestController::class, 'hazardLibrary'])->name('theory.hazard_library');
+Route::post('/hazard-learning/clips/{contentPage}/watched', [TheoryTestController::class, 'markHazardWatched'])
+    ->middleware('auth:web')
+    ->name('theory.hazard_watched');
 
 Route::prefix('theory-test-practice')->name('theory.')->group(function () {
     Route::get('/topic/{topic}', [TheoryTestController::class, 'practice'])->name('practice');

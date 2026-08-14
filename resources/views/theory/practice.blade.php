@@ -11,7 +11,7 @@
 <x-layouts.app :showBack="false" :title="isset($hazardStudyPage) ? 'Hazard learning' : 'Practice'">
     <div
         x-data="practiceRunner()"
-        x-init="initData({{ Js::from($topic) }}, {{ Js::from($practiceItems) }}, {{ Js::from($ads) }}, {{ Js::from($languages) }}, {{ Js::from($preferredLanguage?->code ?? 'en') }}, {{ Js::from(isset($hazardStudyPage) ? ['pageId' => $hazardStudyPage->id, 'returnUrl' => $backUrl] : null) }})"
+        x-init="initData({{ Js::from($topic) }}, {{ Js::from($practiceItems) }}, {{ Js::from($ads) }}, {{ Js::from($languages) }}, {{ Js::from($preferredLanguage?->code ?? 'en') }}, {{ Js::from(isset($hazardStudyPage) ? ['pageId' => $hazardStudyPage->id, 'returnUrl' => $backUrl, 'progressUrl' => $hazardProgressUrl] : null) }})"
         @fullscreenchange.window="handleCgiFullscreenChange()"
         @webkitfullscreenchange.window="handleCgiFullscreenChange()"
         @keydown.escape.window="closeAdditionalSignModal()"
@@ -1188,12 +1188,27 @@
                     }
                 },
 
-                finishPractice() {
+                async finishPractice() {
                     if (!this.canContinue) return;
                     if (this.hazardStudy) {
                         const watched = JSON.parse(localStorage.getItem('hazardWatched') || '{}');
                         watched[this.hazardStudy.pageId] = new Date().toISOString();
                         localStorage.setItem('hazardWatched', JSON.stringify(watched));
+
+                        if (this.hazardStudy.progressUrl) {
+                            try {
+                                await fetch(this.hazardStudy.progressUrl, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    },
+                                });
+                            } catch (error) {
+                                // Local progress remains available if the device is temporarily offline.
+                            }
+                        }
+
                         window.location.href = this.hazardStudy.returnUrl;
                         return;
                     }

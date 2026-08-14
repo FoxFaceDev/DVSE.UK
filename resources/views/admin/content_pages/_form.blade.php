@@ -2,6 +2,9 @@
     $isEditing = isset($contentPage) && $contentPage;
     $currentType = old('type', $isEditing ? $contentPage->type : ($selectedType ?? 'cgi_clips'));
     $currentTopicId = old('topic_id', $isEditing ? $contentPage->topic_id : ($selectedTopicId ?? null));
+    $currentHazardCategory = old('library_category', $isEditing ? $contentPage->library_category : '');
+    $savedHazardCategories = collect($hazardCategories ?? []);
+    $hazardCategoryMode = $savedHazardCategories->isEmpty() || ($currentHazardCategory !== '' && ! $savedHazardCategories->contains($currentHazardCategory)) ? 'new' : 'saved';
     $hazardWindows = old('hazard_windows');
 
     if ($hazardWindows === null) {
@@ -28,7 +31,7 @@
         ->all();
 @endphp
 
-<div x-data="{ type: @js($currentType), languageTab: 'en', hazardWindows: @js($hazardWindows), nextHazardRangeId: {{ count($hazardWindows) + 1 }} }" class="space-y-6">
+<div x-data="{ type: @js($currentType), languageTab: 'en', hazardWindows: @js($hazardWindows), nextHazardRangeId: {{ count($hazardWindows) + 1 }}, hazardCategoryMode: @js($hazardCategoryMode), savedHazardCategory: @js($hazardCategoryMode === 'saved' ? $currentHazardCategory : '') }" class="space-y-6">
     @if($errors->any())
         <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
             <p class="font-bold">Please correct the following:</p>
@@ -74,7 +77,29 @@
             <h3 class="text-lg font-bold text-gray-900">CGI clips</h3>
             <p class="mt-1 text-sm text-gray-500">Upload the hazard video first, followed by the video explaining the hazard.</p>
         </div>
-        <div class="mb-6"><label class="mb-1 block text-sm font-medium text-gray-700">Video library category *</label><input name="library_category" :required="type === 'cgi_clips'" value="{{ old('library_category', $isEditing ? $contentPage->library_category : '') }}" placeholder="Example: Rural or Suburban" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 shadow-sm focus:border-primary focus:ring-primary"><p class="mt-1 text-xs text-gray-500">Every hazard video needs a category. Clips with the same category are grouped together in the learner's video browser.</p></div>
+        <div class="mb-6">
+            <label class="mb-1 block text-sm font-medium text-gray-700">Video library category *</label>
+            <select name="library_category" x-model="savedHazardCategory" :disabled="hazardCategoryMode === 'new'" :required="type === 'cgi_clips' && hazardCategoryMode === 'saved'" @change="if (savedHazardCategory === '__new') { hazardCategoryMode = 'new'; savedHazardCategory = ''; $nextTick(() => $refs.newHazardCategory.focus()) }" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 shadow-sm focus:border-primary focus:ring-primary">
+                <option value="">Select a saved category</option>
+                @foreach($savedHazardCategories as $category)
+                    <option value="{{ $category }}">{{ $category }}</option>
+                @endforeach
+                <option value="__new">+ Add a new category</option>
+            </select>
+            <div x-cloak x-show="hazardCategoryMode === 'new'" class="mt-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                <div class="flex items-end gap-2">
+                    <div class="min-w-0 flex-1">
+                        <label class="mb-1 block text-xs font-bold text-primary-dark">New category name</label>
+                        <input x-ref="newHazardCategory" name="library_category" :disabled="hazardCategoryMode !== 'new'" :required="type === 'cgi_clips' && hazardCategoryMode === 'new'" value="{{ $hazardCategoryMode === 'new' ? $currentHazardCategory : '' }}" maxlength="100" placeholder="Example: Rural or Suburban" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 shadow-sm focus:border-primary focus:ring-primary">
+                    </div>
+                    @if($savedHazardCategories->isNotEmpty())
+                        <button type="button" @click="hazardCategoryMode = 'saved'; savedHazardCategory = ''" class="rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50">Cancel</button>
+                    @endif
+                </div>
+            </div>
+            <p class="mt-1 text-xs text-gray-500">Choose a saved category, or add it once and reuse it for future CGI clips.</p>
+            @error('library_category')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+        </div>
 
         @error('clips')
             <p class="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ $message }}</p>

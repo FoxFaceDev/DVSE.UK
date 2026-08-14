@@ -44,7 +44,7 @@ class ContentPageRequest extends FormRequest
         return [
             'topic_id' => ['required', 'integer', 'exists:topics,id'],
             'admin_title' => ['required', 'string', 'max:150'],
-            'library_category' => ['nullable', 'string', 'max:100'],
+            'library_category' => [$isCgiClips ? 'required' : 'nullable', 'string', 'max:100', 'not_in:__new'],
             'type' => ['required', Rule::in([
                 ContentPage::TYPE_CGI_CLIPS,
                 ContentPage::TYPE_MOTORWAY_SIGN,

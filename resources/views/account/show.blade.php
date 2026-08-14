@@ -41,6 +41,18 @@
             <div class="bg-white rounded-xl border border-gray-100 p-3 text-center shadow-sm"><p class="text-xl font-heading font-bold text-primary">{{ $stats['best'] }}%</p><p class="mt-1 text-[11px] text-gray-500 uppercase tracking-wide">Best</p></div>
         </div>
 
+        <section class="rounded-2xl border border-primary/15 bg-white p-5 shadow-sm">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-[0.16em] text-primary">Hazard learning</p>
+                    <h2 class="mt-1 font-heading text-lg font-bold text-primary-dark">{{ $hazardProgress['completed'] }} of {{ $hazardProgress['total'] }} clips completed</h2>
+                    <p class="mt-1 text-xs text-gray-500">Your watched clips are synced across every device where you sign in.</p>
+                </div>
+                <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 font-heading text-sm font-bold text-primary">{{ $hazardProgress['percent'] }}%</span>
+            </div>
+            <div class="mt-4 h-2.5 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-gradient-to-r from-primary to-sky-400" style="width: {{ $hazardProgress['percent'] }}%"></div></div>
+        </section>
+
         <section class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-100"><h2 class="font-heading font-bold text-primary-dark">Personal details</h2><p class="text-xs text-gray-500 mt-1">Update the name and email used on your account.</p></div>
             <form method="POST" action="{{ route('account.profile.update') }}" class="p-5 space-y-4">

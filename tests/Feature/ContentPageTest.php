@@ -6,6 +6,7 @@ use App\Models\ContentPage;
 use App\Models\Question;
 use App\Models\Section;
 use App\Models\SubSection;
+use App\Models\Topic;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -18,7 +19,7 @@ function learningPageAdmin(): Admin
     ]);
 }
 
-function learningPageTopic(): \App\Models\Topic
+function learningPageTopic(): Topic
 {
     $section = Section::create(['name' => 'Theory']);
     $subSection = SubSection::create([
@@ -32,10 +33,10 @@ function learningPageTopic(): \App\Models\Topic
         'name_ku' => null,
     ]);
 
-    return \App\Models\Topic::create([
+    return Topic::create([
         'topicable_type' => Category::class,
         'topicable_id' => $category->id,
-        'name_en' => 'Motorways Topic'
+        'name_en' => 'Motorways Topic',
     ]);
 }
 
@@ -47,6 +48,7 @@ test('an admin can create a CGI page with hazard and explanation videos', functi
         'topic_id' => $topic->id,
         'admin_title' => 'Vehicles approaching a bend',
         'type' => ContentPage::TYPE_CGI_CLIPS,
+        'library_category' => 'Rural roads',
         'text_en' => 'Compare how the vehicles move through the bend.',
         'hazard_windows' => [
             ['start' => 8.5, 'end' => 13.5, 'points' => 5],
@@ -63,6 +65,7 @@ test('an admin can create a CGI page with hazard and explanation videos', functi
         'topic_id' => $topic->id,
         'admin_title' => 'Vehicles approaching a bend',
         'type' => ContentPage::TYPE_CGI_CLIPS,
+        'library_category' => 'Rural roads',
         'text_en' => 'Compare how the vehicles move through the bend.',
         'hazard_window_start' => 8.5,
         'hazard_window_end' => 13.5,
@@ -80,6 +83,8 @@ test('an admin can create a CGI page with hazard and explanation videos', functi
     $this->get(route('admin.content-pages.index'))->assertOk()->assertSee('CGI clips');
     $this->get(route('admin.content-pages.create'))
         ->assertOk()
+        ->assertSee('<option value="Rural roads">Rural roads</option>', false)
+        ->assertSee('+ Add a new category')
         ->assertSee('Add another hazard range')
         ->assertSee('Max points');
 });
@@ -335,10 +340,10 @@ test('practice contains questions CGI pages and motorway sign pages', function (
         ->assertSee('Preparing hazard clip')
         ->assertSee('Loading explanation')
         ->assertViewHas('practiceItems', function ($items) {
-        return $items->pluck('item_type')->sort()->values()->all() === [
-            ContentPage::TYPE_CGI_CLIPS,
-            ContentPage::TYPE_MOTORWAY_SIGN,
-            'question',
-        ];
+            return $items->pluck('item_type')->sort()->values()->all() === [
+                ContentPage::TYPE_CGI_CLIPS,
+                ContentPage::TYPE_MOTORWAY_SIGN,
+                'question',
+            ];
         });
 });

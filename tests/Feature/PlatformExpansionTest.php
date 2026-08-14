@@ -95,6 +95,8 @@ test('hazard learning library renders filters and clip thumbnails', function () 
         ->assertSee('Latest content')
         ->assertSee('Not watched')
         ->assertSee('Watched')
+        ->assertSee('grid w-full grid-cols-3', false)
+        ->assertSee('snap-x snap-mandatory', false)
         ->assertDontSee('Downloaded')
         ->assertDontSee('Choose a clip to study')
         ->assertSee(route('theory.hazard_study', $page));
@@ -104,6 +106,34 @@ test('hazard learning library renders filters and clip thumbnails', function () 
         ->assertSee('Start hazard clip')
         ->assertSee('See explanation video')
         ->assertSee('hazardWatched', false);
+});
+
+test('hazard learning progress is saved to the user account', function () {
+    $user = User::factory()->create();
+    $category = Category::create(['name_en' => 'Account hazards']);
+    $topic = Topic::create(['topicable_type' => Category::class, 'topicable_id' => $category->id, 'name_en' => 'Account hazard videos']);
+    $page = ContentPage::create([
+        'topic_id' => $topic->id,
+        'admin_title' => 'Persistent watched clip',
+        'library_category' => 'Rural',
+        'type' => 'cgi_clips',
+    ]);
+
+    $this->actingAs($user)->post(route('theory.hazard_watched', $page))->assertNoContent();
+
+    $this->assertDatabaseHas('hazard_learning_progress', [
+        'user_id' => $user->id,
+        'content_page_id' => $page->id,
+    ]);
+
+    $this->get(route('theory.hazard_library', $topic))
+        ->assertOk()
+        ->assertSee('Your progress')
+        ->assertSee('data-account-watched="true"', false);
+
+    $this->get(route('account.show'))
+        ->assertOk()
+        ->assertSee('1 of 1 clips completed');
 });
 
 test('contact page only shows active social networks with branded controls', function () {

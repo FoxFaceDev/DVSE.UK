@@ -52,12 +52,13 @@ class ContentPageController extends Controller
     public function create(Request $request)
     {
         $topics = Topic::with('topicable')->orderBy('name_en')->get();
+        $hazardCategories = $this->hazardCategories();
         $selectedTopicId = $request->query('topic_id');
         $selectedType = $request->query('type', ContentPage::TYPE_CGI_CLIPS);
 
         $languages = Language::active()->get();
 
-        return view('admin.content_pages.create', compact('topics', 'selectedTopicId', 'selectedType', 'languages'));
+        return view('admin.content_pages.create', compact('topics', 'hazardCategories', 'selectedTopicId', 'selectedType', 'languages'));
     }
 
     public function store(ContentPageRequest $request)
@@ -78,10 +79,11 @@ class ContentPageController extends Controller
     public function edit(ContentPage $contentPage)
     {
         $topics = Topic::with('topicable')->orderBy('name_en')->get();
+        $hazardCategories = $this->hazardCategories();
         $contentPage->load('clips');
         $languages = Language::active()->get();
 
-        return view('admin.content_pages.edit', compact('contentPage', 'topics', 'languages'));
+        return view('admin.content_pages.edit', compact('contentPage', 'topics', 'hazardCategories', 'languages'));
     }
 
     public function update(ContentPageRequest $request, ContentPage $contentPage)
@@ -182,6 +184,17 @@ class ContentPageController extends Controller
                 : null,
             'translations' => $translations,
         ];
+    }
+
+    private function hazardCategories()
+    {
+        return ContentPage::query()
+            ->where('type', ContentPage::TYPE_CGI_CLIPS)
+            ->whereNotNull('library_category')
+            ->where('library_category', '!=', '')
+            ->distinct()
+            ->orderBy('library_category')
+            ->pluck('library_category');
     }
 
     private function syncClips(ContentPageRequest $request, ContentPage $contentPage): void

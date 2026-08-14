@@ -78,9 +78,10 @@ class AdController extends Controller
 
         $ad = Ad::create($data);
         $this->syncCategories($ad, $validated['category_ids'] ?? []);
-        app(AdLifecycleNotifier::class)->notifyActivationIfDue($ad);
+        $notifier = app(AdLifecycleNotifier::class);
+        $notifier->notifyActivationIfDue($ad);
 
-        return redirect()->route('admin.ads.index')->with('success', 'Advertisement created successfully');
+        return $this->advertisementRedirect('Advertisement created successfully', $notifier);
     }
 
     public function edit(Ad $ad)
@@ -144,9 +145,10 @@ class AdController extends Controller
 
         $ad->update($data);
         $this->syncCategories($ad, $validated['category_ids'] ?? []);
-        app(AdLifecycleNotifier::class)->notifyActivationIfDue($ad);
+        $notifier = app(AdLifecycleNotifier::class);
+        $notifier->notifyActivationIfDue($ad);
 
-        return redirect()->route('admin.ads.index')->with('success', 'Advertisement updated successfully');
+        return $this->advertisementRedirect('Advertisement updated successfully', $notifier);
     }
 
     public function destroy(Ad $ad)
@@ -165,11 +167,12 @@ class AdController extends Controller
     public function toggleStatus(Ad $ad)
     {
         $ad->update(['is_active' => ! $ad->is_active]);
+        $notifier = app(AdLifecycleNotifier::class);
         if ($ad->is_active) {
-            app(AdLifecycleNotifier::class)->notifyActivationIfDue($ad);
+            $notifier->notifyActivationIfDue($ad);
         }
 
-        return redirect()->route('admin.ads.index')->with('success', 'Advertisement status updated');
+        return $this->advertisementRedirect('Advertisement status updated', $notifier);
     }
 
     private function ensureCategoriesSelected(Request $request): void
@@ -194,5 +197,16 @@ class AdController extends Controller
     private function placementOptions(): array
     {
         return ['home' => 'Home page', 'sections' => 'Section pages', 'subsections' => 'Subsection pages', 'categories' => 'Category pages', 'about' => 'About us', 'contact' => 'Contact us', 'account' => 'Account pages', 'mock_tests' => 'Mock-test information and results'];
+    }
+
+    private function advertisementRedirect(string $message, AdLifecycleNotifier $notifier)
+    {
+        $response = redirect()->route('admin.ads.index')->with('success', $message);
+
+        if ($notifier->lastFailure()) {
+            $response->with('warning', 'The advertisement was saved, but its activation email could not be sent. Check the SMTP hostname and certificate settings. The scheduled notification task will retry it automatically.');
+        }
+
+        return $response;
     }
 }
