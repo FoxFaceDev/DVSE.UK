@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ad;
 use App\Models\Category;
+use App\Models\ContentPage;
 use App\Models\Language;
 use App\Models\MockTest;
 use App\Models\MockTestHistory;
@@ -58,8 +59,32 @@ class TheoryTestController extends Controller
     public function hazardLibrary(Topic $topic)
     {
         $pages = $topic->contentPages()->where('type', 'cgi_clips')->with('clips')->latest()->get();
+        $latestPages = $pages->take(4);
+        $categoryGroups = $pages
+            ->sortBy(fn ($page) => mb_strtolower(($page->library_category ?: 'Other hazards').'|'.($page->admin_title ?: '')))
+            ->groupBy(fn ($page) => $page->library_category ?: 'Other hazards');
 
-        return view('theory.hazard_library', compact('topic', 'pages'));
+        return view('theory.hazard_library', compact('topic', 'pages', 'latestPages', 'categoryGroups'));
+    }
+
+    public function hazardStudy(ContentPage $contentPage)
+    {
+        abort_unless($contentPage->type === ContentPage::TYPE_CGI_CLIPS, 404);
+
+        $contentPage->load('clips');
+        $topic = $contentPage->topic;
+        $practiceItems = collect([array_merge($contentPage->toArray(), [
+            'item_type' => ContentPage::TYPE_CGI_CLIPS,
+        ])]);
+        $ads = collect();
+        $languages = Language::active()->get();
+        $preferredLanguage = auth('web')->user()?->preferredLanguage ?: Language::query()->where('code', 'en')->first();
+        $backUrlOverride = route('theory.hazard_library', $topic);
+        $hazardStudyPage = $contentPage;
+
+        return view('theory.practice', compact(
+            'topic', 'practiceItems', 'ads', 'languages', 'preferredLanguage', 'backUrlOverride', 'hazardStudyPage'
+        ));
     }
 
     public function mockTestInfo(SubSection $subSection)

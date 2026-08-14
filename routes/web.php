@@ -73,6 +73,7 @@ Route::get('/section/{section}', [FrontendController::class, 'showSection'])->na
 Route::get('/sub-section/{subSection}', [FrontendController::class, 'showSubSection'])->name('frontend.sub_section');
 Route::get('/category/{category}', [FrontendController::class, 'showCategory'])->name('frontend.category');
 Route::get('/media/cgi-clips/{cgiClip}', CgiClipMediaController::class)->name('media.cgi-clips.stream');
+Route::get('/hazard-learning/clips/{contentPage}', [TheoryTestController::class, 'hazardStudy'])->name('theory.hazard_study');
 Route::get('/hazard-learning/{topic}', [TheoryTestController::class, 'hazardLibrary'])->name('theory.hazard_library');
 
 Route::prefix('theory-test-practice')->name('theory.')->group(function () {

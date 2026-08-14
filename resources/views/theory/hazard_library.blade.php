@@ -1,10 +1,46 @@
 <x-layouts.app :showBack="true" :backUrl="route('home')" title="Hazard learning videos">
-    <div x-data="hazardLibrary({{ Js::from($pages) }})" class="space-y-6">
-        <header><h1 class="font-heading text-2xl font-bold text-gray-950">{{ $topic->name_en }}</h1><p class="mt-1 text-sm text-gray-500">Choose a clip to study. Your viewed and downloaded filters are stored on this device.</p></header>
-        <div class="flex gap-2 overflow-x-auto pb-1">@foreach(['all'=>'All','unseen'=>'Unseen','low'=>'Low score','downloaded'=>'Downloaded'] as $key=>$label)<button @click="filter='{{ $key }}'" :class="filter==='{{ $key }}' ? 'border-red-600 text-red-600' : 'border-gray-300 text-gray-500'" class="whitespace-nowrap rounded-lg border bg-white px-4 py-2 text-sm">{{ $label }}</button>@endforeach</div>
-        <section><h2 class="mb-3 font-heading text-xl font-bold">Latest content</h2><div class="grid grid-cols-2 gap-3"><template x-for="page in latestPages" :key="page.id"><article class="overflow-hidden rounded-sm bg-gray-200 shadow-sm"><button class="relative block aspect-video w-full bg-slate-800" @click="open(page)"><template x-if="hazardClip(page)?.thumbnail_path"><img :src="hazardClip(page).thumbnail_path" class="h-full w-full object-cover" alt="Hazard video thumbnail"></template><template x-if="!hazardClip(page)?.thumbnail_path"><video :src="hazardClip(page)?.source" preload="metadata" muted class="h-full w-full object-cover"></video></template><span class="absolute bottom-0 left-0 bg-red-700 px-2 py-1 text-white">▶</span><span class="absolute bottom-1 left-9 text-xs font-bold text-white drop-shadow" x-text="views(page.id)+' views'"></span></button><div class="flex items-center gap-2 p-2"><div class="min-w-0 flex-1"><h3 class="truncate text-sm font-bold" x-text="page.admin_title || 'Hazard clip'"></h3><div class="mt-1 text-xs text-red-700" x-text="scoreLabel(page.id)"></div></div><a :href="hazardClip(page)?.source" download @click="markDownloaded(page.id)" class="p-2" title="Download">⇩</a></div></article></template></div><p x-show="filteredPages.length===0" class="rounded-xl bg-white p-8 text-center text-gray-500">No clips match this filter.</p></section>
-        <template x-for="group in groupedPages" :key="group.name"><section><h2 class="mb-3 font-heading text-xl font-bold" x-text="group.name"></h2><div class="grid grid-cols-2 gap-3"><template x-for="page in group.pages" :key="page.id"><article class="overflow-hidden rounded-sm bg-gray-200 shadow-sm"><button class="relative block aspect-video w-full bg-slate-800" @click="open(page)"><template x-if="hazardClip(page)?.thumbnail_path"><img :src="hazardClip(page).thumbnail_path" class="h-full w-full object-cover" alt="Hazard video thumbnail"></template><template x-if="!hazardClip(page)?.thumbnail_path"><video :src="hazardClip(page)?.source" preload="metadata" muted class="h-full w-full object-cover"></video></template><span class="absolute bottom-0 left-0 bg-red-700 px-2 py-1 text-white">▶</span><span class="absolute bottom-1 left-9 text-xs font-bold text-white drop-shadow" x-text="views(page.id)+' views'"></span></button><div class="flex items-center gap-2 p-2"><div class="min-w-0 flex-1"><h3 class="truncate text-sm font-bold" x-text="page.admin_title || 'Hazard clip'"></h3><div class="mt-1 text-xs text-red-700" x-text="scoreLabel(page.id)"></div></div><a :href="hazardClip(page)?.source" download @click="markDownloaded(page.id)" class="p-2" title="Download">⇩</a></div></article></template></div></section></template>
-        <div x-cloak x-show="selected" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" @click.self="close()"><div class="w-full max-w-2xl overflow-hidden rounded-2xl bg-white"><div class="flex items-center justify-between p-4"><h2 class="font-bold" x-text="selected?.admin_title"></h2><button @click="close()" class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-2xl">&times;</button></div><video x-ref="player" :src="selected ? hazardClip(selected)?.source : ''" controls autoplay playsinline class="aspect-video w-full bg-black"></video><div class="p-4"><p class="text-sm text-gray-600">How useful was this clip?</p><div class="mt-2 flex gap-2"><template x-for="n in 5"><button @click="rate(selected.id,n)" class="text-2xl" :class="score(selected.id)>=n ? 'text-red-700':'text-gray-300'">★</button></template></div></div></div></div>
+    <div x-data="hazardLibrary()" class="space-y-8">
+        <div class="flex gap-2 overflow-x-auto pb-1">
+            @foreach(['all' => 'All videos', 'unwatched' => 'Not watched', 'watched' => 'Watched'] as $key => $label)
+                <button type="button" @click="filter = '{{ $key }}'" :class="filter === '{{ $key }}' ? 'border-primary bg-primary text-white shadow-sm' : 'border-gray-200 bg-white text-gray-600'" class="whitespace-nowrap rounded-full border px-4 py-2 text-sm font-bold transition">{{ $label }}</button>
+            @endforeach
+        </div>
+
+        <section x-show="visibleCount(@js($latestPages->pluck('id'))) > 0">
+            <div class="mb-4 flex items-end justify-between gap-3">
+                <div><p class="text-xs font-bold uppercase tracking-[0.18em] text-primary">New learning</p><h2 class="mt-1 font-heading text-2xl font-bold text-gray-950">Latest content</h2></div>
+                <span class="text-xs font-semibold text-gray-400" x-text="`${visibleCount(@js($latestPages->pluck('id')))} clips`"></span>
+            </div>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                @foreach($latestPages as $page) @include('theory._hazard_card', ['page' => $page]) @endforeach
+            </div>
+        </section>
+
+        @foreach($categoryGroups as $category => $categoryPages)
+            <section x-show="visibleCount(@js($categoryPages->pluck('id'))) > 0">
+                <div class="mb-4 flex items-center gap-3"><span class="h-8 w-1 rounded-full bg-primary"></span><div><h2 class="font-heading text-xl font-bold text-gray-950">{{ $category }}</h2><p class="text-xs text-gray-400" x-text="`${visibleCount(@js($categoryPages->pluck('id')))} learning clips`"></p></div></div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    @foreach($categoryPages as $page) @include('theory._hazard_card', ['page' => $page]) @endforeach
+                </div>
+            </section>
+        @endforeach
+
+        <p x-cloak x-show="visibleCount(@js($pages->pluck('id'))) === 0" class="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-gray-500">No videos match this filter.</p>
     </div>
-    <script>function hazardLibrary(pages){return{pages,filter:'all',selected:null,seen:JSON.parse(localStorage.getItem('hazardSeen')||'{}'),downloaded:JSON.parse(localStorage.getItem('hazardDownloaded')||'{}'),scores:JSON.parse(localStorage.getItem('hazardScores')||'{}'),get filteredPages(){return this.pages.filter(p=>this.filter==='all'||(this.filter==='unseen'&&!this.seen[p.id])||(this.filter==='downloaded'&&this.downloaded[p.id])||(this.filter==='low'&&this.score(p.id)>0&&this.score(p.id)<=2))},get latestPages(){return this.filteredPages.slice(0,4)},get groupedPages(){const groups={};this.filteredPages.forEach(p=>{const name=p.library_category||'More videos';(groups[name]??=[]).push(p)});return Object.entries(groups).map(([name,pages])=>({name,pages}))},hazardClip(p){return p?.clips?.find(c=>c.slot===0)},open(p){this.selected=p;this.seen[p.id]=(this.seen[p.id]||0)+1;localStorage.setItem('hazardSeen',JSON.stringify(this.seen))},close(){this.$refs.player?.pause();this.selected=null},views(id){return this.seen[id]||0},score(id){return this.scores[id]||0},scoreLabel(id){return '★'.repeat(this.score(id))+'☆'.repeat(5-this.score(id))},rate(id,n){this.scores[id]=n;localStorage.setItem('hazardScores',JSON.stringify(this.scores))},markDownloaded(id){this.downloaded[id]=true;localStorage.setItem('hazardDownloaded',JSON.stringify(this.downloaded))}}}</script>
+
+    <script>
+        function hazardLibrary() {
+            return {
+                filter: 'all',
+                watched: JSON.parse(localStorage.getItem('hazardWatched') || '{}'),
+                isWatched(id) { return Boolean(this.watched[id]); },
+                matches(id) {
+                    return this.filter === 'all'
+                        || (this.filter === 'watched' && this.isWatched(id))
+                        || (this.filter === 'unwatched' && !this.isWatched(id));
+                },
+                visibleCount(ids) { return ids.filter(id => this.matches(id)).length; },
+            };
+        }
+    </script>
 </x-layouts.app>

@@ -88,6 +88,20 @@ test('hazard learning library renders filters and clip thumbnails', function () 
     $topic = Topic::create(['topicable_type' => Category::class, 'topicable_id' => $category->id, 'name_en' => 'Hazard videos']);
     $page = ContentPage::create(['topic_id' => $topic->id, 'admin_title' => 'Rural road clip', 'type' => 'cgi_clips']);
     $page->clips()->create(['slot' => 0, 'media_url' => 'https://example.com/hazard.mp4', 'thumbnail_path' => 'https://example.com/thumb.jpg']);
+    $page->clips()->create(['slot' => 1, 'media_url' => 'https://example.com/explanation.mp4']);
 
-    $this->get(route('theory.hazard_library', $topic))->assertOk()->assertSee('Latest content')->assertSee('Unseen')->assertSee('Low score')->assertSee('Downloaded')->assertSee('Rural road clip');
+    $this->get(route('theory.hazard_library', $topic))
+        ->assertOk()
+        ->assertSee('Latest content')
+        ->assertSee('Not watched')
+        ->assertSee('Watched')
+        ->assertDontSee('Downloaded')
+        ->assertDontSee('Choose a clip to study')
+        ->assertSee(route('theory.hazard_study', $page));
+
+    $this->get(route('theory.hazard_study', $page))
+        ->assertOk()
+        ->assertSee('Start hazard clip')
+        ->assertSee('See explanation video')
+        ->assertSee('hazardWatched', false);
 });

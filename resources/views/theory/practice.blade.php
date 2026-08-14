@@ -1,17 +1,17 @@
 @php
-    $backUrl = route('home');
-    if ($topic->topicable_type === 'App\Models\Category') {
+    $backUrl = $backUrlOverride ?? route('home');
+    if (! isset($backUrlOverride) && $topic->topicable_type === 'App\Models\Category') {
         $backUrl = route('frontend.category', $topic->topicable_id);
-    } elseif ($topic->topicable_type === 'App\Models\SubSection') {
+    } elseif (! isset($backUrlOverride) && $topic->topicable_type === 'App\Models\SubSection') {
         $backUrl = route('frontend.sub_section', $topic->topicable_id);
-    } elseif ($topic->topicable_type === 'App\Models\Section') {
+    } elseif (! isset($backUrlOverride) && $topic->topicable_type === 'App\Models\Section') {
         $backUrl = route('frontend.section', $topic->topicable_id);
     }
 @endphp
-<x-layouts.app :showBack="false" title="Practice">
+<x-layouts.app :showBack="false" :title="isset($hazardStudyPage) ? 'Hazard learning' : 'Practice'">
     <div
         x-data="practiceRunner()"
-        x-init="initData({{ Js::from($topic) }}, {{ Js::from($practiceItems) }}, {{ Js::from($ads) }}, {{ Js::from($languages) }}, {{ Js::from($preferredLanguage?->code ?? 'en') }})"
+        x-init="initData({{ Js::from($topic) }}, {{ Js::from($practiceItems) }}, {{ Js::from($ads) }}, {{ Js::from($languages) }}, {{ Js::from($preferredLanguage?->code ?? 'en') }}, {{ Js::from(isset($hazardStudyPage) ? ['pageId' => $hazardStudyPage->id, 'returnUrl' => $backUrl] : null) }})"
         @fullscreenchange.window="handleCgiFullscreenChange()"
         @webkitfullscreenchange.window="handleCgiFullscreenChange()"
         @keydown.escape.window="closeAdditionalSignModal()"
@@ -597,13 +597,15 @@
                 adCountdown: 5,
                 adTimer: null,
                 adShown: false,
+                hazardStudy: null,
 
-                initData(topic, items, ads, languages, preferredLanguageCode) {
+                initData(topic, items, ads, languages, preferredLanguageCode, hazardStudy) {
                     this.topic = topic;
                     this.items = items;
                     this.languages = languages;
                     this.availableAds = Array.isArray(ads) ? ads : [];
                     this.languagePreference = preferredLanguageCode || 'en';
+                    this.hazardStudy = hazardStudy;
                     if (!languages.some(language => language.code === this.languagePreference)) this.languagePreference = 'en';
 
                     this.items.forEach(item => {
@@ -1188,6 +1190,13 @@
 
                 finishPractice() {
                     if (!this.canContinue) return;
+                    if (this.hazardStudy) {
+                        const watched = JSON.parse(localStorage.getItem('hazardWatched') || '{}');
+                        watched[this.hazardStudy.pageId] = new Date().toISOString();
+                        localStorage.setItem('hazardWatched', JSON.stringify(watched));
+                        window.location.href = this.hazardStudy.returnUrl;
+                        return;
+                    }
                     if (!this.adShown && this.adData && Object.keys(this.answers).length >= this.adPosition) {
                         this.triggerAd();
                         return;
