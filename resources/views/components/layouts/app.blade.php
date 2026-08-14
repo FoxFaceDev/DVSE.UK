@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
     <style>[x-cloak] { display: none !important; }</style>
 </head>
-<body x-data="{ sidebarOpen: false }" @keydown.escape.window="sidebarOpen = false" class="bg-surface text-on-surface antialiased min-h-screen flex flex-col font-body">
+<body x-data="{ sidebarOpen: false, selectedMenuItem: null }" @keydown.escape.window="sidebarOpen = false" class="bg-surface text-on-surface antialiased min-h-screen flex flex-col font-body">
 
     <!-- Header & Sidebar Component Area -->
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-200">
@@ -60,8 +60,8 @@
         </div>
         <nav class="flex-1 py-4 flex flex-col font-medium text-secondary overflow-y-auto">
             @guest('web')
-                <a href="{{ route('login') }}" class="px-6 py-3 min-h-12 flex items-center hover:bg-surface-dim hover:text-primary transition-colors">Sign in</a>
-                <a href="{{ route('register') }}" class="mx-4 mt-2 px-4 py-3 min-h-12 flex items-center justify-center bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">Create an account</a>
+                <a href="{{ route('login') }}" @click="selectedMenuItem = 'login'" @if(request()->routeIs('login')) aria-current="page" @endif class="mx-3 flex min-h-12 items-center rounded-lg border-l-4 px-4 py-3 transition active:scale-[.98] {{ request()->routeIs('login') ? 'border-primary bg-primary/10 font-bold text-primary' : 'border-transparent hover:bg-surface-dim hover:text-primary' }}" :class="selectedMenuItem === 'login' && 'border-primary bg-primary/10 text-primary'">Sign in</a>
+                <a href="{{ route('register') }}" @click="selectedMenuItem = 'register'" @if(request()->routeIs('register')) aria-current="page" @endif class="mx-4 mt-2 flex min-h-12 items-center justify-center rounded-lg border-2 px-4 py-3 transition active:scale-[.98] {{ request()->routeIs('register') ? 'border-primary-dark bg-primary-dark text-white ring-4 ring-primary/15' : 'border-primary bg-primary text-white hover:bg-primary-dark' }}" :class="selectedMenuItem === 'register' && 'ring-4 ring-primary/20'">Create an account</a>
             @else
                 <a href="{{ route('account.show') }}" class="px-6 py-4 mb-2 bg-primary/5 border-b border-primary/10 hover:bg-primary/10">
                     <div class="flex items-center gap-3">
@@ -75,15 +75,15 @@
                 @if(!auth('web')->user()->hasVerifiedEmail())
                     <a href="{{ route('verification.notice') }}" class="px-6 py-3 min-h-12 flex items-center gap-2 text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors">Verify your email</a>
                 @endif
-                <a href="{{ route('account.show') }}" class="px-6 py-3 min-h-12 flex items-center hover:bg-surface-dim hover:text-primary transition-colors">Account settings</a>
+                <a href="{{ route('account.show') }}" @click="selectedMenuItem = 'account'" @if(request()->routeIs('account.*')) aria-current="page" @endif class="mx-3 flex min-h-12 items-center rounded-lg border-l-4 px-4 py-3 transition active:scale-[.98] {{ request()->routeIs('account.*') ? 'border-primary bg-primary/10 font-bold text-primary' : 'border-transparent hover:bg-surface-dim hover:text-primary' }}" :class="selectedMenuItem === 'account' && 'border-primary bg-primary/10 text-primary'">Account settings</a>
                 @if(auth('web')->user()->hasVerifiedEmail())
-                    <a href="{{ route('history') }}" class="px-6 py-3 min-h-12 flex items-center hover:bg-surface-dim hover:text-primary transition-colors">Test history</a>
+                    <a href="{{ route('history') }}" @click="selectedMenuItem = 'history'" @if(request()->routeIs('history')) aria-current="page" @endif class="mx-3 flex min-h-12 items-center rounded-lg border-l-4 px-4 py-3 transition active:scale-[.98] {{ request()->routeIs('history') ? 'border-primary bg-primary/10 font-bold text-primary' : 'border-transparent hover:bg-surface-dim hover:text-primary' }}" :class="selectedMenuItem === 'history' && 'border-primary bg-primary/10 text-primary'">Test history</a>
                 @endif
             @endguest
             
             <hr class="my-2 border-gray-100">
-            <a href="{{ url('/about-us') }}" class="px-6 py-3 min-h-12 flex items-center hover:bg-surface-dim hover:text-primary transition-colors">About us</a>
-            <a href="{{ url('/contact-us') }}" class="px-6 py-3 min-h-12 flex items-center hover:bg-surface-dim hover:text-primary transition-colors">Contact us</a>
+            <a href="{{ url('/about-us') }}" @click="selectedMenuItem = 'about'" @if(request()->routeIs('about')) aria-current="page" @endif class="mx-3 flex min-h-12 items-center rounded-lg border-l-4 px-4 py-3 transition active:scale-[.98] {{ request()->routeIs('about') ? 'border-primary bg-primary/10 font-bold text-primary' : 'border-transparent hover:bg-surface-dim hover:text-primary' }}" :class="selectedMenuItem === 'about' && 'border-primary bg-primary/10 text-primary'">About us</a>
+            <a href="{{ url('/contact-us') }}" @click="selectedMenuItem = 'contact'" @if(request()->routeIs('contact')) aria-current="page" @endif class="mx-3 flex min-h-12 items-center rounded-lg border-l-4 px-4 py-3 transition active:scale-[.98] {{ request()->routeIs('contact') ? 'border-primary bg-primary/10 font-bold text-primary' : 'border-transparent hover:bg-surface-dim hover:text-primary' }}" :class="selectedMenuItem === 'contact' && 'border-primary bg-primary/10 text-primary'">Contact us</a>
 
             @auth('web')
             <div class="mt-auto px-6 py-4">

@@ -24,4 +24,18 @@ class SiteSetting extends Model
     {
         return json_decode((string) static::valueFor($key, '{}'), true) ?: [];
     }
+
+    public static function socialLinks(): array
+    {
+        return collect(static::json('social_links'))->mapWithKeys(function (mixed $value, string $network): array {
+            if (is_string($value)) {
+                return [$network => ['url' => $value, 'active' => true]];
+            }
+
+            return [$network => [
+                'url' => (string) ($value['url'] ?? ''),
+                'active' => (bool) ($value['active'] ?? false),
+            ]];
+        })->all();
+    }
 }

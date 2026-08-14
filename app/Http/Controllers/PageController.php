@@ -13,11 +13,16 @@ class PageController extends Controller
 
     public function contact()
     {
+        $socialLinks = collect(SiteSetting::socialLinks())
+            ->filter(fn (array $link): bool => $link['active'] && filled($link['url']))
+            ->map(fn (array $link): string => $link['url'])
+            ->all();
+
         return view('pages.contact', [
             'content' => SiteSetting::valueFor('contact_us', ''),
             'email' => SiteSetting::valueFor('contact_email', ''),
             'whatsapp' => SiteSetting::valueFor('whatsapp_number', ''),
-            'socialLinks' => SiteSetting::json('social_links'),
+            'socialLinks' => $socialLinks,
         ]);
     }
 }

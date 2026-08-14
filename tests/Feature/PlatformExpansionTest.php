@@ -105,3 +105,44 @@ test('hazard learning library renders filters and clip thumbnails', function () 
         ->assertSee('See explanation video')
         ->assertSee('hazardWatched', false);
 });
+
+test('contact page only shows active social networks with branded controls', function () {
+    SiteSetting::put('contact_us', 'Send our team a message.');
+    SiteSetting::put('social_links', [
+        'facebook' => ['url' => 'https://facebook.com/dvse', 'active' => true],
+        'instagram' => ['url' => 'https://instagram.com/dvse', 'active' => false],
+    ]);
+
+    $this->get(route('contact'))
+        ->assertOk()
+        ->assertSee('data-social-network="facebook"', false)
+        ->assertSee('aria-label="Facebook"', false)
+        ->assertDontSee('https://instagram.com/dvse')
+        ->assertSee('aria-current="page"', false);
+});
+
+test('admin can activate and deactivate social media links', function () {
+    $admin = Admin::create(['name' => 'Settings Admin', 'email' => 'settings-admin@example.com', 'password' => 'password']);
+
+    $this->actingAs($admin, 'admin')->put(route('admin.site-settings.update'), [
+        'privacy_policy' => 'Privacy policy',
+        'about_us' => 'About DVSE',
+        'contact_us' => 'Contact DVSE',
+        'contact_email' => 'hello@example.com',
+        'whatsapp_number' => '+447700900000',
+        'social_links' => [
+            'facebook' => ['url' => 'https://facebook.com/dvse', 'active' => '0'],
+            'youtube' => ['url' => 'https://youtube.com/@dvse', 'active' => '1'],
+        ],
+    ])->assertRedirect();
+
+    expect(SiteSetting::socialLinks())
+        ->toMatchArray([
+            'facebook' => ['url' => 'https://facebook.com/dvse', 'active' => false],
+            'youtube' => ['url' => 'https://youtube.com/@dvse', 'active' => true],
+        ]);
+
+    $this->get(route('contact'))
+        ->assertDontSee('https://facebook.com/dvse')
+        ->assertSee('data-social-network="youtube"', false);
+});

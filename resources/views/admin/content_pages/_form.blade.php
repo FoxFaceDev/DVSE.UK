@@ -74,7 +74,7 @@
             <h3 class="text-lg font-bold text-gray-900">CGI clips</h3>
             <p class="mt-1 text-sm text-gray-500">Upload the hazard video first, followed by the video explaining the hazard.</p>
         </div>
-        <div class="mb-6"><label class="mb-1 block text-sm font-medium text-gray-700">Video library category *</label><input name="library_category" :required="type === 'cgi_clips'" value="{{ old('library_category', $isEditing ? $contentPage->library_category : '') }}" placeholder="Example: Rural or Suburban" class="w-full rounded-md border-gray-300"><p class="mt-1 text-xs text-gray-500">Every hazard video needs a category. Clips with the same category are grouped together in the learner's video browser.</p></div>
+        <div class="mb-6"><label class="mb-1 block text-sm font-medium text-gray-700">Video library category *</label><input name="library_category" :required="type === 'cgi_clips'" value="{{ old('library_category', $isEditing ? $contentPage->library_category : '') }}" placeholder="Example: Rural or Suburban" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 shadow-sm focus:border-primary focus:ring-primary"><p class="mt-1 text-xs text-gray-500">Every hazard video needs a category. Clips with the same category are grouped together in the learner's video browser.</p></div>
 
         @error('clips')
             <p class="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ $message }}</p>
