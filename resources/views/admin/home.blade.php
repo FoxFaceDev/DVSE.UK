@@ -146,6 +146,11 @@
                         <input type="text" name="name" value="{{ $section->name }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
                     </div>
                     <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Card Description</label>
+                        <textarea name="description" maxlength="180" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="Choose your next step in your learning journey.">{{ old('description', $section->description) }}</textarea>
+                        <p class="mt-1 text-xs text-gray-500">Shown below the section name on learner cards. Maximum 180 characters.</p>
+                    </div>
+                    <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Theme Color (Hex or RGB)</label>
                         <div x-data="{ color: '{{ $section->color ?? '#3b82f6' }}' }" class="flex items-center gap-3 w-full">
                             <input type="color" x-model="color" class="h-10 w-10 p-1 border border-gray-300 rounded cursor-pointer flex-shrink-0 bg-white">
@@ -186,6 +191,11 @@
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Section Name</label>
                     <input type="text" name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Card Description</label>
+                    <textarea name="description" maxlength="180" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="Choose your next step in your learning journey.">{{ old('description') }}</textarea>
+                    <p class="mt-1 text-xs text-gray-500">Shown below the section name on learner cards. Maximum 180 characters.</p>
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Theme Color (Hex or RGB)</label>

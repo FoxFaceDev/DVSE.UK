@@ -82,7 +82,7 @@ test('hazard mock remains available when fewer than fourteen clips exist', funct
         ->assertSee('One developing hazard')
         ->assertSee('Two developing hazards')
         ->assertSee('15 minutes')
-        ->assertSee('Start Hazard Mock Test Now');
+        ->assertSee('Start hazard mock test');
 
     $this->get(route('theory.hazard_mock_start'))
         ->assertOk()

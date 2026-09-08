@@ -14,6 +14,7 @@ class SubSectionController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:180',
             'color' => 'nullable|string|max:50',
             'icon' => 'nullable|image|max:2048',
         ]);
@@ -21,6 +22,7 @@ class SubSectionController extends Controller
         $subSection = new SubSection;
         $subSection->section_id = $section->id;
         $subSection->name = $validated['name'];
+        $subSection->description = $validated['description'] ?? null;
         $subSection->color = $validated['color'] ?? '#3b82f6';
 
         if ($request->hasFile('icon')) {
@@ -47,18 +49,22 @@ class SubSectionController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:180',
             'color' => 'nullable|string|max:50',
             'icon' => 'nullable|image|max:2048',
         ]);
 
         $subSection->name = $validated['name'];
+        if ($request->exists('description')) {
+            $subSection->description = $validated['description'] ?? null;
+        }
         if (isset($validated['color'])) {
             $subSection->color = $validated['color'];
         }
 
         if ($request->hasFile('icon')) {
-            if ($subSection->icon_path) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $subSection->icon_path));
+            if ($subSection->getRawOriginal('icon_path')) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $subSection->getRawOriginal('icon_path')));
             }
             $path = $request->file('icon')->store('icons', 'public');
             $subSection->icon_path = '/storage/'.$path;
@@ -71,8 +77,8 @@ class SubSectionController extends Controller
 
     public function destroy(Section $section, SubSection $subSection)
     {
-        if ($subSection->icon_path) {
-            Storage::disk('public')->delete(str_replace('/storage/', '', $subSection->icon_path));
+        if ($subSection->getRawOriginal('icon_path')) {
+            Storage::disk('public')->delete(str_replace('/storage/', '', $subSection->getRawOriginal('icon_path')));
         }
         $subSection->delete();
 

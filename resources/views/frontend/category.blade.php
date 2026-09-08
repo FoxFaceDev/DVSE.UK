@@ -1,25 +1,15 @@
 <x-layouts.app :showBack="true" :backUrl="route('frontend.sub_section', $category->sub_section_id)" title="{{ $category->name_en }}">
     <div class="space-y-4">
-        <h2 class="font-heading font-bold text-xl mb-4" style="color: {{ $category->subSection->color ?? '#1e293b' }}">{{ $category->name_en }} Topics</h2>
+        <div class="page-intro">
+            <p class="eyebrow">EXPLORE TOPICS</p>
+            <h1 class="font-heading text-2xl font-bold mt-2">{{ $category->name_en }}</h1>
+            @if($category->name_ku)<p class="text-secondary mt-2" lang="ku" dir="rtl">{{ $category->name_ku }}</p>@endif
+            <p class="text-secondary text-sm mt-3">Choose a topic and take your next step.</p>
+        </div>
         
-        <div class="grid grid-cols-1 gap-3">
+        <div class="learning-card-grid">
             @forelse($category->topics as $topic)
-                <a href="{{ $topic->cgi_content_pages_count ? route('theory.hazard_library', $topic) : route('theory.practice', $topic) }}" class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-primary flex justify-between items-center transition-all group">
-                    <div>
-                        <div class="font-medium text-gray-800">{{ $topic->name_en }}</div>
-                        @if($topic->name_ku)
-                        <div class="text-sm text-gray-500 font-body" dir="rtl">{{ $topic->name_ku }}</div>
-                        @endif
-                        <div class="mt-1 text-xs text-gray-400">
-                            {{ $topic->questions_count }} {{ Str::plural('question', $topic->questions_count) }}
-                            @if($topic->content_pages_count)
-                                <span class="mx-1">&middot;</span>
-                                {{ $topic->content_pages_count }} learning {{ Str::plural('page', $topic->content_pages_count) }}
-                            @endif
-                        </div>
-                    </div>
-                    <svg class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </a>
+                <x-topic-card :topic="$topic" :color="$category->subSection->color ?? $category->subSection->section->color" />
             @empty
                 <div class="p-8 text-center text-gray-500 bg-white rounded-lg border border-gray-100">
                     No topics available in this category yet. Please check back later.

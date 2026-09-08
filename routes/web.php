@@ -21,6 +21,7 @@ use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\HazardMockTestController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\IconMediaController;
 use App\Http\Controllers\MarketingEmailPreferenceController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PasswordResetController;
@@ -31,6 +32,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about-us', [PageController::class, 'about'])->name('about');
 Route::get('/contact-us', [PageController::class, 'contact'])->name('contact');
+Route::get('/media/icons/{type}/{id}', IconMediaController::class)
+    ->whereIn('type', ['section', 'sub-section'])
+    ->whereNumber('id')
+    ->name('media.icons');
 Route::get('/email/unsubscribe/{user}', [MarketingEmailPreferenceController::class, 'show'])
     ->middleware('signed')
     ->name('marketing.unsubscribe.show');
@@ -67,6 +72,8 @@ Route::middleware('auth:web')->group(function () {
     Route::put('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
     Route::delete('/account', [AccountController::class, 'destroy'])->name('account.destroy');
 });
+
+Route::get('/learn', [FrontendController::class, 'learn'])->name('learn');
 
 // Dynamic Sections
 Route::get('/section/{section}', [FrontendController::class, 'showSection'])->name('frontend.section');

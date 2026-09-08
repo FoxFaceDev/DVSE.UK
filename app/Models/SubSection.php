@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SubSection extends Model
 {
-    protected $fillable = ['section_id', 'name', 'color', 'icon_path'];
+    protected $fillable = ['section_id', 'name', 'description', 'color', 'icon_path'];
 
     public function getIconPathAttribute($value)
     {
@@ -17,7 +17,11 @@ class SubSection extends Model
             return $value;
         }
 
-        return asset($value);
+        return route('media.icons', [
+            'type' => 'sub-section',
+            'id' => $this->getKey(),
+            'v' => $this->updated_at?->timestamp,
+        ]);
     }
 
     public function section()

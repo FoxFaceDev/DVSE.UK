@@ -2,21 +2,23 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#102b46">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>DVSE.UK - {{ $title ?? 'Home' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
     <style>[x-cloak] { display: none !important; }</style>
 </head>
-<body x-data="{ sidebarOpen: false, selectedMenuItem: null }" @keydown.escape.window="sidebarOpen = false" class="bg-surface text-on-surface antialiased min-h-screen flex flex-col font-body">
+<body x-data="{ sidebarOpen: false, selectedMenuItem: null }" @keydown.escape.window="sidebarOpen = false" class="learner-shell bg-surface text-on-surface antialiased min-h-screen flex flex-col font-body">
 
+    <a href="#main-content" class="skip-link">Skip to content</a>
     <!-- Header & Sidebar Component Area -->
-    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-200">
-        <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+    <header class="app-header bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-200">
+        <div class="app-header-inner max-w-md mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 @if(isset($showBack) && $showBack)
-                <a href="{{ $backUrl ?? url()->previous() }}" class="p-2 -ml-2 text-primary">
+                <a href="{{ $backUrl ?? url()->previous() }}" aria-label="Go back" class="p-2 -ml-2 text-primary">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 </a>
                 @endif
@@ -24,11 +26,11 @@
                     <div class="bg-primary-dark px-2 py-1 rounded-lg flex items-center justify-center" style="height: 36px;">
                         <img src="{{ asset('images/logo.png') }}" alt="DVSE.UK Logo" style="height: 28px; max-height: 28px; width: auto; object-fit: contain;">
                     </div>
-                    <span class="font-heading font-bold text-xl text-primary-dark tracking-wide">DVSE.UK</span>
+                    <span class="font-heading font-bold text-xl text-primary-dark tracking-wide">DVSE.UK<small class="brand-tagline">Drive safer. Go further.</small></span>
                 </a>
             </div>
             
-            <div>
+            <div class="flex items-center">
                 @auth('web')
                     <a href="{{ route('account.show') }}" class="hidden sm:flex items-center gap-2 mr-2 px-3 py-2 rounded-lg text-sm font-semibold text-primary hover:bg-surface-dim" aria-label="Open your account">
                         <span class="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-xs">{{ strtoupper(substr(auth('web')->user()->name, 0, 1)) }}</span>
@@ -56,7 +58,7 @@
          style="display: none;">
         <div class="p-4 border-b border-gray-100 flex justify-between items-center">
             <span class="font-bold text-primary">Menu</span>
-            <button @click="sidebarOpen = false"><svg class="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            <button @click="sidebarOpen = false" aria-label="Close menu" class="p-2"><svg class="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
         </div>
         <nav class="flex-1 py-4 flex flex-col font-medium text-secondary overflow-y-auto">
             @guest('web')
@@ -99,7 +101,7 @@
     </div>
 
     <!-- Main Content -->
-    <main class="flex-1 w-full max-w-md mx-auto px-4 py-6">
+    <main id="main-content" class="app-main flex-1 w-full max-w-md mx-auto px-4 py-6">
         @if(session('status'))
             <div role="status" class="mb-5 rounded-xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm text-primary-dark">
                 @switch(session('status'))
@@ -134,13 +136,13 @@
     </main>
 
     @if($showWhatsappButton ?? false)
-        <a href="https://wa.me/{{ preg_replace('/\D+/', '', $whatsappNumber) }}" target="_blank" rel="noopener" aria-label="Chat with DVSE on WhatsApp" class="fixed bottom-5 right-5 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-green-600 text-white shadow-lg transition hover:scale-105 hover:bg-green-700">
+        <a href="https://wa.me/{{ preg_replace('/\D+/', '', $whatsappNumber) }}" target="_blank" rel="noopener" aria-label="Chat with DVSE on WhatsApp" class="whatsapp-button fixed bottom-5 right-5 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-green-600 text-white shadow-lg transition hover:scale-105 hover:bg-green-700">
             <svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L.2 24l6.5-1.7a11.8 11.8 0 0 0 5.4 1.4h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.2-1.2-6.1-3.5-8.4Zm-8.4 18.2c-1.7 0-3.4-.5-4.9-1.3l-.4-.2-3.9 1 1-3.8-.2-.4a9.8 9.8 0 1 1 8.4 4.7Zm5.4-7.3c-.3-.1-1.8-.9-2.1-1-.3-.1-.5-.1-.7.2l-.9 1.1c-.2.3-.5.3-.8.1-2-.9-3.3-1.7-4.6-4-.3-.6.3-.6.9-1.6.1-.2.1-.4 0-.6l-.9-2.2c-.2-.5-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.9s1.2 3.3 1.4 3.6c.2.2 2.5 3.8 6 5.3 2.2.9 3.1 1 4.2.8.7-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.3-.6-.4Z"/></svg>
         </a>
     @endif
 
     <!-- Footer Component Area -->
-    <footer class="bg-white border-t border-gray-200 py-6 mt-8">
+    <footer class="app-footer bg-white border-t border-gray-200 py-6 mt-8">
         <div class="max-w-md mx-auto px-4 text-center flex flex-col items-center">
             <div class="bg-primary-dark px-3 py-1.5 rounded-xl flex items-center justify-center mb-3" style="height: 48px;">
                 <img src="{{ asset('images/logo.png') }}" alt="DVSE.UK Logo" style="height: 36px; max-height: 36px; width: auto; object-fit: contain;">
@@ -156,5 +158,13 @@
             </p>
         </div>
     </footer>
+    @unless(request()->routeIs('theory.*start', 'theory.practice', 'theory.hazard_study'))
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="{{ route('home') }}" @if(request()->routeIs('home')) aria-current="page" @endif><x-study-icon type="home" /><span>Home</span></a>
+        <a href="{{ route('learn') }}" @if(request()->routeIs('learn', 'frontend.*', 'theory.*')) aria-current="page" @endif><x-study-icon /><span>Learn</span></a>
+        <a href="{{ route('history') }}" @if(request()->routeIs('history')) aria-current="page" @endif><x-study-icon type="clock" /><span>History</span></a>
+        <a href="{{ auth('web')->check() ? route('account.show') : route('login') }}" @if(request()->routeIs('account.*', 'login', 'register')) aria-current="page" @endif><x-study-icon type="user" /><span>{{ auth('web')->check() ? 'Account' : 'Sign in' }}</span></a>
+    </nav>
+    @endunless
 </body>
 </html>

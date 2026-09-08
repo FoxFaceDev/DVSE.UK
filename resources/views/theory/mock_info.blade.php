@@ -1,15 +1,12 @@
 <x-layouts.app :showBack="true" :backUrl="route('frontend.section', $subSection->section_id)" title="Mock Test Rules">
-    <div class="max-w-md mx-auto space-y-6">
-        <div class="text-center mb-8">
-            <h1 class="font-heading font-bold text-2xl text-primary-dark">Mock Test Theory</h1>
-            <p class="text-gray-500 mt-2 text-sm">Official simulation of the real driving theory test.</p>
-        </div>
+    <div class="test-info test-info-green max-w-md mx-auto space-y-6">
+        <header class="test-hero tone-green"><span class="eyebrow">THEORY TEST · FIND YOUR CONFIDENCE</span><h1>Ready. Set. Mock test.</h1><p>A practice run for your driving theory test.</p><x-study-icon type="check" class="hero-icon" /></header>
 
         <div class="bg-white rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
             <div class="bg-blue-50 border-b border-blue-100 p-4">
                 <h2 class="font-bold text-primary flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    Important Instructions
+                    Before you begin
                 </h2>
             </div>
             <div class="p-6 space-y-5 text-sm text-gray-700">
@@ -54,8 +51,8 @@
             </div>
         </div>
 
-        <a href="{{ isset($mockTest) ? route('theory.dynamic_mock_start', $mockTest) : route('theory.mock_test_start', $subSection->id) }}" class="mt-8 w-full block text-center py-4 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold text-lg shadow-[0_4px_14px_0_rgba(0,118,255,0.39)] transform hover:-translate-y-0.5 transition-all duration-200">
-            Start Mock Test Now
+        <a href="{{ isset($mockTest) ? route('theory.dynamic_mock_start', $mockTest) : route('theory.mock_test_start', $subSection->id) }}" class="start-test mt-8 w-full block text-center py-4 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold text-lg shadow-[0_4px_14px_0_rgba(0,118,255,0.39)] transform hover:-translate-y-0.5 transition-all duration-200">
+            <span>Start mock test <span aria-hidden="true">&rarr;</span></span><small>{{ $mockTest->question_count ?? 50 }} questions · {{ $mockTest->duration_minutes ?? 57 }} minutes</small>
         </a>
     </div>
 </x-layouts.app>

@@ -6,13 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Section extends Model
 {
-    protected $fillable = ['name', 'color', 'icon_path'];
+    protected $fillable = ['name', 'description', 'color', 'icon_path'];
 
     public function getIconPathAttribute($value)
     {
         if (!$value) return null;
         if (str_starts_with($value, 'http')) return $value;
-        return asset($value);
+
+        return route('media.icons', [
+            'type' => 'section',
+            'id' => $this->getKey(),
+            'v' => $this->updated_at?->timestamp,
+        ]);
     }
 
     public function subSections()

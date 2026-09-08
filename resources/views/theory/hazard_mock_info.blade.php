@@ -3,22 +3,8 @@
     :backUrl="$hazardSubSection ? route('frontend.sub_section', $hazardSubSection) : route('home')"
     title="Hazard Perception Mock Test"
 >
-    <div class="mx-auto max-w-md space-y-6">
-        <header class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-dark via-primary to-blue-500 px-6 py-8 text-white shadow-xl shadow-primary/20">
-            <div class="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
-            <div class="absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-black/10 blur-2xl"></div>
-
-            <div class="relative z-10">
-                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/30 bg-white/20 shadow-inner backdrop-blur-sm">
-                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M10.3 3.9 2.7 17a2 2 0 0 0 1.73 3h15.14a2 2 0 0 0 1.73-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>
-                    </svg>
-                </div>
-                <p class="text-xs font-bold uppercase tracking-[0.2em] text-blue-100">Official-style practice</p>
-                <h1 class="mt-2 font-heading text-2xl font-bold leading-tight">Car Hazard Perception Test</h1>
-                <p class="mt-2 text-sm leading-6 text-white/80">Know what to expect before you begin your mock test.</p>
-            </div>
-        </header>
+    <div class="test-info test-info-coral mx-auto max-w-md space-y-6">
+        <header class="test-hero tone-coral"><span class="eyebrow">HAZARD PERCEPTION</span><h1>Spot it. React. Stay safe.</h1><p>Your hazard perception mock test starts here.</p><x-study-icon type="play" class="hero-icon" /></header>
 
         @if($errors->has('clips'))
             <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
@@ -87,8 +73,8 @@
         </div>
 
         @if($pool['eligible_count'] > 0)
-            <a href="{{ route('theory.hazard_mock_start') }}" class="block w-full transform rounded-xl bg-primary py-4 text-center text-lg font-bold text-white shadow-[0_4px_14px_0_rgba(0,118,255,0.39)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-dark">
-                Start Hazard Mock Test Now
+            <a href="{{ route('theory.hazard_mock_start') }}" class="start-test block w-full transform rounded-xl bg-primary py-4 text-center text-lg font-bold text-white shadow-[0_4px_14px_0_rgba(0,118,255,0.39)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-dark">
+                <span>Start hazard mock test <span aria-hidden="true">&rarr;</span></span><small>14 clips · Approximately {{ $timeLimitMinutes }} minutes</small>
             </a>
         @else
             <button type="button" disabled class="min-h-14 w-full rounded-xl bg-gray-200 px-6 py-4 text-lg font-bold text-gray-500">
