@@ -19,6 +19,15 @@
                 <div><label class="block text-sm font-semibold">Contact email</label><input type="email" name="contact_email" value="{{ old('contact_email', $settings['contact_email']) }}" class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 shadow-sm focus:border-primary focus:ring-primary"></div>
                 <div><label class="block text-sm font-semibold">WhatsApp number</label><input name="whatsapp_number" value="{{ old('whatsapp_number', $settings['whatsapp_number']) }}" placeholder="+447700900000" class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 shadow-sm focus:border-primary focus:ring-primary"></div>
             </div>
+            <div class="mt-5">
+                <h4 class="text-sm font-bold text-slate-800">Show the floating WhatsApp button on</h4>
+                <p class="mt-1 text-xs text-slate-500">Leave every box unchecked to hide the floating button everywhere.</p>
+                <div class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach(['home' => 'Home page', 'sections' => 'Section pages', 'subsections' => 'Subsection pages', 'categories' => 'Category pages', 'practice' => 'Question practice', 'learning' => 'Hazard learning', 'mock_tests' => 'Mock tests and results', 'account' => 'Account and history', 'auth' => 'Sign in and registration', 'about' => 'About us', 'contact' => 'Contact us'] as $key => $label)
+                        <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3"><input type="checkbox" name="whatsapp_placements[]" value="{{ $key }}" @checked(in_array($key, old('whatsapp_placements', $settings['whatsapp_placements']))) class="h-4 w-4 rounded border-slate-400 text-primary focus:ring-primary"><span class="text-sm font-semibold text-slate-700">{{ $label }}</span></label>
+                    @endforeach
+                </div>
+            </div>
         </section>
         <section class="rounded-lg border bg-white p-6 shadow-sm">
             <h3 class="text-lg font-bold">Social media links</h3>

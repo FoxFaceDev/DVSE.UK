@@ -10,6 +10,8 @@ class SiteSettingController extends Controller
 {
     public function edit()
     {
+        $whatsappPlacements = SiteSetting::valueFor('whatsapp_placements');
+
         return view('admin.site_settings.edit', [
             'settings' => [
                 'privacy_policy' => SiteSetting::valueFor('privacy_policy', ''),
@@ -17,6 +19,9 @@ class SiteSettingController extends Controller
                 'contact_us' => SiteSetting::valueFor('contact_us', ''),
                 'contact_email' => SiteSetting::valueFor('contact_email', ''),
                 'whatsapp_number' => SiteSetting::valueFor('whatsapp_number', ''),
+                'whatsapp_placements' => $whatsappPlacements === null
+                    ? ['sections', 'subsections']
+                    : (json_decode((string) $whatsappPlacements, true) ?: []),
                 'social_links' => SiteSetting::socialLinks(),
             ],
         ]);
@@ -30,6 +35,8 @@ class SiteSettingController extends Controller
             'contact_us' => ['required', 'string', 'max:50000'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'whatsapp_number' => ['nullable', 'string', 'max:30', 'regex:/^[0-9+()\-\s]+$/'],
+            'whatsapp_placements' => ['nullable', 'array'],
+            'whatsapp_placements.*' => ['string', 'in:home,sections,subsections,categories,practice,learning,mock_tests,account,auth,about,contact'],
             'social_links' => ['nullable', 'array'],
             'social_links.*' => ['array:url,active'],
             'social_links.*.url' => ['nullable', 'url', 'max:2048'],
@@ -43,6 +50,7 @@ class SiteSettingController extends Controller
             'url' => $link['url'] ?? '',
             'active' => (bool) $link['active'],
         ])->all());
+        SiteSetting::put('whatsapp_placements', array_values($validated['whatsapp_placements'] ?? []));
 
         return back()->with('success', 'Website content and contact settings updated.');
     }

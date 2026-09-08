@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Section;
-use App\Models\SiteSetting;
 use App\Models\SubSection;
 
 class FrontendController extends Controller
@@ -14,9 +13,7 @@ class FrontendController extends Controller
         $section->load(['subSections', 'topics' => function ($query) {
             $query->withCount(['questions', 'contentPages', 'contentPages as cgi_content_pages_count' => fn ($q) => $q->where('type', 'cgi_clips')]);
         }]);
-        $whatsappNumber = SiteSetting::valueFor('whatsapp_number', '');
-
-        return view('frontend.section', compact('section', 'whatsappNumber'));
+        return view('frontend.section', compact('section'));
     }
 
     public function showSubSection(SubSection $subSection)
@@ -24,9 +21,7 @@ class FrontendController extends Controller
         $subSection->load(['categories', 'mockTests' => fn ($query) => $query->where('is_active', true), 'topics' => function ($query) {
             $query->withCount(['questions', 'contentPages', 'contentPages as cgi_content_pages_count' => fn ($q) => $q->where('type', 'cgi_clips')]);
         }]);
-        $whatsappNumber = SiteSetting::valueFor('whatsapp_number', '');
-
-        return view('frontend.subsection', compact('subSection', 'whatsappNumber'));
+        return view('frontend.subsection', compact('subSection'));
     }
 
     public function showCategory(Category $category)

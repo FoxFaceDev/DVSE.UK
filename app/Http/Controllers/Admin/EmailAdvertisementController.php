@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Mail\AdvertisementEmail;
+use App\Models\Language;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\ValidationException;
 
 class EmailAdvertisementController extends Controller
 {
@@ -17,6 +19,7 @@ class EmailAdvertisementController extends Controller
         $subscribers = User::eligibleForMarketing();
 
         return view('admin.email_advertisements.create', [
+            'languages' => Language::active()->get(),
             'recipientCounts' => [
                 'all' => (clone $subscribers)->count(),
                 User::ACCOUNT_TYPE_USER => (clone $subscribers)->where('account_type', User::ACCOUNT_TYPE_USER)->count(),
@@ -29,6 +32,9 @@ class EmailAdvertisementController extends Controller
     {
         $validated = $request->validate([
             'audience' => ['required', 'in:all,user,instructor'],
+            'language_ids' => ['nullable', 'array', 'min:1'],
+            'language_ids.*' => ['integer', 'distinct', 'exists:languages,id'],
+            'language_filter_present' => ['nullable', 'boolean'],
             'subject' => ['required', 'string', 'max:150'],
             'headline' => ['required', 'string', 'max:150'],
             'message' => ['required', 'string', 'max:20000'],
@@ -40,6 +46,10 @@ class EmailAdvertisementController extends Controller
             'contact_email' => ['required', 'email', 'max:255'],
         ]);
 
+        if ($request->boolean('language_filter_present') && empty($validated['language_ids'] ?? [])) {
+            throw ValidationException::withMessages(['language_ids' => 'Select at least one recipient language.']);
+        }
+
         $imageUrl = null;
 
         if ($request->hasFile('image')) {
@@ -47,7 +57,7 @@ class EmailAdvertisementController extends Controller
             $imageUrl = asset('storage/'.$path);
         }
 
-        $recipients = $this->recipients($validated['audience']);
+        $recipients = $this->recipients($validated['audience'], $validated['language_ids'] ?? null);
         $sent = 0;
 
         $recipients->chunkById(100, function ($users) use ($validated, $imageUrl, &$sent) {
@@ -73,11 +83,12 @@ class EmailAdvertisementController extends Controller
             ->with('success', "Advertisement email sent to {$sent} ".str('recipient')->plural($sent).'.');
     }
 
-    private function recipients(string $audience): Builder
+    private function recipients(string $audience, ?array $languageIds = null): Builder
     {
         return User::query()
             ->eligibleForMarketing()
             ->when($audience !== 'all', fn (Builder $query) => $query->where('account_type', $audience))
+            ->when($languageIds !== null, fn (Builder $query) => $query->whereIn('preferred_language_id', $languageIds))
             ->orderBy('id');
     }
 }

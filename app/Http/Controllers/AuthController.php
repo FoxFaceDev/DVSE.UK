@@ -80,7 +80,9 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'phone_number' => $request->phone_number,
-            'preferred_language_id' => $request->input('is_instructor') === 'no' ? $request->integer('preferred_language_id') : null,
+            'preferred_language_id' => $request->input('is_instructor') === 'no'
+                ? $request->integer('preferred_language_id')
+                : Language::query()->where('code', 'en')->value('id'),
             'privacy_accepted_at' => now(),
             'account_type' => $request->input('is_instructor') === 'yes'
                 ? User::ACCOUNT_TYPE_INSTRUCTOR

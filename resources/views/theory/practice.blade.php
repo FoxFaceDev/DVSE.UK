@@ -638,7 +638,10 @@
                     if (this.totalQuestions < 10) return;
 
                     const languageId = this.languages.find(language => language.code === this.languagePreference)?.id;
-                    const matches = this.availableAds.filter(ad => ad.language_id === null || String(ad.language_id) === String(languageId));
+                    const matches = this.availableAds.filter(ad => {
+                        const languageIds = Array.isArray(ad.languages) ? ad.languages.map(language => String(language.id)) : [];
+                        return languageIds.includes(String(languageId)) || (languageIds.length === 0 && (ad.language_id === null || String(ad.language_id) === String(languageId)));
+                    });
                     if (!matches.length) return;
 
                     const ad = matches[Math.floor(Math.random() * matches.length)];

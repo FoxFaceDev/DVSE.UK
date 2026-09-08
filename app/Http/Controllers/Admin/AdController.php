@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Ad;
 use App\Models\Category;
 use App\Models\Language;
+use App\Models\Topic;
 use App\Services\AdLifecycleNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -17,12 +18,14 @@ class AdController extends Controller
     {
         $search = $request->string('q')->trim()->toString();
         $ads = Ad::query()
-            ->with(['categories', 'language'])
+            ->with(['topics', 'languages', 'categories', 'language'])
             ->when($search, function ($query, $term) {
                 $query->where(function ($searchQuery) use ($term) {
                     $searchQuery->where('title', 'like', "%{$term}%")
                         ->orWhere('link_url', 'like', "%{$term}%")
+                        ->orWhereHas('languages', fn ($languageQuery) => $languageQuery->where('name', 'like', "%{$term}%")->orWhere('code', 'like', "%{$term}%"))
                         ->orWhereHas('language', fn ($languageQuery) => $languageQuery->where('name', 'like', "%{$term}%")->orWhere('code', 'like', "%{$term}%"))
+                        ->orWhereHas('topics', fn ($topicQuery) => $topicQuery->where('name_en', 'like', "%{$term}%"))
                         ->orWhereHas('categories', fn ($categoryQuery) => $categoryQuery->where('name_en', 'like', "%{$term}%"));
                 });
             })
@@ -35,10 +38,10 @@ class AdController extends Controller
 
     public function create()
     {
-        $categories = Category::with('subSection')->orderBy('name_en')->get();
+        $topics = Topic::with('topicable')->orderBy('name_en')->get();
         $languages = Language::orderBy('sort_order')->orderBy('name')->get();
 
-        return view('admin.ads.create', compact('categories', 'languages') + ['placementOptions' => $this->placementOptions()]);
+        return view('admin.ads.create', compact('topics', 'languages') + ['placementOptions' => $this->placementOptions()]);
     }
 
     public function store(Request $request)
@@ -46,6 +49,9 @@ class AdController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'language_id' => 'nullable|integer|exists:languages,id',
+            'language_ids' => 'nullable|array',
+            'language_ids.*' => 'integer|distinct|exists:languages,id',
+            'language_filter_present' => 'nullable|boolean',
             'display_type' => 'required|in:question,site',
             'placements' => 'nullable|array',
             'placements.*' => 'string|in:home,sections,subsections,categories,about,contact,account,mock_tests',
@@ -56,17 +62,27 @@ class AdController extends Controller
             'advertiser_email' => 'required|email|max:255',
             'starts_at' => 'required|date',
             'expires_at' => 'required|date|after:starts_at',
-            'target_all_categories' => 'required|boolean',
+            'target_all_categories' => 'nullable|boolean',
             'category_ids' => 'nullable|array',
             'category_ids.*' => 'integer|distinct|exists:categories,id',
+            'target_all_topics' => 'nullable|boolean',
+            'topic_ids' => 'nullable|array',
+            'topic_ids.*' => 'integer|distinct|exists:topics,id',
             'is_active' => 'nullable|boolean',
         ]);
 
-        $this->ensureCategoriesSelected($request);
+        $this->ensureTargetsSelected($request);
+
+        $languageIds = $this->selectedLanguageIds($validated);
+        $targetsAllTopics = $request->has('target_all_topics')
+            ? $request->boolean('target_all_topics')
+            : $request->boolean('target_all_categories');
 
         $data = $request->only('title', 'language_id', 'display_type', 'placements', 'media_type', 'link_url', 'advertiser_email', 'starts_at', 'expires_at');
         $data['placements'] = $request->input('display_type') === 'site' ? array_values($validated['placements'] ?? []) : null;
-        $data['targets_all_categories'] = $request->boolean('target_all_categories');
+        $data['language_id'] = $languageIds[0] ?? null;
+        $data['targets_all_topics'] = $targetsAllTopics;
+        $data['targets_all_categories'] = $targetsAllTopics;
         $data['is_active'] = $request->boolean('is_active', true);
 
         if ($request->hasFile('media')) {
@@ -77,7 +93,7 @@ class AdController extends Controller
         }
 
         $ad = Ad::create($data);
-        $this->syncCategories($ad, $validated['category_ids'] ?? []);
+        $this->syncTargets($ad, $languageIds, $validated['topic_ids'] ?? [], $validated['category_ids'] ?? []);
         $notifier = app(AdLifecycleNotifier::class);
         $notifier->notifyActivationIfDue($ad);
 
@@ -86,11 +102,11 @@ class AdController extends Controller
 
     public function edit(Ad $ad)
     {
-        $categories = Category::with('subSection')->orderBy('name_en')->get();
+        $topics = Topic::with('topicable')->orderBy('name_en')->get();
         $languages = Language::orderBy('sort_order')->orderBy('name')->get();
-        $ad->load(['categories', 'language']);
+        $ad->load(['topics', 'languages', 'categories']);
 
-        return view('admin.ads.edit', compact('ad', 'categories', 'languages') + ['placementOptions' => $this->placementOptions()]);
+        return view('admin.ads.edit', compact('ad', 'topics', 'languages') + ['placementOptions' => $this->placementOptions()]);
     }
 
     public function update(Request $request, Ad $ad)
@@ -98,6 +114,9 @@ class AdController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'language_id' => 'nullable|integer|exists:languages,id',
+            'language_ids' => 'nullable|array',
+            'language_ids.*' => 'integer|distinct|exists:languages,id',
+            'language_filter_present' => 'nullable|boolean',
             'display_type' => 'required|in:question,site',
             'placements' => 'nullable|array',
             'placements.*' => 'string|in:home,sections,subsections,categories,about,contact,account,mock_tests',
@@ -108,17 +127,27 @@ class AdController extends Controller
             'advertiser_email' => 'required|email|max:255',
             'starts_at' => 'required|date',
             'expires_at' => 'required|date|after:starts_at',
-            'target_all_categories' => 'required|boolean',
+            'target_all_categories' => 'nullable|boolean',
             'category_ids' => 'nullable|array',
             'category_ids.*' => 'integer|distinct|exists:categories,id',
+            'target_all_topics' => 'nullable|boolean',
+            'topic_ids' => 'nullable|array',
+            'topic_ids.*' => 'integer|distinct|exists:topics,id',
             'is_active' => 'nullable|boolean',
         ]);
 
-        $this->ensureCategoriesSelected($request);
+        $this->ensureTargetsSelected($request);
+
+        $languageIds = $this->selectedLanguageIds($validated);
+        $targetsAllTopics = $request->has('target_all_topics')
+            ? $request->boolean('target_all_topics')
+            : $request->boolean('target_all_categories');
 
         $data = $request->only('title', 'language_id', 'display_type', 'placements', 'media_type', 'link_url', 'advertiser_email', 'starts_at', 'expires_at');
         $data['placements'] = $request->input('display_type') === 'site' ? array_values($validated['placements'] ?? []) : null;
-        $data['targets_all_categories'] = $request->boolean('target_all_categories');
+        $data['language_id'] = $languageIds[0] ?? null;
+        $data['targets_all_topics'] = $targetsAllTopics;
+        $data['targets_all_categories'] = $targetsAllTopics;
         $data['is_active'] = $request->boolean('is_active', true);
 
         if ($request->hasFile('media')) {
@@ -144,7 +173,7 @@ class AdController extends Controller
         }
 
         $ad->update($data);
-        $this->syncCategories($ad, $validated['category_ids'] ?? []);
+        $this->syncTargets($ad, $languageIds, $validated['topic_ids'] ?? [], $validated['category_ids'] ?? []);
         $notifier = app(AdLifecycleNotifier::class);
         $notifier->notifyActivationIfDue($ad);
 
@@ -175,22 +204,42 @@ class AdController extends Controller
         return $this->advertisementRedirect('Advertisement status updated', $notifier);
     }
 
-    private function ensureCategoriesSelected(Request $request): void
+    private function ensureTargetsSelected(Request $request): void
     {
         if ($request->input('display_type') === 'site' && empty($request->input('placements', []))) {
             throw ValidationException::withMessages(['placements' => 'Select at least one website placement.']);
         }
-        if ($request->input('display_type', 'question') === 'question' && ! $request->boolean('target_all_categories') && empty($request->input('category_ids', []))) {
+        if (($request->boolean('language_filter_present') || $request->input('display_type', 'question') === 'question') && empty($request->input('language_ids', [])) && ! $request->filled('language_id')) {
+            throw ValidationException::withMessages(['language_ids' => 'Select at least one language.']);
+        }
+        $targetsAll = $request->has('target_all_topics') ? $request->boolean('target_all_topics') : $request->boolean('target_all_categories');
+        if ($request->input('display_type', 'question') === 'question' && ! $targetsAll && empty($request->input('topic_ids', [])) && empty($request->input('category_ids', []))) {
             throw ValidationException::withMessages([
-                'category_ids' => 'Select at least one category or choose Select all categories.',
+                'topic_ids' => 'Select at least one topic or choose Select all topics.',
+                'category_ids' => 'Select at least one topic or choose Select all topics.',
             ]);
         }
     }
 
-    private function syncCategories(Ad $ad, array $categoryIds): void
+    private function selectedLanguageIds(array $validated): array
     {
+        $ids = $validated['language_ids'] ?? (isset($validated['language_id']) ? [$validated['language_id']] : []);
+
+        // Old forms treated a missing language as universal. Preserve that behavior
+        // for existing integrations while the admin UI always submits checkboxes.
+        return collect($ids ?: Language::active()->pluck('id'))->map(fn ($id) => (int) $id)->unique()->values()->all();
+    }
+
+    private function syncTargets(Ad $ad, array $languageIds, array $topicIds, array $legacyCategoryIds): void
+    {
+        $ad->languages()->sync($languageIds);
+        $ad->topics()->sync(
+            $ad->display_type === 'site' || $ad->targets_all_topics ? [] : collect($topicIds)->map(fn ($id) => (int) $id)->unique()->all()
+        );
+
+        // Retained only so older clients and data remain readable during rollout.
         $ad->categories()->sync(
-            $ad->display_type === 'site' || $ad->targets_all_categories ? [] : collect($categoryIds)->map(fn ($id) => (int) $id)->unique()->all()
+            $ad->display_type === 'site' || $ad->targets_all_topics ? [] : collect($legacyCategoryIds)->map(fn ($id) => (int) $id)->unique()->all()
         );
     }
 

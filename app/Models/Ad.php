@@ -9,12 +9,13 @@ class Ad extends Model
     protected $fillable = [
         'language_id', 'title', 'display_type', 'placements', 'media_type', 'media_path', 'media_url',
         'link_url', 'advertiser_email', 'starts_at', 'expires_at', 'activation_notified_at',
-        'expiry_warning_notified_at', 'targets_all_categories', 'is_active',
+        'expiry_warning_notified_at', 'targets_all_categories', 'targets_all_topics', 'is_active',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'targets_all_categories' => 'boolean',
+        'targets_all_topics' => 'boolean',
         'placements' => 'array',
         'starts_at' => 'datetime',
         'expires_at' => 'datetime',
@@ -34,6 +35,16 @@ class Ad extends Model
         return $this->belongsTo(Language::class);
     }
 
+    public function languages()
+    {
+        return $this->belongsToMany(Language::class)->withTimestamps();
+    }
+
+    public function topics()
+    {
+        return $this->belongsToMany(Topic::class)->withTimestamps();
+    }
+
     public function scopeCurrentlyRunning($query)
     {
         return $query->where('is_active', true)
@@ -43,7 +54,14 @@ class Ad extends Model
 
     public function scopeForLanguage($query, ?int $languageId)
     {
-        return $query->where(fn ($q) => $q->whereNull('language_id')->when($languageId, fn ($language) => $language->orWhere('language_id', $languageId)));
+        return $query->where(function ($q) use ($languageId) {
+            $q->whereHas('languages', fn ($languages) => $languages->where('languages.id', $languageId));
+            // Keep pre-migration advertisements working until they are next edited.
+            $q->orWhere(function ($legacy) use ($languageId) {
+                $legacy->whereDoesntHave('languages')
+                    ->where(fn ($language) => $language->whereNull('language_id')->orWhere('language_id', $languageId));
+            });
+        });
     }
 
     public function getMediaPathAttribute($value)

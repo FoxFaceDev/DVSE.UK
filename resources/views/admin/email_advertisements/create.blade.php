@@ -43,6 +43,20 @@
                         </label>
                     @endforeach
                 </div>
+                <div class="mt-6 border-t border-slate-200 pt-5">
+                    <input type="hidden" name="language_filter_present" value="1">
+                    <h5 class="font-bold text-gray-900">Recipient languages *</h5>
+                    <p class="mt-1 text-sm text-gray-500">Only users whose account language is checked will receive this campaign.</p>
+                    <div class="mt-3 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+                        @foreach($languages as $language)
+                            <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-300 bg-slate-50 p-4 hover:border-primary">
+                                <input type="checkbox" name="language_ids[]" value="{{ $language->id }}" @checked(in_array((string) $language->id, array_map('strval', old('language_ids', $languages->pluck('id')->all())))) class="h-5 w-5 rounded border-slate-400 text-primary focus:ring-primary">
+                                <span class="font-semibold text-gray-900">{{ $language->code === 'en' ? 'English only' : $language->name }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('language_ids')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
             </section>
 
             <section class="admin-card rounded-xl border bg-white p-7">

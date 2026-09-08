@@ -31,9 +31,9 @@
                     <label for="preferred_language_id" class="mb-1.5 block text-sm font-semibold text-gray-700">Which language do you want to study with English?</label>
                     <select id="preferred_language_id" name="preferred_language_id" :required="instructor === 'no'" class="w-full min-h-12 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 @error('preferred_language_id') border-red-500 @enderror">
                         <option value="">Select a language</option>
-                        @foreach($languages as $language)<option value="{{ $language->id }}" @selected((string) old('preferred_language_id') === (string) $language->id)>{{ $language->name }}</option>@endforeach
+                        @foreach($languages as $language)<option value="{{ $language->id }}" @selected((string) old('preferred_language_id') === (string) $language->id)>{{ $language->code === 'en' ? 'English only' : $language->name.' with English' }}</option>@endforeach
                     </select>
-                    <p class="mt-1 text-xs text-gray-500">English is always included. You can change this later in Account settings.</p>
+                    <p class="mt-1 text-xs text-gray-500">Choose English only, or another language alongside English. You can change this later.</p>
                     @error('preferred_language_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 

@@ -39,11 +39,18 @@ class TheoryTestController extends Controller
             ->where('display_type', 'question')
             ->forLanguage($preferredLanguage?->id)
             ->where(function ($query) use ($topic) {
-                $query->where('targets_all_categories', true);
-                if ($topic->topicable_type === 'App\Models\Category') {
-                    $query->orWhereHas('categories', fn ($categoryQuery) => $categoryQuery->where('categories.id', $topic->topicable_id));
+                $query->where('targets_all_topics', true)
+                    ->orWhere(fn ($legacyGlobal) => $legacyGlobal->where('targets_all_categories', true)->whereDoesntHave('topics'))
+                    ->orWhereHas('topics', fn ($topicQuery) => $topicQuery->where('topics.id', $topic->id));
+
+                // Compatibility for category-targeted advertisements created before topic targeting.
+                if ($topic->topicable_type === Category::class) {
+                    $query->orWhere(fn ($legacy) => $legacy
+                        ->where('targets_all_topics', false)
+                        ->whereHas('categories', fn ($categories) => $categories->where('categories.id', $topic->topicable_id)));
                 }
             })
+            ->with('languages:id,name,code')
             ->inRandomOrder()
             ->get();
 

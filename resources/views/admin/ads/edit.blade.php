@@ -25,20 +25,9 @@
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Expiry date and time *</label><input type="datetime-local" name="expires_at" required value="{{ old('expires_at', $ad->expires_at?->format('Y-m-d\\TH:i')) }}" class="w-full rounded-md border-gray-300"></div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Ad Language *</label>
-                <select name="language_id" class="w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                    <option value="">All languages</option>
-                    @foreach($languages as $language)
-                        <option value="{{ $language->id }}" @selected((string) old('language_id', $ad->language_id) === (string) $language->id)>
-                            {{ $language->name }}{{ $language->is_active ? '' : ' (Inactive)' }}
-                        </option>
-                    @endforeach
-                </select>
-                <p class="text-xs text-gray-500 mt-1">The ad is shown only when the learner selects this language.</p>
-            </div>
+            @include('admin.ads._language_targets')
 
-            <div x-show="displayType === 'question'">@include('admin.ads._category_targets')</div>
+            <div x-show="displayType === 'question'">@include('admin.ads._topic_targets')</div>
             <div x-cloak x-show="displayType === 'site'" class="rounded-lg border bg-slate-50 p-5"><h4 class="font-bold">Website placements</h4><div class="mt-3 grid gap-2 sm:grid-cols-2">@foreach($placementOptions as $key => $label)<label class="flex gap-2"><input type="checkbox" name="placements[]" value="{{ $key }}" @checked(in_array($key, old('placements', $ad->placements ?? [])))><span>{{ $label }}</span></label>@endforeach</div></div>
 
             <div>
