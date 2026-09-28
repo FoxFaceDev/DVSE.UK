@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MediaStorage;
 use Illuminate\Database\Eloquent\Model;
 
 class Choice extends Model
@@ -20,6 +21,6 @@ class Choice extends Model
 
     public function getImagePathAttribute($value)
     {
-        return $value ? (str_starts_with($value, 'http') ? $value : '/storage/'.ltrim(str_replace('/storage/', '', $value), '/')) : null;
+        return MediaStorage::url($value);
     }
 }

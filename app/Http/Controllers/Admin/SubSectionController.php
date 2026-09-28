@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Section;
 use App\Models\SubSection;
+use App\Support\MediaStorage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class SubSectionController extends Controller
 {
@@ -26,8 +26,7 @@ class SubSectionController extends Controller
         $subSection->color = $validated['color'] ?? '#3b82f6';
 
         if ($request->hasFile('icon')) {
-            $path = $request->file('icon')->store('icons', 'public');
-            $subSection->icon_path = '/storage/'.$path;
+            $subSection->icon_path = MediaStorage::store($request->file('icon'), 'icons');
         }
 
         $subSection->save();
@@ -64,10 +63,9 @@ class SubSectionController extends Controller
 
         if ($request->hasFile('icon')) {
             if ($subSection->getRawOriginal('icon_path')) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $subSection->getRawOriginal('icon_path')));
+                MediaStorage::delete($subSection->getRawOriginal('icon_path'));
             }
-            $path = $request->file('icon')->store('icons', 'public');
-            $subSection->icon_path = '/storage/'.$path;
+            $subSection->icon_path = MediaStorage::store($request->file('icon'), 'icons');
         }
 
         $subSection->save();
@@ -78,7 +76,7 @@ class SubSectionController extends Controller
     public function destroy(Section $section, SubSection $subSection)
     {
         if ($subSection->getRawOriginal('icon_path')) {
-            Storage::disk('public')->delete(str_replace('/storage/', '', $subSection->getRawOriginal('icon_path')));
+            MediaStorage::delete($subSection->getRawOriginal('icon_path'));
         }
         $subSection->delete();
 

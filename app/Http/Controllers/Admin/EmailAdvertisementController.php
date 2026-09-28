@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\AdvertisementEmail;
 use App\Models\Language;
 use App\Models\User;
+use App\Support\MediaStorage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -53,8 +54,8 @@ class EmailAdvertisementController extends Controller
         $imageUrl = null;
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('email-advertisements', 'public');
-            $imageUrl = asset('storage/'.$path);
+            $path = MediaStorage::store($request->file('image'), 'email-advertisements');
+            $imageUrl = MediaStorage::url($path);
         }
 
         $recipients = $this->recipients($validated['audience'], $validated['language_ids'] ?? null);

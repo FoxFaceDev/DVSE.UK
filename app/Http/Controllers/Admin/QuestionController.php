@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Language;
 use App\Models\Question;
 use App\Models\Topic;
+use App\Support\MediaStorage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -126,7 +126,7 @@ class QuestionController extends Controller
     {
         if ($request->hasFile('media')) {
             $this->deleteFile($question?->getRawOriginal('media_path'));
-            $data['media_path'] = '/storage/'.$request->file('media')->store('questions', 'public');
+            $data['media_path'] = MediaStorage::store($request->file('media'), 'questions');
             $data['media_url'] = null;
             if (! $data['media_type']) {
                 $mime = $request->file('media')->getMimeType();
@@ -157,7 +157,7 @@ class QuestionController extends Controller
             ];
             if ($request->hasFile("choices.$index.image")) {
                 $this->deleteFile($choice?->getRawOriginal('image_path'));
-                $data['image_path'] = '/storage/'.$request->file("choices.$index.image")->store('questions/answers', 'public');
+                $data['image_path'] = MediaStorage::store($request->file("choices.$index.image"), 'questions/answers');
             } elseif ($request->input('question_type') !== 'image_answers') {
                 $this->deleteFile($choice?->getRawOriginal('image_path'));
                 $data['image_path'] = null;
@@ -168,6 +168,6 @@ class QuestionController extends Controller
 
     private function deleteFile(?string $path): void
     {
-        if ($path && ! str_starts_with($path, 'http')) Storage::disk('public')->delete(ltrim(str_replace('/storage/', '', $path), '/'));
+        MediaStorage::delete($path);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MediaStorage;
 use Illuminate\Database\Eloquent\Model;
 
 class Question extends Model
@@ -9,7 +10,7 @@ class Question extends Model
     protected $fillable = [
         'topic_id', 'question_type', 'text_en', 'text_ku', 'translations', 'media_path',
         'media_type', 'media_url',
-        'explanation_en', 'explanation_ku'
+        'explanation_en', 'explanation_ku',
     ];
 
     protected $casts = ['translations' => 'array'];
@@ -23,12 +24,7 @@ class Question extends Model
 
     public function getMediaPathAttribute($value)
     {
-        if (!$value) return null;
-        if (str_starts_with($value, 'http')) return $value;
-        
-        // Ensure the path starts with /storage/ for the browser to find it from the root
-        $path = str_replace('/storage/', '', $value);
-        return '/storage/' . ltrim($path, '/');
+        return MediaStorage::url($value);
     }
 
     /**
@@ -46,8 +42,11 @@ class Question extends Model
 
     public function getYoutubeIdAttribute()
     {
-        if (!$this->is_youtube) return null;
+        if (! $this->is_youtube) {
+            return null;
+        }
         preg_match('/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/', $this->media_url, $match);
+
         return (isset($match[2]) && strlen($match[2]) === 11) ? $match[2] : null;
     }
 

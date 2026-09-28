@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MediaStorage;
 use Illuminate\Database\Eloquent\Model;
 
 class CgiClip extends Model
@@ -23,21 +24,15 @@ class CgiClip extends Model
 
     public function getMediaPathAttribute($value)
     {
-        if (! $value) {
-            return null;
-        }
-
-        if (str_starts_with($value, 'http')) {
-            return $value;
-        }
-
-        return '/storage/'.ltrim(str_replace('/storage/', '', $value), '/');
+        return MediaStorage::url($value);
     }
 
     public function getSourceAttribute()
     {
         if ($this->getRawOriginal('media_path')) {
-            return route('media.cgi-clips.stream', $this, false);
+            return MediaStorage::isLocal()
+                ? route('media.cgi-clips.stream', $this, false)
+                : MediaStorage::url($this->getRawOriginal('media_path'));
         }
 
         return $this->media_url;
@@ -45,10 +40,6 @@ class CgiClip extends Model
 
     public function getThumbnailPathAttribute($value)
     {
-        if (! $value || str_starts_with($value, 'http')) {
-            return $value;
-        }
-
-        return '/storage/'.ltrim(str_replace('/storage/', '', $value), '/');
+        return MediaStorage::url($value);
     }
 }

@@ -58,3 +58,40 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 "# DVSE.UK" 
+
+## Cloudflare R2 media storage
+
+Production media can be stored in Cloudflare R2 while local development continues to use
+`storage/app/public`. Configure the production `.env` without committing credentials:
+
+```dotenv
+MEDIA_DISK=r2
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+R2_BUCKET=dvse-media
+R2_ENDPOINT=https://YOUR_ACCOUNT_ID.r2.cloudflarestorage.com
+R2_URL=https://media.hiran.tech
+R2_REGION=auto
+```
+
+Verify read/write/delete access:
+
+```shell
+php artisan optimize:clear
+php artisan media:check-r2
+```
+
+To copy existing files from `storage/app/public` without loading large videos into memory,
+leave `MEDIA_DISK=public` during the copy and run:
+
+```shell
+php artisan media:migrate-to-r2 --dry-run
+php artisan media:migrate-to-r2
+```
+
+After the copy succeeds, set `MEDIA_DISK=r2` and rebuild the Laravel configuration cache:
+
+```shell
+php artisan optimize:clear
+php artisan optimize
+```

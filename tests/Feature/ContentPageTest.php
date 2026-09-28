@@ -7,6 +7,7 @@ use App\Models\Question;
 use App\Models\Section;
 use App\Models\SubSection;
 use App\Models\Topic;
+use App\Support\MediaStorage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -176,7 +177,7 @@ test('an admin can create a motorway sign page with an explanation', function ()
     expect($page->what_to_do_en)->toBe('Follow motorway regulations from this point.')
         ->and($page->additional_sign_images)->toHaveCount(1);
     Storage::disk('public')->assertExists(str_replace('/storage/', '', $page->getRawOriginal('sign_image_path')));
-    Storage::disk('public')->assertExists(str_replace('/storage/', '', $page->additional_sign_images[0]));
+    Storage::disk('public')->assertExists(MediaStorage::key($page->additional_sign_images[0]));
 });
 
 test('a motorway sign page requires both an image and an explanation', function () {

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MediaStorage;
 use Illuminate\Database\Eloquent\Model;
 
 class SubSection extends Model
@@ -15,6 +16,10 @@ class SubSection extends Model
         }
         if (str_starts_with($value, 'http')) {
             return $value;
+        }
+
+        if (! MediaStorage::isLocal()) {
+            return MediaStorage::url($value);
         }
 
         return route('media.icons', [

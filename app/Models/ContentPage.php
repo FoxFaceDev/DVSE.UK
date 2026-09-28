@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MediaStorage;
 use Illuminate\Database\Eloquent\Model;
 
 class ContentPage extends Model
@@ -52,14 +53,17 @@ class ContentPage extends Model
 
     public function getSignImagePathAttribute($value)
     {
-        if (! $value) {
-            return null;
-        }
+        return MediaStorage::url($value);
+    }
 
-        if (str_starts_with($value, 'http')) {
-            return $value;
-        }
+    public function getAdditionalSignImagesAttribute($value): array
+    {
+        $paths = is_array($value) ? $value : json_decode($value ?: '[]', true);
 
-        return '/storage/'.ltrim(str_replace('/storage/', '', $value), '/');
+        return collect($paths ?: [])
+            ->map(fn ($path) => MediaStorage::url($path))
+            ->filter()
+            ->values()
+            ->all();
     }
 }

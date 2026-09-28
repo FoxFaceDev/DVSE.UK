@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MediaStorage;
 use Illuminate\Database\Eloquent\Model;
 
 class Ad extends Model
@@ -66,16 +67,7 @@ class Ad extends Model
 
     public function getMediaPathAttribute($value)
     {
-        if (! $value) {
-            return null;
-        }
-        if (str_starts_with($value, 'http')) {
-            return $value;
-        }
-
-        $path = str_replace('/storage/', '', $value);
-
-        return '/storage/'.ltrim($path, '/');
+        return MediaStorage::url($value);
     }
 
     /**

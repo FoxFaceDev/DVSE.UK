@@ -7,8 +7,9 @@ use App\Http\Requests\Admin\ContentPageRequest;
 use App\Models\ContentPage;
 use App\Models\Language;
 use App\Models\Topic;
+use App\Support\MediaStorage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Collection;
 
 class ContentPageController extends Controller
 {
@@ -212,10 +213,10 @@ class ContentPageController extends Controller
                     $this->deleteStoredFile($existingClip->getRawOriginal('media_path'));
                 }
 
-                $path = $uploadedClip->store('content-pages/cgi', 'public');
+                $path = MediaStorage::store($uploadedClip, 'content-pages/cgi');
                 $contentPage->clips()->updateOrCreate(
                     ['slot' => $slot],
-                    ['media_path' => '/storage/'.$path, 'media_url' => null]
+                    ['media_path' => $path, 'media_url' => null]
                 );
 
                 $existingClip = $contentPage->clips()->where('slot', $slot)->first();
@@ -223,8 +224,8 @@ class ContentPageController extends Controller
 
             if ($uploadedThumbnail && $existingClip) {
                 $this->deleteStoredFile($existingClip->getRawOriginal('thumbnail_path'));
-                $thumbnailPath = $uploadedThumbnail->store('content-pages/thumbnails', 'public');
-                $existingClip->update(['thumbnail_path' => '/storage/'.$thumbnailPath]);
+                $thumbnailPath = MediaStorage::store($uploadedThumbnail, 'content-pages/thumbnails');
+                $existingClip->update(['thumbnail_path' => $thumbnailPath]);
             }
 
             if ($removeClip && ! $uploadedClip && $existingClip) {
@@ -250,14 +251,16 @@ class ContentPageController extends Controller
         }
 
         $this->deleteStoredFile($contentPage->getRawOriginal('sign_image_path'));
-        $path = $request->file('sign_image')->store('content-pages/signs', 'public');
-        $contentPage->update(['sign_image_path' => '/storage/'.$path]);
+        $path = MediaStorage::store($request->file('sign_image'), 'content-pages/signs');
+        $contentPage->update(['sign_image_path' => $path]);
     }
 
     private function syncAdditionalSignImages(ContentPageRequest $request, ContentPage $contentPage): void
     {
-        $images = collect($contentPage->additional_sign_images ?? []);
-        $remove = collect($request->input('remove_additional_sign_images', []));
+        $images = $this->storedAdditionalSignImages($contentPage);
+        $remove = collect($request->input('remove_additional_sign_images', []))
+            ->map(fn ($path) => MediaStorage::key($path))
+            ->filter();
 
         $images = $images->reject(function ($path) use ($remove) {
             if (! $remove->contains($path)) {
@@ -270,8 +273,7 @@ class ContentPageController extends Controller
         });
 
         foreach (array_slice($request->file('additional_sign_images', []), 0, 8 - $images->count()) as $image) {
-            $path = $image->store('content-pages/additional-signs', 'public');
-            $images->push('/storage/'.$path);
+            $images->push(MediaStorage::store($image, 'content-pages/additional-signs'));
         }
 
         $contentPage->update([
@@ -281,7 +283,7 @@ class ContentPageController extends Controller
 
     private function deleteAdditionalSignImages(ContentPage $contentPage): void
     {
-        collect($contentPage->additional_sign_images ?? [])
+        $this->storedAdditionalSignImages($contentPage)
             ->each(fn ($path) => $this->deleteStoredFile($path));
     }
 
@@ -296,10 +298,16 @@ class ContentPageController extends Controller
 
     private function deleteStoredFile(?string $path): void
     {
-        if (! $path || str_starts_with($path, 'http')) {
-            return;
-        }
+        MediaStorage::delete($path);
+    }
 
-        Storage::disk('public')->delete(ltrim(str_replace('/storage/', '', $path), '/'));
+    private function storedAdditionalSignImages(ContentPage $contentPage): Collection
+    {
+        $paths = $contentPage->getRawOriginal('additional_sign_images');
+        $paths = is_array($paths) ? $paths : json_decode($paths ?: '[]', true);
+
+        return collect($paths ?: [])
+            ->map(fn ($path) => MediaStorage::key($path) ?? $path)
+            ->filter();
     }
 }

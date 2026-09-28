@@ -4,12 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ad;
-use App\Models\Category;
 use App\Models\Language;
 use App\Models\Topic;
 use App\Services\AdLifecycleNotifier;
+use App\Support\MediaStorage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class AdController extends Controller
@@ -86,8 +85,7 @@ class AdController extends Controller
         $data['is_active'] = $request->boolean('is_active', true);
 
         if ($request->hasFile('media')) {
-            $path = $request->file('media')->store('ads', 'public');
-            $data['media_path'] = '/storage/'.$path;
+            $data['media_path'] = MediaStorage::store($request->file('media'), 'ads');
         } elseif ($request->media_url) {
             $data['media_url'] = $request->media_url;
         }
@@ -153,20 +151,19 @@ class AdController extends Controller
         if ($request->hasFile('media')) {
             // Delete old media
             if ($ad->getRawOriginal('media_path')) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $ad->getRawOriginal('media_path')));
+                MediaStorage::delete($ad->getRawOriginal('media_path'));
             }
-            $path = $request->file('media')->store('ads', 'public');
-            $data['media_path'] = '/storage/'.$path;
+            $data['media_path'] = MediaStorage::store($request->file('media'), 'ads');
             $data['media_url'] = null;
         } elseif ($request->media_url) {
             if ($ad->getRawOriginal('media_path')) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $ad->getRawOriginal('media_path')));
+                MediaStorage::delete($ad->getRawOriginal('media_path'));
             }
             $data['media_path'] = null;
             $data['media_url'] = $request->media_url;
         } elseif ($request->boolean('remove_media')) {
             if ($ad->getRawOriginal('media_path')) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $ad->getRawOriginal('media_path')));
+                MediaStorage::delete($ad->getRawOriginal('media_path'));
             }
             $data['media_path'] = null;
             $data['media_url'] = null;
@@ -183,7 +180,7 @@ class AdController extends Controller
     public function destroy(Ad $ad)
     {
         if ($ad->getRawOriginal('media_path')) {
-            Storage::disk('public')->delete(str_replace('/storage/', '', $ad->getRawOriginal('media_path')));
+            MediaStorage::delete($ad->getRawOriginal('media_path'));
         }
         $ad->delete();
 
