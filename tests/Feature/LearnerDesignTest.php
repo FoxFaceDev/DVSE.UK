@@ -12,7 +12,10 @@ test('learn navigation opens a dedicated page with current admin managed section
     $section = Section::create(['name' => 'Custom learning', 'color' => '#b45309']);
     $subSection = SubSection::create(['section_id' => $section->id, 'name' => 'Custom practice']);
 
-    $this->get(route('home'))->assertOk()->assertSee('href="'.route('learn').'"', false);
+    $this->get(route('home'))->assertOk()
+        ->assertSee('aria-label="Site footer"', false)
+        ->assertSee('href="'.route('about').'"', false)
+        ->assertDontSee('class="bottom-nav"', false);
     $this->get(route('learn'))->assertOk()->assertSee('Custom learning')->assertSee('Custom practice')
         ->assertSee(route('frontend.sub_section', $subSection), false)->assertSee('#b45309');
 

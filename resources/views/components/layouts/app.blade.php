@@ -231,13 +231,5 @@
             </div>
         </div>
     </footer>
-    @unless(request()->routeIs('theory.*start', 'theory.practice', 'theory.hazard_study'))
-    <nav class="bottom-nav" aria-label="Main navigation">
-        <a href="{{ route('home') }}" @if(request()->routeIs('home')) aria-current="page" @endif><x-study-icon type="home" /><span>Home</span></a>
-        <a href="{{ route('learn') }}" @if(request()->routeIs('learn', 'frontend.*', 'theory.*')) aria-current="page" @endif><x-study-icon /><span>Learn</span></a>
-        <a href="{{ route('history') }}" @if(request()->routeIs('history')) aria-current="page" @endif><x-study-icon type="clock" /><span>History</span></a>
-        <a href="{{ auth('web')->check() ? route('account.show') : route('login') }}" @if(request()->routeIs('account.*', 'login', 'register')) aria-current="page" @endif><x-study-icon type="user" /><span>{{ auth('web')->check() ? 'Account' : 'Sign in' }}</span></a>
-    </nav>
-    @endunless
 </body>
 </html>
