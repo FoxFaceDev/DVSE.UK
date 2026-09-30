@@ -1,0 +1,287 @@
+.app-footer {
+  /* Dynamic fluid sizing between Mobile (360px) and Desktop (1200px) */
+  --card-height: clamp(125px, 20vw, 240px);
+  --icon-size: clamp(38px, 6.5vw, 72px);
+  --font-label: clamp(9.5px, 1.4vw, 18px);
+  --font-footer: clamp(9px, 1.1vw, 15px);
+  --underline-w: clamp(18px, 3.2vw, 36px);
+  --divider-h: clamp(32px, 5.5vw, 65px);
+  --pad-x: clamp(10px, 4vw, 55px);
+}
+
+.app-footer,
+.app-footer * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+.app-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Outer Wrapper for responsive centering */
+.app-footer .navbar-container {
+  width: 100%;
+  max-width: 1050px;
+}
+
+/* Main Futuristic Container */
+.app-footer .neon-navbar {
+  position: relative;
+  width: 100%;
+  height: var(--card-height);
+  background: radial-gradient(ellipse at center, #041029 0%, #010613 60%, #00030a 100%);
+  border-radius: clamp(16px, 2.5vw, 28px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 15px 40px rgba(0, 10, 35, 0.5), 0 0 1px rgba(0, 119, 255, 0.3);
+  user-select: none;
+  transition: box-shadow 0.4s ease;
+}
+
+.app-footer .neon-navbar:hover {
+  box-shadow: 0 20px 50px rgba(0, 15, 50, 0.7), 0 0 15px rgba(0, 119, 255, 0.2);
+}
+
+/* Dot Matrix Accents (Left & Right) */
+.app-footer .dots-pattern {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: clamp(70px, 18vw, 200px);
+  pointer-events: none;
+  background-image: radial-gradient(#0072ff 1.2px, transparent 1.2px);
+  background-size: 7px 7px;
+  opacity: 0.8;
+  z-index: 1;
+}
+
+.app-footer .dots-left {
+  left: 0;
+  -webkit-mask-image: radial-gradient(circle at 10% 50%, black 20%, transparent 80%);
+  mask-image: radial-gradient(circle at 10% 50%, black 20%, transparent 80%);
+}
+
+.app-footer .dots-right {
+  right: 0;
+  -webkit-mask-image: radial-gradient(circle at 90% 50%, black 20%, transparent 80%);
+  mask-image: radial-gradient(circle at 90% 50%, black 20%, transparent 80%);
+}
+
+/* Navigation Items Grid (Always Horizontal on all devices) */
+.app-footer .nav-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(14px, 3.5vw, 35px) var(--pad-x) 0 var(--pad-x);
+  height: 65%;
+}
+
+/* Nav Item Link with Smooth Transitions */
+.app-footer .nav-item {
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 1.4vw, 16px);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Icon Badge Container */
+.app-footer .icon-wrapper {
+  position: relative;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  min-width: var(--icon-size);
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #061430 0%, #010614 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.35s ease;
+}
+
+/* SVG Ring Overlay */
+.app-footer .ring-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  transition: all 0.35s ease;
+}
+
+/* Inner Vector Icons */
+.app-footer .inner-icon {
+  position: relative;
+  z-index: 3;
+  width: calc(var(--icon-size) * 0.44);
+  height: calc(var(--icon-size) * 0.44);
+  stroke: #ffc400;
+  stroke-width: 1.8;
+  fill: none;
+  filter: drop-shadow(0 0 3px rgba(255, 196, 0, 0.6));
+  transition: all 0.35s ease;
+}
+
+/* Text and Underline Box */
+.app-footer .nav-label-box {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(3px, 0.6vw, 6px);
+}
+
+.app-footer .nav-label {
+  color: #ffffff;
+  font-size: var(--font-label);
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.app-footer .nav-underline {
+  width: var(--underline-w);
+  height: clamp(1.5px, 0.2vw, 2.5px);
+  background-color: #ffb700;
+  box-shadow: 0 0 6px #ffb700;
+  border-radius: 2px;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Vertical Divider */
+.app-footer .divider-line {
+  width: 1px;
+  height: var(--divider-h);
+  background: linear-gradient(to bottom, transparent, #0088ff 45%, #00d4ff 50%, #0088ff 55%, transparent);
+  box-shadow: 0 0 8px rgba(0, 170, 255, 0.8);
+  opacity: 0.85;
+}
+
+/* Bottom Futuristic Circuit Line */
+.app-footer .circuit-line-wrapper {
+  position: relative;
+  width: 100%;
+  height: clamp(16px, 3vw, 32px);
+  margin-top: -6px;
+  z-index: 2;
+}
+
+.app-footer .circuit-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Footer Copyright Section */
+.app-footer .footer-bar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: clamp(6px, 1.2vw, 12px);
+}
+
+.app-footer .copyright-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #ffffff;
+  font-size: var(--font-footer);
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.app-footer .c-icon {
+  width: clamp(13px, 1.6vw, 18px);
+  height: clamp(13px, 1.6vw, 18px);
+  border: 1.2px solid #0088ff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: clamp(8px, 1vw, 11px);
+  color: #0088ff;
+  box-shadow: 0 0 5px #0088ff;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+/* ========================================================
+   ✨ HOVER & INTERACTIVE EFFECTS
+   ======================================================== */
+
+.app-footer .nav-item:hover {
+  transform: translateY(-3px);
+}
+
+.app-footer .nav-item:hover .icon-wrapper {
+  box-shadow: 0 0 25px rgba(0, 136, 255, 0.6);
+  transform: scale(1.05);
+}
+
+.app-footer .nav-item:hover .inner-icon {
+  stroke: #ffffff;
+  filter: drop-shadow(0 0 6px #ffcc00) drop-shadow(0 0 12px #ffae00);
+}
+
+.app-footer .nav-item:hover .nav-label {
+  color: #e2f1ff;
+  text-shadow: 0 0 10px rgba(0, 170, 255, 0.8);
+}
+
+.app-footer .nav-item:hover .nav-underline {
+  width: calc(var(--underline-w) * 1.5);
+  background-color: #ffd700;
+  box-shadow: 0 0 12px #ffd700, 0 0 20px #ff9900;
+}
+
+.app-footer .copyright-badge:hover {
+  color: #00d4ff;
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.7);
+}
+
+.app-footer .copyright-badge:hover .c-icon {
+  border-color: #00ffff;
+  color: #00ffff;
+  box-shadow: 0 0 10px #00ffff;
+}
+
+.app-footer .nav-item:active {
+  transform: scale(0.96);
+}
+
+@media (max-width: 520px) {
+  .app-footer .nav-label-box {
+    align-items: center;
+  }
+
+  .app-footer .nav-item {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-footer *,
+  .app-footer *::before,
+  .app-footer *::after {
+    transition: none !important;
+  }
+}

@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>DVSE.UK - {{ $title ?? 'Home' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lexend:wght@400;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body x-data="{ sidebarOpen: false, selectedMenuItem: null }" @keydown.escape.window="sidebarOpen = false" class="learner-shell bg-surface text-on-surface antialiased min-h-screen flex flex-col font-body">
@@ -142,20 +142,93 @@
     @endif
 
     <!-- Footer Component Area -->
-    <footer class="app-footer bg-white border-t border-gray-200 py-6 mt-8">
-        <div class="max-w-md mx-auto px-4 text-center flex flex-col items-center">
-            <div class="bg-primary-dark px-3 py-1.5 rounded-xl flex items-center justify-center mb-3" style="height: 48px;">
-                <img src="{{ asset('images/logo.png') }}" alt="DVSE.UK Logo" style="height: 36px; max-height: 36px; width: auto; object-fit: contain;">
+    <footer class="app-footer" aria-label="Site footer">
+        <div class="navbar-container">
+            <div class="neon-navbar">
+                <div class="dots-pattern dots-left" aria-hidden="true"></div>
+                <div class="dots-pattern dots-right" aria-hidden="true"></div>
+
+                <nav class="nav-content" aria-label="Footer navigation">
+                    <a href="{{ route('about') }}" class="nav-item">
+                        <span class="icon-wrapper" aria-hidden="true">
+                            <svg class="ring-svg" viewBox="0 0 74 74">
+                                <defs>
+                                    <filter id="footerNeonBlueGlow" x="-30%" y="-30%" width="160%" height="160%">
+                                        <feGaussianBlur stdDeviation="2.5" result="blur" />
+                                        <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                                    </filter>
+                                    <filter id="footerNeonGoldGlow" x="-40%" y="-40%" width="180%" height="180%">
+                                        <feGaussianBlur stdDeviation="2.5" result="blur" />
+                                        <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                                    </filter>
+                                    <linearGradient id="footerGoldArcGrad" x1="0%" y1="0%" x2="100%" y2="80%">
+                                        <stop offset="0%" stop-color="#ffae00" />
+                                        <stop offset="50%" stop-color="#ffe600" />
+                                        <stop offset="100%" stop-color="#ff7b00" stop-opacity="0.1" />
+                                    </linearGradient>
+                                </defs>
+                                <circle cx="37" cy="37" r="34" fill="none" stroke="#0077ff" stroke-width="2" filter="url(#footerNeonBlueGlow)" />
+                                <ellipse cx="58" cy="18" rx="10" ry="6" transform="rotate(25 58 18)" fill="#ffaa00" opacity="0.5" filter="blur(5px)" />
+                                <path d="M 37,3 A 34,34 0 0,1 70,30" fill="none" stroke="url(#footerGoldArcGrad)" stroke-width="2.4" stroke-linecap="round" filter="url(#footerNeonGoldGlow)" />
+                            </svg>
+                            <svg class="inner-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </span>
+                        <span class="nav-label-box"><span class="nav-label">About Us</span><span class="nav-underline"></span></span>
+                    </a>
+
+                    <span class="divider-line" aria-hidden="true"></span>
+
+                    <a href="{{ route('contact') }}" class="nav-item">
+                        <span class="icon-wrapper" aria-hidden="true">
+                            <svg class="ring-svg" viewBox="0 0 74 74">
+                                <circle cx="37" cy="37" r="34" fill="none" stroke="#0077ff" stroke-width="2" filter="url(#footerNeonBlueGlow)" />
+                                <ellipse cx="58" cy="18" rx="10" ry="6" transform="rotate(25 58 18)" fill="#ffaa00" opacity="0.5" filter="blur(5px)" />
+                                <path d="M 37,3 A 34,34 0 0,1 70,30" fill="none" stroke="url(#footerGoldArcGrad)" stroke-width="2.4" stroke-linecap="round" filter="url(#footerNeonGoldGlow)" />
+                            </svg>
+                            <svg class="inner-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                        </span>
+                        <span class="nav-label-box"><span class="nav-label">Contact Us</span><span class="nav-underline"></span></span>
+                    </a>
+
+                    <span class="divider-line" aria-hidden="true"></span>
+
+                    <a href="{{ route('home') }}" class="nav-item">
+                        <span class="icon-wrapper" aria-hidden="true">
+                            <svg class="ring-svg" viewBox="0 0 74 74">
+                                <circle cx="37" cy="37" r="34" fill="none" stroke="#0077ff" stroke-width="2" filter="url(#footerNeonBlueGlow)" />
+                                <ellipse cx="58" cy="18" rx="10" ry="6" transform="rotate(25 58 18)" fill="#ffaa00" opacity="0.5" filter="blur(5px)" />
+                                <path d="M 37,3 A 34,34 0 0,1 70,30" fill="none" stroke="url(#footerGoldArcGrad)" stroke-width="2.4" stroke-linecap="round" filter="url(#footerNeonGoldGlow)" />
+                            </svg>
+                            <svg class="inner-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                        </span>
+                        <span class="nav-label-box"><span class="nav-label">Back to Home</span><span class="nav-underline"></span></span>
+                    </a>
+                </nav>
+
+                <div class="circuit-line-wrapper" aria-hidden="true">
+                    <svg class="circuit-svg" viewBox="0 0 1000 30" fill="none" preserveAspectRatio="none">
+                        <defs>
+                            <linearGradient id="footerNeonFluidGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#0044ff" stop-opacity="0" /><stop offset="10%" stop-color="#0066ff" /><stop offset="70%" stop-color="#0099ff" /><stop offset="82%" stop-color="#ffb700" /><stop offset="100%" stop-color="#ffb700" />
+                            </linearGradient>
+                            <filter id="footerCircuitGlow" x="-20%" y="-50%" width="140%" height="200%">
+                                <feGaussianBlur stdDeviation="2" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                            </filter>
+                        </defs>
+                        <path d="M 20,22 L 725,22 C 755,22 770,8 805,8 L 980,8" stroke="url(#footerNeonFluidGrad)" stroke-width="2.2" filter="url(#footerCircuitGlow)" />
+                        <circle cx="215" cy="22" r="2" fill="#ffffff" filter="url(#footerCircuitGlow)" /><circle cx="215" cy="22" r="4" fill="#00d4ff" opacity="0.8" filter="url(#footerCircuitGlow)" />
+                        <circle cx="805" cy="8" r="2.2" fill="#ffffff" filter="url(#footerCircuitGlow)" /><circle cx="805" cy="8" r="4.5" fill="#ffb700" opacity="0.9" filter="url(#footerCircuitGlow)" />
+                    </svg>
+                </div>
+
+                <div class="footer-bar"><span class="copyright-badge"><span class="c-icon">C</span><span>DVSE.UK</span></span></div>
             </div>
-            <h3 class="font-heading font-bold text-lg text-primary-dark mb-4">DVSE.UK</h3>
-            <div class="flex justify-center gap-6 text-sm text-secondary mb-4">
-                <a href="{{ url('/about-us') }}" class="hover:text-primary transition-colors">About us</a>
-                <a href="{{ url('/contact-us') }}" class="hover:text-primary transition-colors">Contact us</a>
-                <a href="{{ route('home') }}" class="hover:text-primary transition-colors">Back to home</a>
-            </div>
-            <p class="text-xs text-gray-400 flex items-center justify-center gap-1">
-                <span>&copy; DVSE.UK</span>
-            </p>
         </div>
     </footer>
     @unless(request()->routeIs('theory.*start', 'theory.practice', 'theory.hazard_study'))
