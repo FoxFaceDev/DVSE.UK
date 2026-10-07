@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Section;
 use App\Models\SubSection;
+use App\Rules\SafeIconFile;
 use App\Support\MediaStorage;
 use Illuminate\Http\Request;
 
@@ -16,7 +17,7 @@ class SubSectionController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:180',
             'color' => 'nullable|string|max:50',
-            'icon' => 'nullable|image|max:2048',
+            'icon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp,svg', 'max:2048', new SafeIconFile],
         ]);
 
         $subSection = new SubSection;
@@ -50,7 +51,7 @@ class SubSectionController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:180',
             'color' => 'nullable|string|max:50',
-            'icon' => 'nullable|image|max:2048',
+            'icon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp,svg', 'max:2048', new SafeIconFile],
         ]);
 
         $subSection->name = $validated['name'];

@@ -89,8 +89,8 @@
                                 <img src="{{ $subSection->icon_path }}" alt="Current Icon" class="w-10 h-10 object-contain">
                             </div>
                         @endif
-                        <input type="file" name="icon" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary hover:file:bg-primary-100">
-                        <p class="text-[10px] text-gray-400 mt-1">Leave blank to keep current icon</p>
+                        <input type="file" name="icon" accept=".svg,image/svg+xml,image/jpeg,image/png,image/webp,image/gif" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary hover:file:bg-primary-100">
+                        <p class="text-[10px] text-gray-400 mt-1">SVG, JPG, PNG, WebP or GIF; maximum 2 MB. Leave blank to keep the current icon.</p>
                     </div>
                     <div class="flex justify-end gap-3">
                         <button type="button" onclick="document.getElementById('editSubSectionModal{{ $subSection->id }}').classList.add('hidden')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">Cancel</button>
@@ -138,7 +138,8 @@
                 </div>
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Icon Image</label>
-                    <input type="file" name="icon" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary hover:file:bg-primary-100">
+                    <input type="file" name="icon" accept=".svg,image/svg+xml,image/jpeg,image/png,image/webp,image/gif" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary hover:file:bg-primary-100">
+                    <p class="text-[10px] text-gray-400 mt-1">SVG, JPG, PNG, WebP or GIF; maximum 2 MB.</p>
                 </div>
                 <div class="flex justify-end gap-3">
                     <button type="button" onclick="document.getElementById('createSubSectionModal').classList.add('hidden')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">Cancel</button>

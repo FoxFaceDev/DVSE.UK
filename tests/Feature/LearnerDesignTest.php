@@ -73,6 +73,53 @@ test('admin icon replacements are immediately served to admin and learner cards'
     Storage::disk('public')->assertExists(str_replace('/storage/', '', $subSection->getRawOriginal('icon_path')));
 });
 
+test('admins can upload safe SVG icons for sections and sub-sections', function () {
+    Storage::fake('public');
+    $admin = Admin::create(['name' => 'SVG Admin', 'email' => 'svg-icons@example.com', 'password' => bcrypt('password')]);
+    $section = Section::create(['name' => 'Theory', 'color' => '#245aa2']);
+    $subSection = SubSection::create(['section_id' => $section->id, 'name' => 'Practice']);
+    $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path fill="#1664f5" d="M4 4h24v24H4z"/></svg>';
+
+    $this->actingAs($admin, 'admin')->put(route('admin.sections.update', $section), [
+        'name' => 'Theory',
+        'color' => '#245aa2',
+        'icon' => UploadedFile::fake()->createWithContent('section-icon.svg', $svg),
+    ])->assertRedirect();
+
+    $this->actingAs($admin, 'admin')->put(route('admin.sections.sub_sections.update', [$section, $subSection]), [
+        'name' => 'Practice',
+        'color' => '#245aa2',
+        'icon' => UploadedFile::fake()->createWithContent('sub-section-icon.svg', $svg),
+    ])->assertRedirect();
+
+    $section->refresh();
+    $subSection->refresh();
+
+    expect($section->getRawOriginal('icon_path'))->toEndWith('.svg')
+        ->and($subSection->getRawOriginal('icon_path'))->toEndWith('.svg');
+    Storage::disk('public')->assertExists($section->getRawOriginal('icon_path'));
+    Storage::disk('public')->assertExists($subSection->getRawOriginal('icon_path'));
+    $this->get($section->icon_path)->assertOk()->assertHeader('content-type', 'image/svg+xml');
+    $this->get($subSection->icon_path)->assertOk()->assertHeader('content-type', 'image/svg+xml');
+    $this->get(route('home'))->assertSee($section->icon_path, false);
+    $this->get(route('frontend.section', $section))->assertSee($subSection->icon_path, false);
+});
+
+test('unsafe SVG icons are rejected', function () {
+    Storage::fake('public');
+    $admin = Admin::create(['name' => 'SVG Safety Admin', 'email' => 'svg-safety@example.com', 'password' => bcrypt('password')]);
+    $section = Section::create(['name' => 'Theory', 'color' => '#245aa2']);
+    $unsafeSvg = '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script><rect width="10" height="10"/></svg>';
+
+    $this->actingAs($admin, 'admin')->from(route('admin.home'))->put(route('admin.sections.update', $section), [
+        'name' => 'Theory',
+        'color' => '#245aa2',
+        'icon' => UploadedFile::fake()->createWithContent('unsafe.svg', $unsafeSvg),
+    ])->assertRedirect(route('admin.home'))->assertSessionHasErrors('icon');
+
+    expect($section->refresh()->getRawOriginal('icon_path'))->toBeNull();
+});
+
 test('mock tests appear after categories and topics', function () {
     $section = Section::create(['name' => 'Theory']);
     $subSection = SubSection::create(['section_id' => $section->id, 'name' => 'Practice']);

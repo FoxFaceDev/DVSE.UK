@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Section;
+use App\Rules\SafeIconFile;
 use App\Support\MediaStorage;
 use Illuminate\Http\Request;
 
@@ -15,7 +16,7 @@ class SectionController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:180',
             'color' => 'nullable|string|max:50',
-            'icon' => 'nullable|image|max:2048',
+            'icon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp,svg', 'max:2048', new SafeIconFile],
         ]);
 
         $section = new Section;
@@ -48,7 +49,7 @@ class SectionController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:180',
             'color' => 'nullable|string|max:50',
-            'icon' => 'nullable|image|max:2048',
+            'icon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp,svg', 'max:2048', new SafeIconFile],
         ]);
 
         $section->name = $validated['name'];
