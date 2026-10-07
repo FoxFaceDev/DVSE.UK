@@ -10,14 +10,14 @@
                 <p class="mt-2 leading-6 text-gray-600">We will no longer send marketing emails to {{ $user->email }}. Essential account and security emails are not affected.</p>
             @else
                 <h1 class="mt-4 font-heading text-2xl font-bold text-primary-dark">Unsubscribe from marketing emails?</h1>
-                <p class="mt-2 leading-6 text-gray-600">This will stop DVSE.UK offers, product news and promotional emails to {{ $user->email }}.</p>
+                <p class="mt-2 leading-6 text-gray-600">This will stop Rivex.uk offers, product news and promotional emails to {{ $user->email }}.</p>
                 <form method="POST" action="{{ url()->full() }}" class="mt-6">
                     @csrf
                     <button type="submit" class="min-h-12 w-full rounded-xl bg-primary px-5 py-3 font-bold text-white hover:bg-primary-dark">Unsubscribe</button>
                 </form>
             @endif
 
-            <a href="{{ route('home') }}" class="mt-5 inline-block text-sm font-semibold text-primary hover:underline">Return to DVSE.UK</a>
+            <a href="{{ route('home') }}" class="mt-5 inline-block text-sm font-semibold text-primary hover:underline">Return to Rivex.uk</a>
         </div>
     </div>
 </x-layouts.app>

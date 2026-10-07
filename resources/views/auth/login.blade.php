@@ -51,7 +51,7 @@
             </form>
 
             <div class="mt-7 pt-6 border-t border-gray-100 text-center text-sm text-gray-500">
-                New to DVSE.UK?
+                New to Rivex.uk?
                 <a href="{{ route('register') }}" class="font-semibold text-primary hover:text-primary-dark">Create an account</a>
             </div>
         </div>

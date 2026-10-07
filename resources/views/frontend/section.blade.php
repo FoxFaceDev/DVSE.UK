@@ -1,27 +1,13 @@
-<x-layouts.app :showBack="true" :backUrl="route('home')" title="{{ $section->name }}">
-    <div class="space-y-6">
-        <div class="page-intro">
-            <h1 class="font-heading font-bold text-2xl mb-2" style="color: {{ $section->color ?? '#3b82f6' }}">{{ $section->name }}</h1>
-            <p class="text-secondary text-sm">Choose your next step. Every session counts.</p>
-        </div>
-
-        <div class="space-y-4">
-            @forelse($section->subSections as $subSection)
-                <x-mode-card :href="route('frontend.sub_section', $subSection->id)" :name="$subSection->name" :description="$subSection->description" :image="$subSection->icon_path" :color="$subSection->color ?? $section->color" :index="$loop->index" />
-            @empty
-                <div class="p-8 text-center text-gray-500 bg-white rounded-lg border border-gray-100">
-                    No sub-sections available yet. Please check back later.
-                </div>
-            @endforelse
-        </div>
-        
-        @if($section->topics->isNotEmpty())
-            <h3 class="font-heading font-bold text-lg mt-6 mb-3 text-gray-700">Topics</h3>
-            <div class="learning-card-grid">
-                @foreach($section->topics as $topic)
-                    <x-topic-card :topic="$topic" :color="$section->color" />
-                @endforeach
-            </div>
-        @endif
-    </div>
-</x-layouts.app>
+<x-layouts.rivex page="section" :title="$section->name" :heading="$section->name" subheading="Choose your next step. Every session counts.">
+    @php($fallbackIcons = ['icon-theory.svg', 'icon-hazard.svg', 'icon-highway.svg', 'icon-signs.svg', 'icon-perks.svg'])
+    <div class="rivex-stage"><ul class="rivex-cards rivex-cards--section">
+        @foreach($section->subSections as $subSection)
+            <x-rivex-card :href="route('frontend.sub_section', $subSection)" :name="$subSection->name" :description="$subSection->description" :color="$subSection->color ?? $section->color" :image="$subSection->icon_path" :fallback-image="$fallbackIcons[$loop->index % count($fallbackIcons)]" :compact="true" :index="$loop->index" />
+        @endforeach
+        @foreach($section->topics as $topic)
+            @php($cardIndex = $section->subSections->count() + $loop->index)
+            <x-rivex-card :href="$topic->cgi_content_pages_count ? route('theory.hazard_library', $topic) : route('theory.practice', $topic)" :name="$topic->name_en" :color="$section->color" :fallback-image="$fallbackIcons[$cardIndex % count($fallbackIcons)]" :compact="true" :index="$cardIndex" />
+        @endforeach
+        @if($section->subSections->isEmpty() && $section->topics->isEmpty())<li class="rivex-empty">No items are available in this section yet.</li>@endif
+    </ul></div>
+</x-layouts.rivex>

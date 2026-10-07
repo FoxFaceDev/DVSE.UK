@@ -65,7 +65,7 @@
                 <div class="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
                     <div>
                         <label for="business_name" class="mb-1 block text-sm">Business or organisation name *</label>
-                        <input id="business_name" name="business_name" type="text" maxlength="150" required value="{{ old('business_name', 'DVSE.UK') }}" class="w-full">
+                        <input id="business_name" name="business_name" type="text" maxlength="150" required value="{{ old('business_name', 'Rivex.uk') }}" class="w-full">
                     </div>
                     <div>
                         <label for="contact_email" class="mb-1 block text-sm">Contact email *</label>

@@ -15,6 +15,6 @@ class AdActivated extends Mailable
 
     public function build()
     {
-        return $this->subject('Your advertisement is now live on DVSE Platform')->view('emails.ad_activated');
+        return $this->subject('Your advertisement is now live on Rivex.uk')->view('emails.ad_activated');
     }
 }

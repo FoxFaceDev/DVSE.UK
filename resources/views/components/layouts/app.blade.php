@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#102b46">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>DVSE.UK - {{ $title ?? 'Home' }}</title>
+    <title>Rivex.uk - {{ $title ?? 'Home' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lexend:wght@400;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>[x-cloak] { display: none !important; }</style>
@@ -22,11 +22,11 @@
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 </a>
                 @endif
-                <a href="{{ route('home') }}" class="flex items-center gap-2" aria-label="DVSE.UK home">
+                <a href="{{ route('home') }}" class="flex items-center gap-2" aria-label="Rivex.uk home">
                     <div class="bg-primary-dark px-2 py-1 rounded-lg flex items-center justify-center" style="height: 36px;">
-                        <img src="{{ asset('images/logo.png') }}" alt="DVSE.UK Logo" style="height: 28px; max-height: 28px; width: auto; object-fit: contain;">
+                        <img src="{{ asset('images/rivex/logo.png') }}" alt="Rivex.uk Logo" style="height: 28px; max-height: 28px; width: auto; object-fit: contain;">
                     </div>
-                    <span class="font-heading font-bold text-xl text-primary-dark tracking-wide">DVSE.UK<small class="brand-tagline">Drive safer. Go further.</small></span>
+                    <span class="font-heading font-bold text-xl text-primary-dark tracking-wide">Rivex.uk<small class="brand-tagline">Drive your future.</small></span>
                 </a>
             </div>
             
@@ -106,12 +106,12 @@
             <div role="status" class="mb-5 rounded-xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm text-primary-dark">
                 @switch(session('status'))
                     @case('verification-link-sent') A fresh verification link has been sent to your email. @break
-                    @case('email-verified') Your email is verified. Welcome to DVSE.UK! @break
+                    @case('email-verified') Your email is verified. Welcome to Rivex.uk! @break
                     @case('profile-updated') Your account details were updated. @break
                     @case('profile-updated-verification-sent') Your details were updated. Please verify your new email address. @break
                     @case('password-updated') Your password was changed successfully. @break
-                    @case('marketing-subscribed') You are now subscribed to DVSE.UK marketing emails. @break
-                    @case('marketing-unsubscribed') You have unsubscribed from DVSE.UK marketing emails. @break
+                    @case('marketing-subscribed') You are now subscribed to Rivex.uk marketing emails. @break
+                    @case('marketing-unsubscribed') You have unsubscribed from Rivex.uk marketing emails. @break
                     @case('account-deleted') Your account has been deleted. @break
                     @default {{ session('status') }}
                 @endswitch
@@ -136,7 +136,7 @@
     </main>
 
     @if($showWhatsappButton ?? false)
-        <a href="https://wa.me/{{ preg_replace('/\D+/', '', $whatsappNumber) }}" target="_blank" rel="noopener" aria-label="Chat with DVSE on WhatsApp" class="whatsapp-button fixed bottom-5 right-5 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-green-600 text-white shadow-lg transition hover:scale-105 hover:bg-green-700">
+        <a href="https://wa.me/{{ preg_replace('/\D+/', '', $whatsappNumber) }}" target="_blank" rel="noopener" aria-label="Chat with Rivex.uk on WhatsApp" data-legacy-label="Chat with DVSE on WhatsApp" class="whatsapp-button fixed bottom-5 right-5 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-green-600 text-white shadow-lg transition hover:scale-105 hover:bg-green-700">
             <svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L.2 24l6.5-1.7a11.8 11.8 0 0 0 5.4 1.4h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.2-1.2-6.1-3.5-8.4Zm-8.4 18.2c-1.7 0-3.4-.5-4.9-1.3l-.4-.2-3.9 1 1-3.8-.2-.4a9.8 9.8 0 1 1 8.4 4.7Zm5.4-7.3c-.3-.1-1.8-.9-2.1-1-.3-.1-.5-.1-.7.2l-.9 1.1c-.2.3-.5.3-.8.1-2-.9-3.3-1.7-4.6-4-.3-.6.3-.6.9-1.6.1-.2.1-.4 0-.6l-.9-2.2c-.2-.5-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.9s1.2 3.3 1.4 3.6c.2.2 2.5 3.8 6 5.3 2.2.9 3.1 1 4.2.8.7-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.3-.6-.4Z"/></svg>
         </a>
     @endif
@@ -227,7 +227,7 @@
                     </svg>
                 </div>
 
-                <div class="footer-bar"><span class="copyright-badge"><span class="c-icon">C</span><span>DVSE.UK</span></span></div>
+                <div class="footer-bar"><span class="copyright-badge"><span class="c-icon">C</span><span>Rivex.uk</span></span></div>
             </div>
         </div>
     </footer>

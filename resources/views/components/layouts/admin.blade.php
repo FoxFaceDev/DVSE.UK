@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Admin Portal - DVSE.UK</title>
+    <title>Admin Portal - Rivex.uk</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
     <style>[x-cloak] { display: none !important; }</style>
@@ -14,9 +14,9 @@
     <!-- Sidebar -->
     <aside class="w-64 flex-shrink-0 bg-primary-dark text-white flex flex-col">
         <div class="p-6 flex flex-col items-center border-b border-primary/20">
-            <img src="{{ asset('images/logo.png') }}" alt="DVSE.UK Logo" style="height: 64px; max-height: 64px; width: auto; object-fit: contain;" class="mb-3 bg-white/10 p-2 rounded-lg">
+            <img src="{{ asset('images/rivex/logo.png') }}" alt="Rivex.uk Logo" style="height: 64px; max-height: 64px; width: auto; object-fit: contain;" class="mb-3 bg-white/10 p-2 rounded-lg">
             <h1 class="text-xl font-heading font-bold text-center">Control Panel</h1>
-            <p class="text-primary-100 text-xs mt-1 text-center">DVSE.UK Administration</p>
+            <p class="text-primary-100 text-xs mt-1 text-center">Rivex.uk Administration</p>
         </div>
         <nav class="flex-1 px-4 py-4 space-y-2">
             <a href="{{ route('admin.home') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.home', 'admin.sections.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Dashboard</a>
@@ -31,7 +31,7 @@
             <a href="{{ route('admin.email-advertisements.create') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.email-advertisements.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Email Campaigns</a>
         </nav>
         <div class="p-4 border-t border-primary/30 text-center text-sm text-gray-300">
-            &copy; DVSE.UK
+            &copy; Rivex.uk
         </div>
     </aside>
 

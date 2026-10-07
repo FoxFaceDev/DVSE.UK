@@ -3,7 +3,7 @@
         <div class="bg-white rounded-2xl p-5 sm:p-8 shadow-lg shadow-primary/5 border border-gray-100">
             <div class="text-center mb-7">
                 <h1 class="text-2xl font-heading font-bold text-primary-dark">Set a new password</h1>
-                <p class="text-gray-500 mt-2 text-sm">Choose a new password for your DVSE.UK account.</p>
+                <p class="text-gray-500 mt-2 text-sm">Choose a new password for your Rivex.uk account.</p>
             </div>
 
             @if($errors->any())

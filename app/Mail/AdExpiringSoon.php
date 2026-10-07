@@ -15,6 +15,6 @@ class AdExpiringSoon extends Mailable
 
     public function build()
     {
-        return $this->subject('Your DVSE Platform advertisement expires in one week')->view('emails.ad_expiring');
+        return $this->subject('Your Rivex.uk advertisement expires in one week')->view('emails.ad_expiring');
     }
 }

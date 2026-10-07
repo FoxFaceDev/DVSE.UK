@@ -87,7 +87,7 @@
         <section class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-100">
                 <h2 class="font-heading font-bold text-primary-dark">Marketing emails</h2>
-                <p class="mt-1 text-xs text-gray-500">Choose whether DVSE.UK may email you about learning products, services and promotions.</p>
+                <p class="mt-1 text-xs text-gray-500">Choose whether Rivex.uk may email you about learning products, services and promotions.</p>
             </div>
             <form method="POST" action="{{ route('account.marketing-preferences.update') }}" class="p-5">
                 @csrf @method('PATCH')
@@ -142,7 +142,7 @@
         <section class="rounded-2xl border border-red-100 bg-red-50/60 p-5">
             <h2 class="font-heading font-bold text-red-800">Delete account</h2>
             <p class="mt-1 text-sm leading-5 text-red-700">This permanently removes your profile and test history.</p>
-            <form method="POST" action="{{ route('account.destroy') }}" class="mt-4 space-y-3" onsubmit="return confirm('Delete your DVSE.UK account and all test history? This cannot be undone.');">
+            <form method="POST" action="{{ route('account.destroy') }}" class="mt-4 space-y-3" onsubmit="return confirm('Delete your Rivex.uk account and all test history? This cannot be undone.');">
                 @csrf @method('DELETE')
                 <label for="delete-password" class="block text-sm font-semibold text-red-800">Confirm with your password</label>
                 <input id="delete-password" type="password" name="password" required autocomplete="current-password" class="w-full min-h-12 px-4 py-3 rounded-xl bg-white border border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none">

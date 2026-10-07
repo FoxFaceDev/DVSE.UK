@@ -36,7 +36,7 @@
 
         @if(count($socialLinks))
             <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-                <h2 class="font-heading text-lg font-bold text-slate-900">Follow DVSE.UK</h2>
+                <h2 class="font-heading text-lg font-bold text-slate-900">Follow Rivex.uk</h2>
                 <p class="mt-1 text-sm text-slate-500">News, driving tips and platform updates.</p>
                 <div class="mt-4 grid grid-cols-2 gap-3">
                     @foreach($socialLinks as $network => $url)

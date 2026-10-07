@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - DVSE.UK</title>
+    <title>Admin Login - Rivex.uk</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lexend:wght@400;600;700&family=Outfit:wght@400;500;700;900&display=swap" rel="stylesheet">
 </head>
@@ -18,10 +18,10 @@
         <!-- Logo/Header Area -->
         <div class="text-center mb-8 flex flex-col items-center">
             <div class="bg-primary-dark p-4 rounded-2xl shadow-md border border-primary/20 mb-6 inline-block">
-                <img src="{{ asset('images/logo.png') }}" alt="DVSE.UK Logo" class="h-12 w-auto object-contain">
+                <img src="{{ asset('images/rivex/logo.png') }}" alt="Rivex.uk Logo" class="h-12 w-auto object-contain">
             </div>
             <h1 class="text-3xl font-heading font-black text-gray-900 tracking-tight">Admin Portal</h1>
-            <p class="text-gray-500 mt-2 font-medium">Secure access to DVSE management</p>
+            <p class="text-gray-500 mt-2 font-medium">Secure access to Rivex.uk management</p>
         </div>
 
         <!-- Login Card -->
@@ -40,7 +40,7 @@
                         </span>
                         <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
                                class="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all @error('email') border-red-500 bg-red-50 @enderror"
-                               placeholder="admin@dvse.uk">
+                               placeholder="admin@rivex.uk">
                     </div>
                     @error('email')
                         <p class="mt-2 text-sm text-red-500 font-medium">{{ $message }}</p>
@@ -100,7 +100,7 @@
 
         <!-- Footer -->
         <p class="text-center mt-8 text-gray-400 text-sm font-medium">
-            &copy; {{ date('Y') }} DVSE.UK Administration. All rights reserved.
+            &copy; {{ date('Y') }} Rivex.uk Administration. All rights reserved.
         </p>
     </div>
 

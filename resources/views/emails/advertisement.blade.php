@@ -11,7 +11,7 @@
             <td align="center">
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;overflow:hidden;border-radius:16px;background:#ffffff;box-shadow:0 8px 30px rgba(0,52,111,.10);">
                     <tr>
-                        <td style="background:#00346f;padding:22px 28px;color:#ffffff;font-size:22px;font-weight:bold;">DVSE.UK</td>
+                        <td style="background:#00346f;padding:22px 28px;color:#ffffff;font-size:22px;font-weight:bold;">Rivex.uk</td>
                     </tr>
                     @if($imageUrl)
                         <tr>
@@ -35,7 +35,7 @@
                             <strong style="color:#334155;">{{ $businessName }}</strong><br>
                             {{ $businessAddress }}<br>
                             Contact: <a href="mailto:{{ $contactEmail }}" style="color:#004a99;">{{ $contactEmail }}</a>
-                            <p style="margin:14px 0 0;">You received this email because you chose to receive DVSE.UK marketing emails.</p>
+                            <p style="margin:14px 0 0;">You received this email because you chose to receive Rivex.uk marketing emails.</p>
                             <p style="margin:6px 0 0;"><a href="{{ $unsubscribeUrl }}" style="color:#004a99;text-decoration:underline;">Unsubscribe from marketing emails</a></p>
                         </td>
                     </tr>

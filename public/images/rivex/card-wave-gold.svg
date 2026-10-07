@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 180" preserveAspectRatio="xMaxYMid slice">
+  <defs><linearGradient id="g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#fbe3a2" stop-opacity="0"/><stop offset=".55" stop-color="#fbe3a2" stop-opacity=".7"/><stop offset="1" stop-color="#fdf0c9" stop-opacity=".85"/></linearGradient></defs>
+  <path d="M60 180C190 176 270 128 322 74C362 32 396 10 420 0V180Z" fill="url(#g)"/>
+  <path d="M170 180C260 168 340 130 420 84V180Z" fill="#fff" opacity=".4"/>
+</svg>

@@ -2,7 +2,7 @@
     <section class="mb-10">
         <div class="mb-5">
             <h2 class="text-xl font-heading font-bold text-slate-900">User statistics</h2>
-            <p class="mt-1 text-sm text-slate-600">Account types and email verification across DVSE.UK.</p>
+            <p class="mt-1 text-sm text-slate-600">Account types and email verification across Rivex.uk.</p>
         </div>
 
         <div class="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">

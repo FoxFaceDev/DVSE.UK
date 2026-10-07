@@ -22,7 +22,7 @@ class AdvertisementEmail extends Mailable
         public ?string $buttonLabel = null,
         public ?string $linkUrl = null,
         public ?string $imageUrl = null,
-        public string $businessName = 'DVSE.UK',
+        public string $businessName = 'Rivex.uk',
         public string $businessAddress = '',
         public string $contactEmail = '',
         public string $unsubscribeUrl = '',
