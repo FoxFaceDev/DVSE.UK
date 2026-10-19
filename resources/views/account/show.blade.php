@@ -1,4 +1,5 @@
 <x-layouts.app :showBack="true" :backUrl="route('home')" title="My account">
+    @if($user->isInstructor())<a class="v2-button mb-6" href="{{ route('instructors.edit') }}">Manage instructor profile</a>@endif
     <div class="space-y-5">
         <div class="flex items-center gap-4">
             <div class="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center text-2xl font-heading font-bold shadow-sm">

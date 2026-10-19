@@ -1,4 +1,4 @@
-<x-layouts.rivex page="section" :title="$section->name" :heading="$section->name" subheading="Choose your next step. Every session counts.">
+<x-layouts.app :title="$section->name">name" :heading="$section->name" subheading="Choose your next step. Every session counts.">
     @php($fallbackIcons = ['icon-theory.svg', 'icon-hazard.svg', 'icon-highway.svg', 'icon-signs.svg', 'icon-perks.svg'])
     <div class="rivex-stage"><ul class="rivex-cards rivex-cards--section">
         @foreach($section->subSections as $subSection)
@@ -10,4 +10,4 @@
         @endforeach
         @if($section->subSections->isEmpty() && $section->topics->isEmpty())<li class="rivex-empty">No items are available in this section yet.</li>@endif
     </ul></div>
-</x-layouts.rivex>
+</x-layouts.app>

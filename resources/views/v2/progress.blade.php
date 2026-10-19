@@ -1,0 +1,5 @@
+<x-layouts.app title="Learning Progress" :backUrl="route('v2.theory')">
+    <div class="v2-stat-grid" data-progress-summary><div class="v2-stat"><strong data-total-answered>0</strong>Answered</div><div class="v2-stat"><strong data-total-correct>0</strong>Correct</div><div class="v2-stat"><strong data-total-flags>0</strong>Flagged</div></div>
+    <p class="my-5 text-sm text-secondary">Revision progress and flags are saved on this device.</p><a class="v2-button" href="{{ route('v2.revision') }}">Continue revising</a>
+    <section class="v2-panel mt-6"><h2>Recent mock tests</h2>@if($histories->isNotEmpty())<table class="v2-table"><thead><tr><th>Date</th><th>Score</th><th>Result</th></tr></thead><tbody>@foreach($histories as $history)<tr><td>{{ $history->created_at->format('d M Y') }}</td><td>{{ $history->score }}/{{ $history->total_questions }}</td><td>{{ $history->passed ? 'Passed' : 'Keep practising' }}</td></tr>@endforeach</tbody></table>@else<p>No saved mock tests yet.</p>@guest('web')<a class="v2-link" href="{{ route('login') }}">Sign in to save your mock test history</a>@endguest @endif</section>
+</x-layouts.app>

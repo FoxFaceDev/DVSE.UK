@@ -1,277 +1,76 @@
-<x-layouts.app :showBack="false" title="Mock Test Theory">
-    <!-- Receive data from Laravel -->
-    <div x-data="mockTestRunner()" x-init="initData({{ Js::from($questions) }})" class="space-y-6 max-w-md mx-auto">
-        
-        <!-- Loading state -->
-        <template x-if="!initialized">
-            <div class="p-10 text-center"><p class="text-gray-500 animate-pulse font-medium">Preparing official exam...</p></div>
-        </template>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#014cc1">
+  <title>Questions 2/50 – RIVEX.UK</title>
+  <meta name="description" content="Theory test question 2 of 50.">
+  <link rel="icon" href="{{ asset('design-v2/Questions_media/img/logo.png') }}" type="image/png">
+  <link rel="preload" href="{{ asset('design-v2/Questions_media/fonts/plus-jakarta-sans-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ asset('design-v2/Questions_media/fonts/open-sans-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{ asset('design-v2/Questions_media/css/questions.css') }}">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  @vite('resources/js/app.js')
+  <link rel="stylesheet" href="{{ asset('design-v2/ui.css') }}">
+</head>
+<body x-data="v2Exam({{ Js::from(['questions'=>$questions, 'duration'=>$durationMinutes, 'auto'=>request()->boolean('auto'), 'voice'=>request()->boolean('voice'), 'submit'=>route('theory.mock_test_submit'), 'back'=>isset($mockTest) ? route('theory.dynamic_mock_info', $mockTest) : route('theory.mock_test_info', $subSection)]) }})" :class="current?.media_source ? 'page--media' : 'page--text'" @keydown.escape.window="exitOpen = false">
 
-        <template x-if="initialized && questions.length === 0">
-            <div class="p-10 text-center"><p class="text-gray-500">No questions found.</p></div>
-        </template>
+  <!-- UI glyphs (inline sprite, no scripts) -->
+  <svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M20 12H5M11.5 5.5 5 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-audio" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9.3h3.6L11.4 5c.7-.6 1.6-.1 1.6.8v12.4c0 .9-.9 1.4-1.6.8l-4.8-4.3H3a1 1 0 0 1-1-1v-3.4a1 1 0 0 1 1-1z"/><path d="M16 8.8a4.6 4.6 0 0 1 0 6.4M18.9 6a8.6 8.6 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 6.8V12h4.2"/></g></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M14.5 5 7.5 12l7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="m9.5 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M6 21V4M6 5h11.5l-3 4.2 3 4.3H6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </svg>
 
-        <template x-if="initialized && questions.length > 0">
-            <div>
-                <!-- Top Indicator & Timer -->
-                <div class="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
-                    <div class="text-sm font-bold text-gray-800 bg-gray-100 px-3 py-1.5 rounded-lg flex items-center gap-2">
-                        <span x-text="String(displayQuestionNumber).padStart(2, '0')"></span> / <span x-text="questions.length"></span>
-                    </div>
-                    
-                    <div class="flex items-center gap-2 px-4 py-1.5 rounded-lg font-bold shadow-sm border transition-colors"
-                         :class="timeLeft <= 300 ? 'bg-red-50 text-red-600 border-red-200 animate-pulse' : 'bg-white text-gray-800 border-gray-200'">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <span x-text="formattedTime" class="tracking-widest"></span>
-                    </div>
-
-                    <div class="flex gap-2">
-                        <span class="rounded-full bg-blue-50 px-3 py-2 text-xs font-bold text-primary">English only</span>
-                        <button @click="confirmExit()" class="p-2 text-gray-400 hover:text-error hover:bg-error-container rounded-full transition-colors" title="Exit Exam">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Progress Bar -->
-                <div class="w-full bg-gray-100 rounded-full h-1.5 mb-6 overflow-hidden">
-                    <div class="bg-primary h-1.5 rounded-full transition-all duration-300" :style="'width: ' + ((displayQuestionNumber / questions.length) * 100) + '%'"></div>
-                </div>
-
-                <!-- ============ QUESTION CARD ============ -->
-                <div>
-                    <!-- Question Area -->
-                    <div class="bg-white p-6 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 mb-6">
-                        <!-- Media: Image or GIF -->
-                        <template x-if="currentQuestion.media_source && (currentQuestion.media_type === 'image' || currentQuestion.media_type === 'gif' || (!currentQuestion.media_type && currentQuestion.media_source))">
-                            <img :src="currentQuestion.media_source" 
-                                class="w-full max-h-64 object-contain rounded-lg mb-4 bg-gray-100"
-                                :alt="currentQuestion.text_en">
-                        </template>
-                        
-                        <!-- Media: Video -->
-                        <template x-if="currentQuestion.media_source && currentQuestion.media_type === 'video'">
-                            <div class="w-full mb-4">
-                                <template x-if="getYoutubeId(currentQuestion.media_source)">
-                                    <div class="aspect-video">
-                                        <iframe :key="'yt-' + realQuestionIndex" class="w-full h-full rounded-lg" :src="'https://www.youtube.com/embed/' + getYoutubeId(currentQuestion.media_source) + '?autoplay=1&mute=1'" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                                    </div>
-                                </template>
-                                <template x-if="!getYoutubeId(currentQuestion.media_source)">
-                                    <video :key="'vid-' + realQuestionIndex" :src="currentQuestion.media_source" autoplay muted controls playsinline preload="auto"
-                                        class="w-full max-h-64 rounded-lg bg-gray-100 object-contain"></video>
-                                </template>
-                            </div>
-                        </template>
-                        
-                        <h2 class="font-heading font-medium text-lg text-gray-900 leading-snug" x-text="currentQuestion.text_en"></h2>
-                    </div>
-
-                    <!-- Choices -->
-                    <div class="mb-6" :class="currentQuestion.question_type === 'image_answers' ? 'grid grid-cols-2 gap-3' : 'space-y-3'">
-                        <template x-for="(choice, index) in currentQuestion.choices" :key="choice.id">
-                            <button 
-                                @click="selectChoice(choice)"
-                                :class="{
-                                    'border-gray-200 hover:border-primary hover:bg-surface-dim bg-white': selectedChoiceId !== choice.id,
-                                    'border-primary bg-primary/5 text-primary-dark ring-1 ring-primary shadow-sm': selectedChoiceId === choice.id
-                                }"
-                                class="w-full text-left p-4 rounded-lg border-2 transition-all flex items-start gap-3 group">
-                                
-                                <div class="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
-                                     :class="{
-                                        'border-gray-300 group-hover:border-primary': selectedChoiceId !== choice.id,
-                                        'border-primary bg-primary text-white': selectedChoiceId === choice.id
-                                     }">
-                                     <template x-if="selectedChoiceId === choice.id">
-                                        <div class="w-2 h-2 bg-white rounded-full"></div>
-                                     </template>
-                                </div>
-
-                                <div class="flex-1">
-                                    <template x-if="choice.image_path"><img :src="choice.image_path" :alt="choice.text_en || 'Image answer'" class="mb-2 aspect-square w-full rounded-lg object-contain bg-gray-50"></template>
-                                    <div class="font-medium" x-text="choice.text_en"></div>
-                                </div>
-                            </button>
-                        </template>
-                    </div>
-
-                    <!-- Controls Bottom -->
-                    <div class="flex justify-between items-center pt-4">
-                        <button @click="prevQuestion()" :disabled="realQuestionIndex === 0" class="px-5 py-3 rounded-md font-medium transition-colors disabled:opacity-50 text-secondary bg-gray-100 hover:bg-gray-200">Back</button>
-
-                        <template x-if="realQuestionIndex < questions.length - 1">
-                            <button @click="nextQuestion()" :disabled="!hasAnswered" class="px-8 py-3 rounded-md font-bold text-white bg-primary hover:bg-primary-dark transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">Next</button>
-                        </template>
-
-                        <template x-if="realQuestionIndex === questions.length - 1">
-                            <button @click="finishTest()" :disabled="!hasAnswered" class="px-8 py-3 rounded-md font-bold text-white bg-success hover:bg-green-700 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed">Submit Exam</button>
-                        </template>
-                    </div>
-                </div>
-            </div>
-        </template>
-        <!-- Exit Modal Overlay -->
-        <template x-if="showExitModal">
-            <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-                <!-- Backdrop -->
-                <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" @click="showExitModal = false"></div>
-                
-                <!-- Modal Box -->
-                <div class="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden transform transition-all p-6">
-                    <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
-                        <svg class="w-8 h-8 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    </div>
-                    <h3 class="text-xl font-heading font-bold text-center text-gray-900 mb-2">Quit Mock Test?</h3>
-                    <p class="text-center text-gray-500 mb-6 text-sm">Are you sure you want to quit? Your timer will stop, and your progress will be permanently lost.</p>
-                    
-                    <div class="flex gap-3">
-                        <button @click="showExitModal = false" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
-                            Cancel
-                        </button>
-                        <button @click="executeExit()" class="flex-1 py-3 bg-error hover:bg-red-700 text-white rounded-xl font-bold transition-colors shadow-sm">
-                            Yes, Quit
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </template>
+  <!-- ===== Fixed header: back · "Questions 2/50" · audio, then progress bar + timer (header of theory.html, without the road) ===== -->
+  <header class="top">
+    <div class="appbar">
+      <div class="appbar__inner">
+        <div class="appbar__row">
+        <a class="back" href="#exit" @click.prevent="exitOpen = true" aria-label="Exit exam">
+          <svg class="back__icon" aria-hidden="true"><use href="#i-back"/></svg>
+        </a>
+        <h1 class="appbar__title">Questions <span class="appbar__count" x-text="(index+1)+'/'+questions.length"></span></h1>
+        <button class="back hdr-audio" type="button" @click="speak()" aria-label="Read the question aloud">
+          <svg class="back__icon" aria-hidden="true"><use href="#i-audio"/></svg>
+        </button>
+        </div>
+        <div class="appbar__bar">
+          <progress class="meter" :max="questions.length || 1" :value="index+1" aria-label="Question progress"></progress>
+          <span class="timer" aria-label="Time remaining 56:55"><svg aria-hidden="true"><use href="#i-clock"/></svg><span x-text="time"></span></span>
+        </div>
+      </div>
     </div>
+  </header>
 
-    <script>
-        function mockTestRunner() {
-            return {
-                initialized: false,
-                showExitModal: false,
-                questions: [],
-                realQuestionIndex: 0,
-                hasAnswered: false,
-                selectedChoiceId: null,
-                correctCount: 0,
-                
-                // Answers mapping
-                answers: {}, // map of question_index => choice_id
-                
-                // Timer state (57 minutes)
-                timeLeft: {{ (int) $durationMinutes }} * 60,
-                timerInterval: null,
-                
-                initData(questions) {
-                    this.questions = questions;
-                    
-                    // Prepare media_source
-                    this.questions.forEach(q => {
-                        q.media_source = q.media_path || q.media_url || null;
-                    });
-                    
-                    this.initialized = true;
-                    this.startTimer();
-                },
-                
-                get currentQuestion() {
-                    return this.questions[this.realQuestionIndex];
-                },
+  <!-- ===== Question · (media) · answers ===== -->
+  <main class="stage"><template x-if="current"><section class="panel card" aria-labelledby="q-text"><h2 class="q" id="q-text" x-text="current.text_en"></h2><template x-if="current.media_source"><figure class="media"><template x-if="current.media_type !== 'video'"><img class="media__img" :src="current.media_source" :alt="current.text_en"></template><template x-if="current.media_type === 'video' && !youtube(current.media_source)"><video class="media__img" :src="current.media_source" controls playsinline></video></template><template x-if="current.media_type === 'video' && youtube(current.media_source)"><iframe class="media__img" :src="youtube(current.media_source)" title="Question video" allowfullscreen></iframe></template></figure></template><p class="hint" id="q-hint">Select one answer</p><fieldset class="opts" aria-labelledby="q-text" aria-describedby="q-hint" :class="{'v2-image-answers':current.question_type === 'image_answers'}"><template x-for="choice in current.choices" :key="current.id+'-'+choice.id"><label class="opt"><input class="opt__input" type="radio" :name="'answer-'+current.id" :value="choice.id" :checked="answers[current.id] === choice.id" @change="select(choice)"><span class="opt__box" aria-hidden="true"></span><span class="opt__text"><template x-if="choice.image_path"><img class="v2-choice-image" :src="choice.image_path" :alt="choice.text_en || 'Answer image'"></template><span x-text="choice.text_en"></span></span></label></template></fieldset></section></template><div class="v2-empty" x-show="!current">No questions available.</div></main>
 
-                
-                get displayQuestionNumber() {
-                    return this.realQuestionIndex + 1;
-                },
-                
-                get formattedTime() {
-                    const m = Math.floor(this.timeLeft / 60);
-                    const s = this.timeLeft % 60;
-                    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-                },
+  <!-- ===== Fixed footer (as quiz-en.html): Previous · Flag · Next ===== -->
+  <footer class="dock">
+    <nav class="actions" aria-label="Question actions">
+      <a class="act" href="#previous" @click.prevent="previous()" :aria-disabled="index === 0">
+        <span class="act__btn"><svg class="act__icon" aria-hidden="true"><use href="#i-prev"/></svg></span>
+        <span class="act__label">Previous</span>
+      </a>
+      <label class="act">
+        <input class="act__toggle" type="checkbox" name="flag" aria-label="Flag this question" :checked="isFlagged" @change="toggleFlag()">
+        <span class="act__btn"><svg class="act__icon" aria-hidden="true"><use href="#i-flag"/></svg></span>
+        <span class="act__label">Flag</span>
+      </label>
+      <a class="act" href="#next" @click.prevent="next()">
+        <span class="act__btn"><svg class="act__icon" aria-hidden="true"><use href="#i-next"/></svg></span>
+        <span class="act__label" x-text="index === questions.length-1 ? 'Finish' : 'Next'"></span>
+      </a>
+    </nav>
+  </footer>
 
-                startTimer() {
-                    this.timerInterval = setInterval(() => {
-                        if (this.timeLeft > 0) {
-                            this.timeLeft--;
-                        } else {
-                            clearInterval(this.timerInterval);
-                            this.finishTest(); // Auto submit
-                        }
-                    }, 1000);
-                },
-                
-                selectChoice(choice) {
-                    this.selectedChoiceId = choice.id;
-                    this.hasAnswered = true;
-                    this.answers[this.realQuestionIndex] = {
-                        choice_id: choice.id,
-                        is_correct: choice.is_correct
-                    };
-                },
-                
-                nextQuestion() {
-                    if (this.realQuestionIndex < this.questions.length - 1) {
-                        this.realQuestionIndex++;
-                        this.restoreState();
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                },
-                
-                prevQuestion() {
-                    if (this.realQuestionIndex > 0) {
-                        this.realQuestionIndex--;
-                        this.restoreState();
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                },
-                
-                restoreState() {
-                    const ans = this.answers[this.realQuestionIndex];
-                    if (ans) {
-                        this.hasAnswered = true;
-                        this.selectedChoiceId = ans.choice_id;
-                    } else {
-                        this.hasAnswered = false;
-                        this.selectedChoiceId = null;
-                    }
-                },
-                
-                confirmExit() {
-                    this.showExitModal = true;
-                },
-
-                executeExit() {
-                    window.location.href = "{{ route('home') }}";
-                },
-
-                finishTest() {
-                    if(this.timerInterval) clearInterval(this.timerInterval);
-
-                    const answers = {};
-                    for (const idx in this.answers) {
-                        const question = this.questions[idx];
-                        if (question) answers[question.id] = this.answers[idx].choice_id;
-                    }
-
-                    fetch('{{ route('theory.mock_test_submit') }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({
-                            question_ids: this.questions.map(question => question.id),
-                            answers: answers
-                        })
-                    }).then(response => response.json()).then(data => {
-                        window.location.href = data.redirect;
-                    }).catch(() => {
-                        window.location.href = '{{ route('theory.mock_test_result') }}?correct=0&total=' + this.questions.length;
-                    });
-                },
-
-                getYoutubeId(url) {
-                    if (!url) return null;
-                    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-                    const match = url.match(regExp);
-                    return (match && match[2].length === 11) ? match[2] : null;
-                }
-            }
-        }
-    </script>
-</x-layouts.app>
+<div class="v2-overlay" x-cloak x-show="exitOpen" @click.self="exitOpen=false"><section class="v2-dialog" role="dialog" aria-modal="true" aria-labelledby="exit-title"><h2 id="exit-title">Leave this test?</h2><p>Your current answers will be lost.</p><button class="v2-button" @click="exitOpen=false">Keep going</button><a class="v2-button v2-button--secondary" :href="back">Leave test</a></section></div><div class="v2-error" x-cloak x-show="error" role="alert"><p x-text="error"></p><button class="v2-button" @click="finish()" :disabled="submitting">Retry submission</button></div>
+</body>
+</html>

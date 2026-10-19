@@ -4,7 +4,6 @@ use App\Models\Admin;
 use App\Models\Category;
 use App\Models\Section;
 use App\Models\SubSection;
-use App\Models\Topic;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -13,8 +12,8 @@ test('learn navigation opens a dedicated page with current admin managed section
     $subSection = SubSection::create(['section_id' => $section->id, 'name' => 'Custom practice']);
 
     $this->get(route('home'))->assertOk()
-        ->assertSee('aria-label="Site footer"', false)
-        ->assertSee('href="'.route('about').'"', false)
+        ->assertSee('aria-label="Main navigation"', false)
+        ->assertSee('href="'.route('v2.more').'"', false)
         ->assertDontSee('class="bottom-nav"', false);
     $this->get(route('learn'))->assertOk()->assertSee('Custom learning')->assertSee('Custom practice')
         ->assertSee(route('frontend.sub_section', $subSection), false)->assertSee('#b45309');
@@ -25,7 +24,7 @@ test('learn navigation opens a dedicated page with current admin managed section
     ])->assertRedirect();
 
     $this->get(route('learn'))->assertOk()->assertSee('Renamed learning')->assertSee('#7c3aed')->assertDontSee('Custom learning');
-    $this->get(route('home'))->assertOk()->assertSee('Renamed learning')->assertSee('#7c3aed');
+    $this->get(route('v2.more'))->assertOk()->assertSee('Renamed learning')->assertSee('#7c3aed');
 });
 
 test('category and topic cards retain translations counts routes and inherited colours', function () {
@@ -170,5 +169,5 @@ test('cards use the default description when an admin leaves it empty', function
 
     $this->get(route('home'))
         ->assertOk()
-        ->assertSee('Choose your next step in your learning journey.');
+        ->assertSee('Practise official-style questions and track your progress.');
 });

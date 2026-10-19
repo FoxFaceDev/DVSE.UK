@@ -1,0 +1,4 @@
+<x-layouts.app title="Driving Guidance">
+    <section class="v2-panel"><h2>Build your driving confidence</h2><p>Revise a little at a time, review your mistakes and practise recognising developing hazards.</p><a class="v2-link" href="{{ route('v2.revision') }}">Practise revision questions</a><a class="v2-link" href="{{ route('v2.hazards', ['clips'=>1]) }}">Hazard perception clips</a><a class="v2-link" href="{{ route('instructors.index') }}">Find a driving instructor</a></section>
+    <section class="v2-panel"><h2>Become an instructor</h2><p>Find official information about qualifying as an approved driving instructor.</p><a class="v2-link" href="https://www.gov.uk/become-car-driving-instructor" target="_blank" rel="noopener">Driving instructor qualification guidance on GOV.UK</a><a class="v2-link" href="{{ route('register', ['instructor'=>1]) }}">Already an instructor? Join RIVEX</a></section>
+</x-layouts.app>

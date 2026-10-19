@@ -202,7 +202,7 @@ test('practice receives ads matching the learners account language', function ()
     $this->get(route('theory.practice', $topic))
         ->assertOk()
         ->assertViewHas('ads', fn ($ads) => $ads->pluck('language_id')->values()->all() === [$english->id])
-        ->assertSee('ad.language_id === null || String(ad.language_id) === String(languageId)', false);
+        ->assertSee('v2Quiz(', false);
 });
 
 test('admins can search advertisements by title link language or category', function () {

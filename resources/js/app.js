@@ -1,4 +1,5 @@
 import './bootstrap';
+import './learner-v2';
 
 import Alpine from 'alpinejs';
 import {

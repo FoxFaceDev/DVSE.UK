@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        View::composer(['components.layouts.app', 'components.layouts.rivex'], function ($view) {
+        View::composer(['components.layouts.app', 'components.layouts.rivex', 'home', 'v2.*', 'theory.mock_info', 'theory.mock_result', 'instructors.index'], function ($view) {
             $route = request()->route()?->getName();
             $placement = match (true) {
                 $route === 'home' => 'home',

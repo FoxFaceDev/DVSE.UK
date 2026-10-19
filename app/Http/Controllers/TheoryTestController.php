@@ -56,6 +56,10 @@ class TheoryTestController extends Controller
 
         $languages = Language::active()->get();
 
+        if ($contentPages->isEmpty()) {
+            return view('v2.quiz', compact('topic', 'questions', 'ads', 'languages', 'preferredLanguage') + ['flagged' => false]);
+        }
+
         return view('theory.practice', compact('topic', 'practiceItems', 'ads', 'languages', 'preferredLanguage'));
     }
 
@@ -149,7 +153,7 @@ class TheoryTestController extends Controller
 
     public function mockTestInfo(SubSection $subSection)
     {
-        return view('theory.mock_info', compact('subSection'));
+        return view('theory.mock_info', compact('subSection') + ['startUrl' => route('theory.mock_test_start', $subSection)]);
     }
 
     public function mockTestStart(SubSection $subSection)
@@ -176,6 +180,7 @@ class TheoryTestController extends Controller
 
         $questions->each(fn ($question) => $question->setRelation('choices', $question->choices->shuffle()->values()));
         session(['mock_test_pass_mark' => 43, 'mock_test_duration' => 57]);
+        session(['mock_test_started_at' => now()->timestamp]);
 
         return view('theory.mock_test', compact('subSection', 'questions') + ['mockTest' => null, 'durationMinutes' => 57]);
     }
@@ -187,7 +192,7 @@ class TheoryTestController extends Controller
             return redirect()->route('theory.hazard_mock_info');
         }
 
-        return view('theory.mock_info', ['subSection' => $mockTest->subSection, 'mockTest' => $mockTest]);
+        return view('theory.mock_info', ['subSection' => $mockTest->subSection, 'mockTest' => $mockTest, 'startUrl' => route('theory.dynamic_mock_start', $mockTest)]);
     }
 
     public function dynamicMockStart(MockTest $mockTest)
@@ -200,6 +205,7 @@ class TheoryTestController extends Controller
         $questions = $nonVideoQuestions->concat($videoQuestions)->values();
         $questions->each(fn ($question) => $question->setRelation('choices', $question->choices->shuffle()->values()));
         session(['mock_test_pass_mark' => $mockTest->pass_mark, 'mock_test_duration' => $mockTest->duration_minutes]);
+        session(['mock_test_started_at' => now()->timestamp]);
 
         return view('theory.mock_test', ['subSection' => $mockTest->subSection, 'questions' => $questions, 'mockTest' => $mockTest, 'durationMinutes' => $mockTest->duration_minutes]);
     }
@@ -215,7 +221,12 @@ class TheoryTestController extends Controller
         $passMark = (int) ($result['pass_mark'] ?? $request->session()->get('mock_test_pass_mark', 43));
         $passed = $correct >= $passMark;
 
-        return view('theory.mock_result', compact('correct', 'total', 'passed', 'reviews', 'passMark'));
+        return view('theory.mock_result', compact('correct', 'total', 'passed', 'reviews', 'passMark') + [
+            'bestCategory' => $result['best_category'] ?? null,
+            'worstCategory' => $result['worst_category'] ?? null,
+            'timeTaken' => isset($result['time_taken']) ? gmdate('i:s', $result['time_taken']).' mins' : null,
+            'timeRemaining' => isset($result['time_remaining']) ? gmdate('i:s', $result['time_remaining']).' mins' : null,
+        ]);
     }
 
     public function submitMockTest(Request $request)
@@ -225,26 +236,35 @@ class TheoryTestController extends Controller
             'question_ids.*' => ['integer', 'distinct', 'exists:questions,id'],
             'answers' => ['nullable', 'array'],
             'answers.*' => ['integer'],
+            'time_taken' => ['nullable', 'integer', 'min:0', 'max:86400'],
         ]);
 
         $questionIds = collect($validated['question_ids'])->map(fn ($id) => (int) $id)->values();
-        $questions = Question::with('choices')->whereIn('id', $questionIds)->get()->keyBy('id');
+        $questions = Question::with(['choices', 'topic'])->whereIn('id', $questionIds)->get()->keyBy('id');
         $answers = collect($validated['answers'] ?? []);
         $correct = 0;
         $reviews = [];
+        $categories = [];
 
         foreach ($questionIds as $questionId) {
             $question = $questions->get($questionId);
             $choiceId = (int) ($answers->get((string) $questionId, 0));
+            $category = $question->topic?->name_en ?? 'General';
+            $categories[$category] ??= ['correct' => 0, 'total' => 0];
+            $categories[$category]['total']++;
 
             if ($question && $question->choices->contains(fn ($choice) => $choice->id === $choiceId && $choice->is_correct)) {
                 $correct++;
-            } elseif ($question) {
+                $categories[$category]['correct']++;
+            }
+            if ($question) {
                 $selected = $question->choices->firstWhere('id', $choiceId);
                 $right = $question->choices->firstWhere('is_correct', true);
                 $reviews[] = [
                     'question' => $question->text_en,
                     'question_image' => $question->media_source,
+                    'media_type' => $question->media_type,
+                    'is_correct' => (bool) ($selected?->is_correct ?? false),
                     'selected' => $selected?->text_en,
                     'selected_image' => $selected?->image_path,
                     'correct' => $right?->text_en,
@@ -263,7 +283,14 @@ class TheoryTestController extends Controller
         $total = $questionIds->count();
         $passMark = (int) $request->session()->get('mock_test_pass_mark', 43);
         $passed = $correct >= $passMark;
-        $request->session()->put('mock_test_result', ['correct' => $correct, 'total' => $total, 'reviews' => $reviews, 'pass_mark' => $passMark]);
+        $ranked = collect($categories)->sortByDesc(fn ($score) => $score['correct'] / $score['total']);
+        $duration = (int) $request->session()->get('mock_test_duration', 57) * 60;
+        $elapsed = $request->session()->has('mock_test_started_at')
+            ? max(0, min($duration, now()->timestamp - $request->session()->get('mock_test_started_at')))
+            : min($duration, (int) ($validated['time_taken'] ?? 0));
+        $request->session()->put('mock_test_result', ['correct' => $correct, 'total' => $total, 'reviews' => $reviews, 'pass_mark' => $passMark,
+            'best_category' => $ranked->keys()->first(), 'worst_category' => $ranked->keys()->last(),
+            'time_taken' => $elapsed, 'time_remaining' => max(0, $duration - $elapsed)]);
 
         if (auth('web')->check() && auth('web')->user()->hasVerifiedEmail()) {
             MockTestHistory::create([

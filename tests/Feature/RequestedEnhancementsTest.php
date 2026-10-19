@@ -108,8 +108,8 @@ test('mock test results retain incorrect answers for review', function () {
     $this->post(route('theory.mock_test_submit'), ['question_ids' => [$question->id], 'answers' => [$question->id => $wrong->id]])->assertRedirect();
     $this->get(route('theory.mock_test_result'))
         ->assertOk()
-        ->assertSee('See wrong answers')
-        ->assertSee('x-show="showWrongAnswers"', false)
+        ->assertSee('Review your answers')
+        ->assertSee('id="review"', false)
         ->assertSee('What is correct?')
         ->assertSee('Right');
 });
@@ -155,7 +155,7 @@ test('video advertisements request autoplay with sound', function () {
 
     $this->get(route('theory.practice', $topic))
         ->assertOk()
-        ->assertSee('youtubeEmbedUrl(adData.media_source, true, false)', false)
-        ->assertSee('<video x-ref="adVideo" :src="adData.media_source" autoplay controls playsinline preload="auto"', false)
-        ->assertSee('video.muted = false', false);
+        ->assertSee('youtube(ad.media_source)', false)
+        ->assertSee('<video class="v2-ad-media" :src="ad.media_source" controls autoplay playsinline', false)
+        ->assertDontSee('autoplay muted', false);
 });

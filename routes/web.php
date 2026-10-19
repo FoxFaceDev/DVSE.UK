@@ -22,11 +22,36 @@ use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\HazardMockTestController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IconMediaController;
+use App\Http\Controllers\InstructorController;
+use App\Http\Controllers\LearnerController;
 use App\Http\Controllers\MarketingEmailPreferenceController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\TheoryTestController;
+use App\Http\Controllers\WordHelpController;
+use App\Models\Section;
 use Illuminate\Support\Facades\Route;
+
+Route::post('/questions/{question}/word-help', WordHelpController::class)->middleware(['auth:web', 'verified', 'throttle:10,1'])->name('v2.word-help');
+
+Route::get('/theory', [LearnerController::class, 'theory'])->name('v2.theory');
+Route::get('/revision', [LearnerController::class, 'revision'])->name('v2.revision');
+Route::get('/revision/start', [LearnerController::class, 'revise'])->name('v2.revise');
+Route::get('/flagged-questions', [LearnerController::class, 'revise'])->name('v2.flagged');
+Route::get('/search-questions', [LearnerController::class, 'search'])->name('v2.search');
+Route::get('/learning-progress', [LearnerController::class, 'progress'])->name('v2.progress');
+Route::get('/mock-test', [LearnerController::class, 'mock'])->name('v2.mock');
+Route::get('/hazard-perception', [LearnerController::class, 'hazards'])->name('v2.hazards');
+Route::get('/offers', [LearnerController::class, 'offers'])->name('v2.offers');
+Route::get('/more', fn () => view('v2.more', ['sections' => Section::all()]))->name('v2.more');
+Route::get('/pass-guarantee', fn () => app(LearnerController::class)->information('Pass Guarantee', 'Build your confidence with revision questions, timed mock tests and hazard perception practice. A pass guarantee programme is not currently available.'))->name('v2.guarantee');
+Route::get('/driving-guidance', fn () => view('v2.guidance'))->name('v2.guidance');
+Route::get('/instructors', [InstructorController::class, 'index'])->name('instructors.index');
+Route::get('/instructors/{user}', [InstructorController::class, 'show'])->name('instructors.show');
+Route::middleware('auth:web')->group(function () {
+    Route::get('/instructor-profile', [InstructorController::class, 'edit'])->name('instructors.edit');
+    Route::put('/instructor-profile', [InstructorController::class, 'update'])->name('instructors.update');
+});
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -144,6 +169,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('site-settings', [SiteSettingController::class, 'update'])->name('site-settings.update');
         Route::resource('users', AdminUserController::class)->only(['index', 'edit', 'update', 'destroy']);
         Route::put('users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.reset-password');
+        Route::put('users/{user}/instructor-profile', [AdminUserController::class, 'updateInstructorProfile'])->name('users.instructor-profile.update');
         Route::get('csrf-token', fn () => response()->json(['token' => csrf_token()]))->name('csrf-token');
 
         // Advertisements

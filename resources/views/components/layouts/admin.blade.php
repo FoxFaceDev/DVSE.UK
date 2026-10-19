@@ -6,13 +6,13 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Admin Portal - Rivex.uk</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
     <style>[x-cloak] { display: none !important; }</style>
 </head>
-<body class="admin-shell flex min-h-screen font-body text-slate-950 antialiased">
+<body x-data="{ adminMenuOpen: false }" @keydown.escape.window="adminMenuOpen = false" class="admin-shell flex min-h-screen font-body text-slate-950 antialiased">
+    <div x-cloak x-show="adminMenuOpen" @click="adminMenuOpen = false" class="fixed inset-0 z-40 bg-slate-950/50 lg:hidden"></div>
 
     <!-- Sidebar -->
-    <aside class="w-64 flex-shrink-0 bg-primary-dark text-white flex flex-col">
+    <aside :class="adminMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'" class="fixed inset-y-0 left-0 z-50 flex w-64 flex-shrink-0 flex-col overflow-y-auto bg-gradient-to-b from-blue-700 to-primary-dark text-white transition-transform lg:static lg:translate-x-0">
         <div class="p-6 flex flex-col items-center border-b border-primary/20">
             <img src="{{ asset('images/rivex/logo.png') }}" alt="Rivex.uk Logo" style="height: 64px; max-height: 64px; width: auto; object-fit: contain;" class="mb-3 bg-white/10 p-2 rounded-lg">
             <h1 class="text-xl font-heading font-bold text-center">Control Panel</h1>
@@ -38,10 +38,11 @@
     <!-- Main Content -->
     <div class="flex-1 flex flex-col">
         <header class="border-b border-slate-300 bg-white shadow-sm">
-            <div class="px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center justify-between px-4 py-4 sm:px-8">
+                <button type="button" @click="adminMenuOpen = !adminMenuOpen" :aria-expanded="adminMenuOpen" class="mr-3 rounded-lg bg-blue-50 p-3 text-primary lg:hidden" aria-label="Open administration menu">☰</button>
                 <h2 class="text-xl font-heading text-primary-dark">{{ $title ?? 'Dashboard' }}</h2>
                 <div class="flex items-center gap-4">
-                    <div class="text-sm font-medium text-gray-600">
+                    <div class="hidden text-sm font-medium text-gray-600 sm:block">
                         {{ auth('admin')->user()->name }}
                     </div>
                     <form action="{{ route('admin.logout') }}" method="POST">
@@ -54,7 +55,7 @@
             </div>
         </header>
 
-        <main class="flex-1 p-8">
+        <main class="min-w-0 flex-1 p-4 sm:p-8">
             {{ $slot }}
         </main>
     </div>

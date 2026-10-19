@@ -11,7 +11,7 @@
 
             @if($errors->any())<div role="alert" class="mb-5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">Please correct the highlighted fields below.</div>@endif
 
-            <form action="{{ route('register') }}" method="POST" x-data="Object.assign(registrationForm('', ''), { instructor: @js(old('is_instructor', 'no')) })" x-init="initPhoneInput()" @submit="prepareRegistrationSubmission()" class="space-y-4">
+            <form action="{{ route('register') }}" method="POST" x-data="Object.assign(registrationForm('', ''), { instructor: @js(old('is_instructor', request()->boolean('instructor') ? 'yes' : 'no')) })" x-init="initPhoneInput()" @submit="prepareRegistrationSubmission()" class="space-y-4">
                 @csrf
                 <div><label for="name" class="mb-1.5 block text-sm font-semibold text-gray-700">Full name</label><input id="name" name="name" value="{{ old('name') }}" required autofocus autocomplete="name" class="w-full min-h-12 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 @error('name') border-red-500 @enderror">@error('name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror</div>
                 <div><label for="email" class="mb-1.5 block text-sm font-semibold text-gray-700">Email address</label><input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email" class="w-full min-h-12 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 @error('email') border-red-500 @enderror">@error('email')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror</div>

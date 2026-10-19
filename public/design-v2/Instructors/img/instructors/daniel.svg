@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 264">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f6fe4"/><stop offset="1" stop-color="#1b3f9e"/></linearGradient>
+  <radialGradient id="h" cx=".3" cy=".2" r=".9"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
+  <rect width="240" height="264" fill="url(#g)"/>
+  <rect width="240" height="264" fill="url(#h)"/>
+  <circle cx="120" cy="104" r="44" fill="#fff" fill-opacity=".22"/>
+  <path d="M42 252c6-48 40-76 78-76s72 28 78 76z" fill="#fff" fill-opacity=".22"/>
+  <text x="120" y="122" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="50" font-weight="700" fill="#fff" letter-spacing="1">DH</text>
+</svg>

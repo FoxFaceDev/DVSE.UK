@@ -2,6 +2,11 @@
 
 return [
 
+    'word_help' => [
+        'key' => env('OPENAI_WORD_API_KEY'),
+        'model' => env('OPENAI_WORD_MODEL'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

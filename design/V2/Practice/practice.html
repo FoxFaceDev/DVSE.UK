@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#0452bc">
+  <title>Practice Revision Questions – RIVEX.UK</title>
+  <meta name="description" content="Practise revision questions by category and track your progress.">
+  <link rel="icon" href="img/logo.png" type="image/png">
+  <link rel="preload" href="fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/practice.css?v=20261010">
+</head>
+<body>
+
+  <!-- UI glyphs (inline sprite, no scripts) -->
+  <svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M20 12H5M11.5 5.5 5 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><g fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2.4"/><rect x="13" y="3" width="8" height="8" rx="2.4"/><rect x="3" y="13" width="8" height="8" rx="2.4"/><rect x="13" y="13" width="8" height="8" rx="2.4"/></g></symbol>
+    <symbol id="i-bars" viewBox="0 0 24 24"><g fill="currentColor"><rect x="4.2" y="11" width="3.4" height="7.5" rx="1"/><rect x="10.3" y="5" width="3.4" height="13.5" rx="1"/><rect x="16.4" y="8.5" width="3.4" height="10" rx="1"/><rect x="2.5" y="19.8" width="19" height="2" rx="1"/></g></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6.5 3h11a1.5 1.5 0 0 1 1.5 1.5V21l-7-4.6L5 21V4.5A1.5 1.5 0 0 1 6.5 3Z" fill="currentColor"/></symbol>
+  </svg>
+
+  <!-- ===== Fixed top: header + tabs ===== -->
+  <div class="top">
+    <header class="appbar">
+      <div class="appbar__inner">
+        <a class="back" href="index.html" aria-label="Back">
+          <svg class="back__icon" aria-hidden="true"><use href="#i-back"/></svg>
+        </a>
+        <h1 class="appbar__title">Practice Revision Questions</h1>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="Practice views">
+      <ul class="tabs__list">
+        <li class="tabs__item">
+          <a class="tab tab--active" href="#category" aria-current="page">
+            <svg class="tab__icon" aria-hidden="true"><use href="#i-grid"/></svg><span>Category</span>
+          </a>
+        </li>
+        <li class="tabs__item">
+          <a class="tab" href="#progress">
+            <svg class="tab__icon" aria-hidden="true"><use href="#i-bars"/></svg><span>Progress</span>
+          </a>
+        </li>
+        <li class="tabs__item">
+          <a class="tab" href="#selected">
+            <svg class="tab__icon" aria-hidden="true"><use href="#i-bookmark"/></svg><span>Selected</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- ===== Categories (6 and a half fit on screen, the rest scroll) ===== -->
+  <main class="stage" id="category">
+    <ul class="cats">
+      <li class="cat">
+        <img class="cat__icon" src="img/practice/all-categories.svg" alt="" width="120" height="120">
+        <div class="cat__body">
+          <div class="cat__head">
+            <h2 class="cat__title"><a class="cat__link" href="#all-categories">All categories</a></h2>
+            <span class="cat__pct">97%</span>
+          </div>
+          <progress class="cat__bar" max="100" value="97" aria-label="All categories progress">97%</progress>
+          <p class="cat__stats">
+            <span class="cat__stat">Answered: <b>764</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Correct: <b>755</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Total: <b>771</b></span>
+          </p>
+        </div>
+        <label class="pick">
+          <input class="pick__input" type="checkbox" name="categories" value="all-categories" aria-label="Select All categories">
+        </label>
+      </li>
+      <li class="cat">
+        <img class="cat__icon" src="img/practice/video-clips.svg" alt="" width="120" height="120">
+        <div class="cat__body">
+          <div class="cat__head">
+            <h2 class="cat__title"><a class="cat__link" href="#video-clips">Video Clips</a></h2>
+            <span class="cat__pct">100%</span>
+          </div>
+          <progress class="cat__bar" max="100" value="100" aria-label="Video Clips progress">100%</progress>
+          <p class="cat__stats">
+            <span class="cat__stat">Answered: <b>27</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Correct: <b>27</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Total: <b>27</b></span>
+          </p>
+        </div>
+        <label class="pick">
+          <input class="pick__input" type="checkbox" name="categories" value="video-clips" aria-label="Select Video Clips">
+        </label>
+      </li>
+      <li class="cat">
+        <img class="cat__icon" src="img/practice/rules-of-the-road.svg" alt="" width="120" height="120">
+        <div class="cat__body">
+          <div class="cat__head">
+            <h2 class="cat__title"><a class="cat__link" href="#rules-of-the-road">Rules of the Road</a></h2>
+            <span class="cat__pct">100%</span>
+          </div>
+          <progress class="cat__bar" max="100" value="100" aria-label="Rules of the Road progress">100%</progress>
+          <p class="cat__stats">
+            <span class="cat__stat">Answered: <b>67</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Correct: <b>67</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Total: <b>67</b></span>
+          </p>
+        </div>
+        <label class="pick">
+          <input class="pick__input" type="checkbox" name="categories" value="rules-of-the-road" aria-label="Select Rules of the Road" checked>
+        </label>
+      </li>
+      <li class="cat">
+        <img class="cat__icon" src="img/practice/safety-margins.svg" alt="" width="120" height="120">
+        <div class="cat__body">
+          <div class="cat__head">
+            <h2 class="cat__title"><a class="cat__link" href="#safety-margins">Safety Margins</a></h2>
+            <span class="cat__pct">100%</span>
+          </div>
+          <progress class="cat__bar" max="100" value="100" aria-label="Safety Margins progress">100%</progress>
+          <p class="cat__stats">
+            <span class="cat__stat">Answered: <b>34</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Correct: <b>34</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Total: <b>34</b></span>
+          </p>
+        </div>
+        <label class="pick">
+          <input class="pick__input" type="checkbox" name="categories" value="safety-margins" aria-label="Select Safety Margins">
+        </label>
+      </li>
+      <li class="cat">
+        <img class="cat__icon" src="img/practice/vulnerable-road-users.svg" alt="" width="120" height="120">
+        <div class="cat__body">
+          <div class="cat__head">
+            <h2 class="cat__title"><a class="cat__link" href="#vulnerable-road-users">Vulnerable Road Users</a></h2>
+            <span class="cat__pct">100%</span>
+          </div>
+          <progress class="cat__bar" max="100" value="100" aria-label="Vulnerable Road Users progress">100%</progress>
+          <p class="cat__stats">
+            <span class="cat__stat">Answered: <b>71</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Correct: <b>71</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Total: <b>71</b></span>
+          </p>
+        </div>
+        <label class="pick">
+          <input class="pick__input" type="checkbox" name="categories" value="vulnerable-road-users" aria-label="Select Vulnerable Road Users">
+        </label>
+      </li>
+      <li class="cat">
+        <img class="cat__icon" src="img/practice/vehicle-handling.svg" alt="" width="120" height="120">
+        <div class="cat__body">
+          <div class="cat__head">
+            <h2 class="cat__title"><a class="cat__link" href="#vehicle-handling">Vehicle Handling</a></h2>
+            <span class="cat__pct">100%</span>
+          </div>
+          <progress class="cat__bar" max="100" value="100" aria-label="Vehicle Handling progress">100%</progress>
+          <p class="cat__stats">
+            <span class="cat__stat">Answered: <b>45</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Correct: <b>45</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Total: <b>45</b></span>
+          </p>
+        </div>
+        <label class="pick">
+          <input class="pick__input" type="checkbox" name="categories" value="vehicle-handling" aria-label="Select Vehicle Handling">
+        </label>
+      </li>
+      <li class="cat">
+        <img class="cat__icon" src="img/practice/motorway-rules.svg" alt="" width="120" height="120">
+        <div class="cat__body">
+          <div class="cat__head">
+            <h2 class="cat__title"><a class="cat__link" href="#motorway-rules">Motorway Rules</a></h2>
+            <span class="cat__pct">100%</span>
+          </div>
+          <progress class="cat__bar" max="100" value="100" aria-label="Motorway Rules progress">100%</progress>
+          <p class="cat__stats">
+            <span class="cat__stat">Answered: <b>57</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Correct: <b>57</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Total: <b>57</b></span>
+          </p>
+        </div>
+        <label class="pick">
+          <input class="pick__input" type="checkbox" name="categories" value="motorway-rules" aria-label="Select Motorway Rules">
+        </label>
+      </li>
+      <li class="cat">
+        <img class="cat__icon" src="img/practice/incidents-accidents-emergencies.svg" alt="" width="120" height="120">
+        <div class="cat__body">
+          <div class="cat__head">
+            <h2 class="cat__title cat__title--long"><a class="cat__link" href="#incidents-accidents-and-emergencies">Incidents, Accidents and Emergencies</a></h2>
+            <span class="cat__pct">100%</span>
+          </div>
+          <progress class="cat__bar" max="100" value="100" aria-label="Incidents, Accidents and Emergencies progress">100%</progress>
+          <p class="cat__stats">
+            <span class="cat__stat">Answered: <b>56</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Correct: <b>56</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Total: <b>56</b></span>
+          </p>
+        </div>
+        <label class="pick">
+          <input class="pick__input" type="checkbox" name="categories" value="incidents-accidents-and-emergencies" aria-label="Select Incidents, Accidents and Emergencies">
+        </label>
+      </li>
+      <li class="cat">
+        <img class="cat__icon" src="img/practice/road-and-traffic-signs.svg" alt="" width="120" height="120">
+        <div class="cat__body">
+          <div class="cat__head">
+            <h2 class="cat__title"><a class="cat__link" href="#road-and-traffic-signs">Road and Traffic Signs</a></h2>
+            <span class="cat__pct">100%</span>
+          </div>
+          <progress class="cat__bar" max="100" value="100" aria-label="Road and Traffic Signs progress">100%</progress>
+          <p class="cat__stats">
+            <span class="cat__stat">Answered: <b>134</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Correct: <b>134</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Total: <b>134</b></span>
+          </p>
+        </div>
+        <label class="pick">
+          <input class="pick__input" type="checkbox" name="categories" value="road-and-traffic-signs" aria-label="Select Road and Traffic Signs">
+        </label>
+      </li>
+      <li class="cat">
+        <img class="cat__icon" src="img/practice/hazard-awareness.svg" alt="" width="120" height="120">
+        <div class="cat__body">
+          <div class="cat__head">
+            <h2 class="cat__title"><a class="cat__link" href="#hazard-awareness">Hazard Awareness</a></h2>
+            <span class="cat__pct">100%</span>
+          </div>
+          <progress class="cat__bar" max="100" value="100" aria-label="Hazard Awareness progress">100%</progress>
+          <p class="cat__stats">
+            <span class="cat__stat">Answered: <b>78</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Correct: <b>78</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Total: <b>78</b></span>
+          </p>
+        </div>
+        <label class="pick">
+          <input class="pick__input" type="checkbox" name="categories" value="hazard-awareness" aria-label="Select Hazard Awareness">
+        </label>
+      </li>
+      <li class="cat">
+        <img class="cat__icon" src="img/practice/safety-and-your-vehicle.svg" alt="" width="120" height="120">
+        <div class="cat__body">
+          <div class="cat__head">
+            <h2 class="cat__title"><a class="cat__link" href="#safety-and-your-vehicle">Safety and Your Vehicle</a></h2>
+            <span class="cat__pct">100%</span>
+          </div>
+          <progress class="cat__bar" max="100" value="100" aria-label="Safety and Your Vehicle progress">100%</progress>
+          <p class="cat__stats">
+            <span class="cat__stat">Answered: <b>82</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Correct: <b>82</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Total: <b>82</b></span>
+          </p>
+        </div>
+        <label class="pick">
+          <input class="pick__input" type="checkbox" name="categories" value="safety-and-your-vehicle" aria-label="Select Safety and Your Vehicle">
+        </label>
+      </li>
+      <li class="cat">
+        <img class="cat__icon" src="img/practice/alertness.svg" alt="" width="120" height="120">
+        <div class="cat__body">
+          <div class="cat__head">
+            <h2 class="cat__title"><a class="cat__link" href="#alertness">Alertness</a></h2>
+            <span class="cat__pct">100%</span>
+          </div>
+          <progress class="cat__bar" max="100" value="100" aria-label="Alertness progress">100%</progress>
+          <p class="cat__stats">
+            <span class="cat__stat">Answered: <b>26</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Correct: <b>26</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Total: <b>26</b></span>
+          </p>
+        </div>
+        <label class="pick">
+          <input class="pick__input" type="checkbox" name="categories" value="alertness" aria-label="Select Alertness">
+        </label>
+      </li>
+      <li class="cat">
+        <img class="cat__icon" src="img/practice/attitude.svg" alt="" width="120" height="120">
+        <div class="cat__body">
+          <div class="cat__head">
+            <h2 class="cat__title"><a class="cat__link" href="#attitude">Attitude</a></h2>
+            <span class="cat__pct">100%</span>
+          </div>
+          <progress class="cat__bar" max="100" value="100" aria-label="Attitude progress">100%</progress>
+          <p class="cat__stats">
+            <span class="cat__stat">Answered: <b>38</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Correct: <b>38</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Total: <b>38</b></span>
+          </p>
+        </div>
+        <label class="pick">
+          <input class="pick__input" type="checkbox" name="categories" value="attitude" aria-label="Select Attitude">
+        </label>
+      </li>
+      <li class="cat">
+        <img class="cat__icon" src="img/practice/vehicle-loading.svg" alt="" width="120" height="120">
+        <div class="cat__body">
+          <div class="cat__head">
+            <h2 class="cat__title"><a class="cat__link" href="#vehicle-loading">Vehicle Loading</a></h2>
+            <span class="cat__pct">100%</span>
+          </div>
+          <progress class="cat__bar" max="100" value="100" aria-label="Vehicle Loading progress">100%</progress>
+          <p class="cat__stats">
+            <span class="cat__stat">Answered: <b>21</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Correct: <b>21</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Total: <b>21</b></span>
+          </p>
+        </div>
+        <label class="pick">
+          <input class="pick__input" type="checkbox" name="categories" value="vehicle-loading" aria-label="Select Vehicle Loading">
+        </label>
+      </li>
+      <li class="cat">
+        <img class="cat__icon" src="img/practice/other-types-of-vehicle.svg" alt="" width="120" height="120">
+        <div class="cat__body">
+          <div class="cat__head">
+            <h2 class="cat__title"><a class="cat__link" href="#other-types-of-vehicle">Other Types of Vehicle</a></h2>
+            <span class="cat__pct">100%</span>
+          </div>
+          <progress class="cat__bar" max="100" value="100" aria-label="Other Types of Vehicle progress">100%</progress>
+          <p class="cat__stats">
+            <span class="cat__stat">Answered: <b>22</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Correct: <b>22</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Total: <b>22</b></span>
+          </p>
+        </div>
+        <label class="pick">
+          <input class="pick__input" type="checkbox" name="categories" value="other-types-of-vehicle" aria-label="Select Other Types of Vehicle">
+        </label>
+      </li>
+      <li class="cat">
+        <img class="cat__icon" src="img/practice/essential-documents.svg" alt="" width="120" height="120">
+        <div class="cat__body">
+          <div class="cat__head">
+            <h2 class="cat__title"><a class="cat__link" href="#essential-documents">Essential Documents</a></h2>
+            <span class="cat__pct">100%</span>
+          </div>
+          <progress class="cat__bar" max="100" value="100" aria-label="Essential Documents progress">100%</progress>
+          <p class="cat__stats">
+            <span class="cat__stat">Answered: <b>27</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Correct: <b>27</b></span><i class="cat__sep" aria-hidden="true"></i>
+            <span class="cat__stat">Total: <b>27</b></span>
+          </p>
+        </div>
+        <label class="pick">
+          <input class="pick__input" type="checkbox" name="categories" value="essential-documents" aria-label="Select Essential Documents">
+        </label>
+      </li>
+    </ul>
+  </main>
+
+  <!-- ===== Fixed bottom: hint + continue ===== -->
+  <footer class="dock">
+    <div class="dock__inner">
+      <p class="dock__hint" id="dock-hint">Select one or more categories to revise</p>
+      <a class="cta" href="quiz-ku.html" aria-describedby="dock-hint"><span class="cta__label">Continue</span></a>
+    </div>
+  </footer>
+
+</body>
+</html>

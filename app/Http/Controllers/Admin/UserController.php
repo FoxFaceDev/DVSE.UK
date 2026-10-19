@@ -58,6 +58,20 @@ class UserController extends Controller
         return back()->with('success', 'Password reset successfully.');
     }
 
+    public function updateInstructorProfile(Request $request, User $user)
+    {
+        $this->authorizeSuperadmin();
+        abort_unless($user->isInstructor() && $user->instructorProfile, 404);
+        $request->validate(['is_approved' => ['nullable', 'boolean'], 'is_premium' => ['nullable', 'boolean'], 'is_published' => ['nullable', 'boolean']]);
+        $user->instructorProfile->forceFill([
+            'is_approved' => $request->boolean('is_approved'),
+            'is_premium' => $request->boolean('is_premium'),
+            'is_published' => $request->boolean('is_published'),
+        ])->save();
+
+        return back()->with('success', 'Instructor listing updated.');
+    }
+
     public function destroy(User $user)
     {
         $this->authorizeSuperadmin();

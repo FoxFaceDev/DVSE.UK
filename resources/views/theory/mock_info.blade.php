@@ -1,58 +1,102 @@
-<x-layouts.app :showBack="true" :backUrl="route('frontend.section', $subSection->section_id)" title="Mock Test Rules">
-    <div class="test-info test-info-green max-w-md mx-auto space-y-6">
-        <header class="test-hero tone-green"><span class="eyebrow">THEORY TEST · FIND YOUR CONFIDENCE</span><h1>Ready. Set. Mock test.</h1><p>A practice run for your driving theory test.</p><x-study-icon type="check" class="hero-icon" /></header>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#014cc1">
+  <title>Mock Test – RIVEX.UK</title>
+  <meta name="description" content="Car driver mock theory test for Northern Ireland: 50 multiple choice questions in 57 minutes.">
+  <link rel="icon" href="{{ asset('design-v2/Mock_test/img/logo.png') }}" type="image/png">
+  <link rel="preload" href="{{ asset('design-v2/Mock_test/fonts/plus-jakarta-sans-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{ asset('design-v2/Mock_test/css/mock.css') }}">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  @vite('resources/js/app.js')
+  <link rel="stylesheet" href="{{ asset('design-v2/ui.css') }}">
+</head>
+<body>
 
-        <div class="bg-white rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
-            <div class="bg-blue-50 border-b border-blue-100 p-4">
-                <h2 class="font-bold text-primary flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    Before you begin
-                </h2>
-            </div>
-            <div class="p-6 space-y-5 text-sm text-gray-700">
-                <ul class="space-y-4">
-                    <li class="flex items-start gap-3">
-                        <div class="mt-0.5 bg-blue-100 text-blue-600 p-1.5 rounded-md flex-shrink-0">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        </div>
-                        <div>
-                            <strong class="block text-gray-900 text-base mb-0.5">{{ $mockTest->question_count ?? 50 }} Questions</strong>
-                            You must answer all {{ $mockTest->question_count ?? 50 }} multiple-choice questions in English.
-                        </div>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <div class="mt-0.5 bg-amber-100 text-amber-600 p-1.5 rounded-md flex-shrink-0">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <div>
-                            <strong class="block text-gray-900 text-base mb-0.5">{{ $mockTest->duration_minutes ?? 57 }} Minutes Time Limit</strong>
-                            A countdown timer will run during the test. When time expires, your test will submit automatically.
-                        </div>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <div class="mt-0.5 bg-green-100 text-green-600 p-1.5 rounded-md flex-shrink-0">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <div>
-                            <strong class="block text-gray-900 text-base mb-0.5">Pass Mark: {{ $mockTest->pass_mark ?? 43 }} out of {{ $mockTest->question_count ?? 50 }}</strong>
-                            You must score at least {{ $mockTest->pass_mark ?? 43 }} correct answers to pass the mock test.
-                        </div>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <div class="mt-0.5 bg-red-100 text-red-600 p-1.5 rounded-md flex-shrink-0">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
-                        </div>
-                        <div>
-                            <strong class="block text-gray-900 text-base mb-0.5">Exam Conditions</strong>
-                            Please read the questions carefully. No explanations will be shown during the test, and translations are disabled.
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
+  <!-- UI glyphs (inline sprite, no scripts) -->
+  <svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M20 12H5M11.5 5.5 5 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 6.8V12h4.2"/></g></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path fill="currentColor" d="M7 2.5h10a1 1 0 0 1 1 1V4h2.6a1 1 0 0 1 1 1.1c-.3 3.3-2 5.5-4.5 6.1A6 6 0 0 1 13 14.4V17h2.5a1.5 1.5 0 0 1 1.5 1.5V21H7v-2.5A1.5 1.5 0 0 1 8.5 17H11v-2.6a6 6 0 0 1-4.1-3.2C4.4 10.6 2.7 8.4 2.4 5.1A1 1 0 0 1 3.4 4H6v-.5a1 1 0 0 1 1-1zM4.5 6c.4 1.8 1.3 3 2.4 3.6A10 10 0 0 1 6.2 6H4.5zm15 0h-1.7a10 10 0 0 1-.7 3.6c1.1-.6 2-1.8 2.4-3.6z"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M10.3 2h3.4l.6 2.6 1.6.7 2.3-1.4 2.4 2.4-1.4 2.3.7 1.6 2.6.6v3.4l-2.6.6-.7 1.6 1.4 2.3-2.4 2.4-2.3-1.4-1.6.7-.6 2.6h-3.4l-.6-2.6-1.6-.7-2.3 1.4-2.4-2.4 1.4-2.3-.7-1.6L2 13.7v-3.4l2.6-.6.7-1.6-1.4-2.3 2.4-2.4 2.3 1.4 1.6-.7zM12 8.4a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2z"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9.3h3.6L11.4 5c.7-.6 1.6-.1 1.6.8v12.4c0 .9-.9 1.4-1.6.8l-4.8-4.3H3a1 1 0 0 1-1-1v-3.4a1 1 0 0 1 1-1z"/><path d="M16 8.8a4.6 4.6 0 0 1 0 6.4M18.9 6a8.6 8.6 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#1f9d3a"/><circle cx="12" cy="7.3" r="1.6" fill="#fff"/><path d="M10.2 10.4h2.9v6.4h1.3v1.8H9.8v-1.8h1.2v-4.6h-.8z" fill="#fff"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M6 3.9c0-1.2 1.3-1.9 2.3-1.3l12.3 8.1c.9.6.9 2 0 2.6L8.3 21.4c-1 .6-2.3-.1-2.3-1.3z"/></symbol>
+  </svg>
 
-        <a href="{{ isset($mockTest) ? route('theory.dynamic_mock_start', $mockTest) : route('theory.mock_test_start', $subSection->id) }}" class="start-test mt-8 w-full block text-center py-4 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold text-lg shadow-[0_4px_14px_0_rgba(0,118,255,0.39)] transform hover:-translate-y-0.5 transition-all duration-200">
-            <span>Start mock test <span aria-hidden="true">&rarr;</span></span><small>{{ $mockTest->question_count ?? 50 }} questions · {{ $mockTest->duration_minutes ?? 57 }} minutes</small>
+  <!-- ===== Fixed header: back · title · road art (same as theory.html) ===== -->
+  <header class="top">
+    <div class="appbar">
+      <div class="appbar__inner">
+        <span class="appbar__art" aria-hidden="true"></span>
+        <div class="appbar__row">
+        <a class="back" href="{{ route('v2.theory') }}" aria-label="Back">
+          <svg class="back__icon" aria-hidden="true"><use href="#i-back"/></svg>
         </a>
+        <h1 class="appbar__title">Mock Test</h1>
+        </div>
+      </div>
     </div>
-</x-layouts.app>
+  </header>
+
+  <!-- ===== Test summary + settings (the switches are sent with the start button) ===== -->
+  <form class="mock" action="{{ $startUrl }}" method="get">
+    @include('v2.site-ad')
+    <img class="hero-img" src="{{ asset('design-v2/Mock_test/img/mock/hero.webp') }}" alt="Learner revising theory test questions at a computer, with a RIVEX learner car on the road" width="864" height="372" fetchpriority="high">
+
+    <section class="panel summary" aria-labelledby="test-name">
+      <h2 class="summary__title" id="test-name">{{ $mockTest->name ?? 'Car Driver – Great Britain' }}</h2>
+      <ul class="facts">
+        <li class="fact">
+          <span class="fact__icon" aria-hidden="true"><svg><use href="#i-clock"/></svg></span>
+          <p class="fact__text">You will have <strong>{{ $mockTest->duration_minutes ?? 57 }} minutes</strong> to answer <strong>{{ $mockTest->question_count ?? 50 }} multiple choice questions.</strong></p>
+        </li>
+        <li class="fact fact--gold">
+          <span class="fact__icon" aria-hidden="true"><svg><use href="#i-trophy"/></svg></span>
+          <p class="fact__text">To pass, you need to answer at least <strong>{{ $mockTest->pass_mark ?? 43 }} questions correctly.</strong></p>
+        </li>
+      </ul>
+    </section>
+
+    <h2 class="section-title" id="settings-title">Test settings</h2>
+    <div class="panel settings" role="group" aria-labelledby="settings-title">
+      <label class="setting">
+        <span class="setting__icon" aria-hidden="true"><svg><use href="#i-gear"/></svg></span>
+        <span class="setting__body">
+          <span class="setting__title">Auto move to next question</span>
+          <span class="setting__desc">Automatically go to the next question after answering.</span>
+        </span>
+        <span class="switch">
+          <input class="switch__input" type="checkbox" role="switch" name="auto" value="1">
+          <span class="switch__track" aria-hidden="true"></span>
+        </span>
+      </label>
+      <label class="setting">
+        <span class="setting__icon" aria-hidden="true"><svg><use href="#i-sound"/></svg></span>
+        <span class="setting__body">
+          <span class="setting__title">Voiceover <svg class="setting__info" aria-hidden="true"><use href="#i-info"/></svg></span>
+          <span class="setting__desc">Read the question and options out loud.</span>
+        </span>
+        <span class="switch">
+          <input class="switch__input" type="checkbox" role="switch" name="voice" value="1">
+          <span class="switch__track" aria-hidden="true"></span>
+        </span>
+      </label>
+    </div>
+
+    <!-- ===== Fixed start button ===== -->
+    <div class="dock">
+      <button class="start" type="submit">
+        <svg class="start__icon" aria-hidden="true"><use href="#i-play"/></svg>
+        <span class="start__label">Start mock test</span>
+      </button>
+    </div>
+  </form>
+
+@include('v2.site-extras')
+</body>
+</html>

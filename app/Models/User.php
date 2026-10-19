@@ -89,6 +89,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->account_type === self::ACCOUNT_TYPE_INSTRUCTOR;
     }
 
+    public function instructorProfile()
+    {
+        return $this->hasOne(InstructorProfile::class);
+    }
+
     public function scopeEligibleForMarketing(Builder $query): Builder
     {
         return $query

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 790 338" preserveAspectRatio="none">
+  <!-- banner background: soft sky, blue blob behind the illustration, yellow + blue waves (decoration only) -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6effd"/><stop offset="1" stop-color="#f3f7ff"/></linearGradient>
+    <linearGradient id="blob" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1557e0"/><stop offset=".6" stop-color="#2f78f0"/><stop offset="1" stop-color="#6aa6ff"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f7c22a"/><stop offset="1" stop-color="#ffd34d"/></linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1a5fe3"/><stop offset="1" stop-color="#3b86f5"/></linearGradient>
+  </defs>
+  <rect width="790" height="338" fill="url(#sky)"/>
+  <path d="M0 0h190c-22 26-40 56-34 92 8 50-36 74-74 84-34 9-60 26-82 48z" fill="url(#blob)"/>
+  <path d="M150 0h60c-20 20-30 44-26 70-8-30-18-52-34-70z" fill="#7fb4ff" opacity=".35"/>
+  <path d="M0 205c40 20 70 40 120 60 0 0-60 10-120 5z" fill="url(#gold)" opacity=".9"/>
+  <path transform="translate(0 16)" d="M120 292c90-40 190-44 300-16 90 22 170 26 250-4 50-14 90-14 120-18v16c-36 12-90 24-160 36-100 20-180 2-270-20-90-20-160-12-240 26z" fill="url(#gold)"/>
+  <path d="M0 300c60-30 130-26 190-6 110 36 200 44 300 24 120-24 200-40 300-20v40H0z" fill="url(#sea)"/>
+</svg>
