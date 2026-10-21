@@ -86,3 +86,40 @@ test('uploaded revision icons can be replaced with bundled SVGs without deleting
     expect($card->fresh()->icon_path)->toBe(asset('design-v2/Practice/img/practice/alertness.svg'));
     expect(is_file(public_path('design-v2/Practice/img/practice/alertness.svg')))->toBeTrue();
 });
+
+test('legacy live revision menu topics are linked without mixing in other menu cards or losing questions', function () {
+    $admin = Admin::create(['name' => 'Live editor', 'email' => 'live-revision@example.com', 'password' => bcrypt('password')]);
+    $section = Section::where('home_key', 'theory')->firstOrFail();
+    $subSection = $section->subSections()->create(['name' => 'Theory Test']);
+    $entry = $subSection->topics()->create(['name_en' => 'Practice Revision Question', 'name_ku' => 'پرسیارەکان']);
+    $question = $entry->questions()->create(['text_en' => 'An existing live revision question']);
+    $subSection->topics()->create(['name_en' => 'Pass Guarantee']);
+    $subSection->topics()->create(['name_en' => 'Search Question']);
+    $orphan = Topic::create(['topicable_type' => Category::class, 'topicable_id' => 999999, 'name_en' => 'CGI Clips']);
+
+    $this->actingAs($admin, 'admin')->get(route('admin.topics.index', ['revision' => 1]))
+        ->assertOk()->assertSee('No revision group is configured.')
+        ->assertDontSee('CGI Clips')->assertDontSee('Pass Guarantee')->assertDontSee('Unknown placement');
+
+    $group = RevisionCatalog::connectEntry($entry);
+    expect($group)->not->toBeNull();
+    expect($group->topics()->count())->toBe(15);
+    expect($entry->fresh()->revision_group_id)->toBe($group->id);
+    expect($question->fresh()->topic_id)->toBe($entry->id);
+    expect($orphan->fresh())->not->toBeNull();
+
+    $this->get(route('admin.topics.index', ['revision' => 1]))->assertOk()
+        ->assertSee('Video Clips')->assertSee('Rules of the Road')
+        ->assertDontSee('CGI Clips')->assertDontSee('Pass Guarantee')->assertDontSee('Search Question')->assertDontSee('Unknown placement');
+    $this->get(route('theory.practice', $entry))->assertOk()->assertViewIs('v2.revision')
+        ->assertSee('Video Clips')->assertSee('data-topic="'.$entry->id.'" data-total="1"', false);
+    $this->get(route('v2.revise', ['group' => $group->id]))->assertOk()
+        ->assertViewHas('questions', fn ($questions) => $questions->pluck('id')->all() === [$question->id]);
+    $this->get(route('frontend.sub_section', $subSection))->assertOk()
+        ->assertSee(route('theory.practice', $entry), false)->assertDontSee('href="'.route('frontend.category', $group).'"', false);
+
+    $group->topics()->where('name_en', 'Attitude')->firstOrFail()->delete();
+    RevisionCatalog::connectEntry($entry->fresh());
+    expect($group->topics()->count())->toBe(14);
+    expect(Category::where('page_type', 'revision')->count())->toBe(1);
+});

@@ -1,7 +1,9 @@
 <x-layouts.admin title="Manage Categories">
     <div class="mb-6 flex items-center justify-between">
         <div><h2 class="text-xl font-heading font-bold text-gray-800">{{ $revisionMode ? 'Revision Cards' : 'All Categories' }}</h2><p class="mt-1 text-sm text-gray-500">{{ $revisionMode ? 'Edit the Practice screen cards, add questions, or drag to reorder.' : 'Categories are grouped and ordered inside their placement.' }}</p></div>
-        <a href="{{ route('admin.topics.create', $revisionGroup ? ['topicable_type' => \App\Models\Category::class, 'topicable_id' => $revisionGroup->id] : []) }}" class="rounded-lg bg-primary px-4 py-2 font-medium text-white hover:bg-primary-dark">{{ $revisionMode ? 'Add Revision Card' : 'Add Category' }}</a>
+        @if(!$revisionMode || $revisionGroup)
+            <a href="{{ route('admin.topics.create', $revisionGroup ? ['topicable_type' => \App\Models\Category::class, 'topicable_id' => $revisionGroup->id] : []) }}" class="rounded-lg bg-primary px-4 py-2 font-medium text-white hover:bg-primary-dark">{{ $revisionMode ? 'Add Revision Card' : 'Add Category' }}</a>
+        @endif
     </div>
 
     @if(session('success'))
@@ -19,7 +21,7 @@
                 @include('admin.topics._table', ['topics' => $placementTopics])
             </section>
         @empty
-            <div class="rounded-lg border border-gray-200 bg-white px-6 py-10 text-center text-gray-500 shadow-sm">No categories found.</div>
+            <div class="rounded-lg border border-gray-200 bg-white px-6 py-10 text-center text-gray-500 shadow-sm">{{ $revisionMode && !$revisionGroup ? 'No revision group is configured. Apply the latest database migrations, or create a category group with the Practice Revision Questions layout.' : 'No categories found.' }}</div>
         @endforelse
     </div>
 </x-layouts.admin>

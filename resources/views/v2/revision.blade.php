@@ -72,7 +72,7 @@
 @foreach($categories as $category)
 <li class="cat" style="--revision-color: {{ $category->color ?: '#1a68e8' }}" data-topic="{{ $category->id }}" data-total="{{ $category->questions_count }}" data-questions='@json($category->questions->pluck("id"))'>
 <img class="cat__icon" src="{{ $category->icon_path ?: asset('design-v2/Practice/img/practice/all-categories.svg') }}" alt="" width="120" height="120">
-<div class="cat__body"><div class="cat__head"><h2 class="cat__title {{ mb_strlen($category->name_en) > 30 ? 'cat__title--long' : '' }}"><a class="cat__link" href="{{ route('theory.practice', $category) }}">{{ $category->name_en }}</a></h2><span class="cat__pct" data-pct>0%</span></div>
+<div class="cat__body"><div class="cat__head"><h2 class="cat__title {{ mb_strlen($category->name_en) > 30 ? 'cat__title--long' : '' }}"><a class="cat__link" href="{{ $category->revision_group_id ? route('v2.revise', ['group' => $category->revision_group_id, 'categories' => [$category->id]]) : route('theory.practice', $category) }}">{{ $category->name_en }}</a></h2><span class="cat__pct" data-pct>0%</span></div>
 <progress class="cat__bar" max="100" value="0" aria-label="{{ $category->name_en }} progress"></progress>
 <p class="cat__stats"><span class="cat__stat">Answered: <b data-answered>0</b></span><i class="cat__sep" aria-hidden="true"></i><span class="cat__stat">Correct: <b data-correct>0</b></span><i class="cat__sep" aria-hidden="true"></i><span class="cat__stat">Total: <b>{{ $category->questions_count }}</b></span></p></div>
 <label class="pick"><input class="pick__input" type="checkbox" name="categories[]" value="{{ $category->id }}" aria-label="Select {{ $category->name_en }}"></label></li>

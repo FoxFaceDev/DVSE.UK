@@ -25,6 +25,7 @@ class TopicController extends Controller
         $topics = Topic::with('topicable')
             ->when($revisionMode, fn ($query) => $query->questionCategories())
             ->when($revisionGroup, fn ($query) => $query->where('topicable_type', Category::class)->where('topicable_id', $revisionGroup->id))
+            ->when($revisionMode && ! $revisionGroup, fn ($query) => $query->whereRaw('1 = 0'))
             ->orderBy('topicable_type')->orderBy('topicable_id')->ordered()->get();
 
         return view('admin.topics.index', compact('topics', 'revisionMode', 'revisionGroup'));
@@ -51,6 +52,7 @@ class TopicController extends Controller
         }
 
         $category = Topic::create($validated);
+        RevisionCatalog::connectEntry($category);
 
         return redirect()->to($this->parentAdminUrl($category))->with('success', 'Category created successfully. You can add another category here.');
     }
@@ -85,6 +87,7 @@ class TopicController extends Controller
         }
 
         $topic->update($validated);
+        RevisionCatalog::connectEntry($topic);
 
         return redirect()->route('admin.topics.index')->with('success', 'Category updated successfully.');
     }

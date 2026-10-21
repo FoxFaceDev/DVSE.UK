@@ -3,7 +3,10 @@
 namespace App\Support;
 
 use App\Models\Category;
+use App\Models\SubSection;
 use App\Models\Topic;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class RevisionCatalog
 {
@@ -28,6 +31,39 @@ class RevisionCatalog
     public static function icons(): array
     {
         return ['all-categories' => 'All categories'] + self::CARDS;
+    }
+
+    public static function connectEntry(Topic $entry): ?Category
+    {
+        if ($entry->revision_group_id) {
+            return $entry->revisionGroup;
+        }
+        $name = Str::lower($entry->name_en);
+        if (! Str::contains($name, 'revision') || ! Str::contains($name, 'question')) {
+            return null;
+        }
+        $parent = $entry->topicable;
+        $subSection = $parent instanceof SubSection ? $parent : ($parent instanceof Category ? $parent->subSection : null);
+        if (! $subSection) {
+            return null;
+        }
+
+        return DB::transaction(function () use ($entry, $subSection) {
+            $group = $subSection->categories()->where('page_type', 'revision')->orderBy('id')->first();
+            if (! $group) {
+                $group = $subSection->categories()->create([
+                    'name_en' => $entry->name_en,
+                    'name_ku' => $entry->name_ku,
+                    'page_type' => 'revision',
+                ]);
+                self::populate($group);
+            }
+
+            $entry->revision_group_id = $group->id;
+            $entry->save();
+
+            return $group;
+        });
     }
 
     public static function populate(Category $group): void

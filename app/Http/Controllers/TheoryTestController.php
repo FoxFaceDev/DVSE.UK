@@ -16,8 +16,12 @@ use Illuminate\Http\Request;
 
 class TheoryTestController extends Controller
 {
-    public function practice(Topic $topic)
+    public function practice(Topic $topic, Request $request)
     {
+        if ($topic->revisionGroup?->isRevisionPractice()) {
+            return app(LearnerController::class)->revision($request, $topic->revisionGroup);
+        }
+
         $questions = $topic->questions()->with('choices')->get();
         $questions->each(fn ($question) => $question->setRelation('choices', $question->choices->shuffle()->values()));
         $contentPages = $topic->contentPages()->with('clips')->get();

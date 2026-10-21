@@ -41,7 +41,7 @@
 
   <main class="menu">
     <ul class="cards cards--admin-menu">
-      @foreach($subSection->categories as $category)
+      @foreach($subSection->categories->reject(fn ($group) => $subSection->topics->contains('revision_group_id', $group->id)) as $category)
         <li>
           <a class="card {{ $loop->first ? 'card--gold' : '' }}" href="{{ route('frontend.category', $category) }}" style="--admin-card-color: {{ $subSection->color ?: $subSection->section->color ?: '#1a5fe0' }}">
             <img class="card__icon" src="{{ asset('design-v2/Theory/img/theory/book.svg') }}" alt="" width="120" height="100">

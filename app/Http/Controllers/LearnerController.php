@@ -37,7 +37,7 @@ class LearnerController extends Controller
         $revisionGroup ??= isset($validated['group']) ? Category::findOrFail($validated['group'])
             : Category::where('page_type', 'revision')->orderBy('id')->first();
         $categories = Topic::questionCategories()
-            ->when($revisionGroup, fn ($query) => $query->where('topicable_type', Category::class)->where('topicable_id', $revisionGroup->id))
+            ->when($revisionGroup, fn ($query) => $query->inRevisionGroup($revisionGroup->id))
             ->withCount('questions')->with('questions:id,topic_id')->ordered()->get();
 
         return view('v2.revision', compact('categories', 'revisionGroup'));
@@ -60,7 +60,7 @@ class LearnerController extends Controller
             $selectedCategoryIds = $validated['topics'] ?? [];
         }
         $categoryQuery = Topic::questionCategories()
-            ->when(isset($groupData['group']), fn ($query) => $query->where('topicable_type', Category::class)->where('topicable_id', $groupData['group']));
+            ->when(isset($groupData['group']), fn ($query) => $query->inRevisionGroup((int) $groupData['group']));
         if ($request->has('categories') || $request->has('topics')) {
             $categoryQuery->whereIn('id', $selectedCategoryIds);
         }

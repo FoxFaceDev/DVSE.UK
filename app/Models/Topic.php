@@ -74,6 +74,18 @@ class Topic extends Model
         return $this->morphTo();
     }
 
+    public function revisionGroup()
+    {
+        return $this->belongsTo(Category::class, 'revision_group_id');
+    }
+
+    public function scopeInRevisionGroup($query, int $groupId)
+    {
+        return $query->where(fn ($placement) => $placement
+            ->where(fn ($child) => $child->where('topicable_type', Category::class)->where('topicable_id', $groupId))
+            ->orWhere(fn ($entry) => $entry->where('revision_group_id', $groupId)->whereHas('questions')));
+    }
+
     public function questions()
     {
         return $this->hasMany(Question::class);

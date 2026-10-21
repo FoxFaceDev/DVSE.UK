@@ -38,6 +38,12 @@ Admins can manage these cards under **Revision Cards**, or within the revision c
 New groups can select the **Practice Revision Questions** page layout to receive the same
 starter cards; names, icons (preset or upload), colors, questions, and order remain editable.
 
+The follow-up `000005_link_legacy_revision_entries` migration also supports installations
+where the Theory menu's "Practice Revision Question" is a topic rather than a category
+group. It keeps that topic and its existing questions, links it to a revision group,
+and creates the starter cards only for a newly created group. The Revision Cards admin
+screen never falls back to showing unrelated question or menu topics if setup is missing.
+
 Run the dependency installation and build, apply all pending migrations, then rebuild Laravel's caches:
 
 ```sh
