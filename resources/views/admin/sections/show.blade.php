@@ -71,6 +71,10 @@
                         <input type="text" name="name" value="{{ $subSection->name }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
                     </div>
                     <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Page layout</label>
+                        <select name="page_type" class="w-full rounded-lg border border-gray-300 px-3 py-2"><option value="standard">Standard content page</option><option value="hazard" @selected($subSection->isHazardPerception())>Hazard Perception menu</option></select>
+                    </div>
+                    <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Card Description</label>
                         <textarea name="description" maxlength="180" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="Choose your next step in your learning journey.">{{ old('description', $subSection->description) }}</textarea>
                         <p class="mt-1 text-xs text-gray-500">Shown below the sub-section name on learner cards. Maximum 180 characters.</p>

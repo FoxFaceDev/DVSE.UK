@@ -28,6 +28,48 @@ test('theory menu links each admin managed subsection to its own content', funct
     $this->get(route('home'))->assertOk()->assertSee(route('v2.theory', ['section' => $section->id]), false);
 });
 
+test('theory test uses the supplied two page designs with admin managed cards', function () {
+    $section = Section::create(['name' => 'Theory Test Practice', 'color' => '#1664f5']);
+    $subSection = $section->subSections()->create([
+        'name' => 'Theory Test',
+        'description' => 'Admin managed theory menu',
+        'color' => '#f7b500',
+        'icon_path' => 'https://example.com/theory-card.svg',
+    ]);
+    $category = Category::create(['sub_section_id' => $subSection->id, 'name_en' => 'Road Rules']);
+    $topic = $subSection->topics()->create(['name_en' => 'Safety Margins']);
+    $mockTest = $subSection->mockTests()->create([
+        'name' => 'Admin Mock Test',
+        'type' => 'theory',
+        'question_count' => 10,
+        'pass_mark' => 8,
+        'duration_minutes' => 12,
+        'is_active' => true,
+    ]);
+
+    $this->get(route('v2.theory', ['section' => $section->id]))
+        ->assertOk()
+        ->assertSee('design-v2/theory-index.css', false)
+        ->assertSee('https://example.com/theory-card.svg', false)
+        ->assertSee('href="'.route('frontend.sub_section', $subSection).'"', false);
+
+    $this->get(route('frontend.sub_section', $subSection))
+        ->assertOk()
+        ->assertSee('design-v2/Theory/css/theory.css', false)
+        ->assertSee('Road Rules')
+        ->assertSee('Safety Margins')
+        ->assertSee('Admin Mock Test')
+        ->assertSee(route('frontend.category', $category), false)
+        ->assertSee(route('theory.practice', $topic), false)
+        ->assertSee(route('theory.dynamic_mock_info', $mockTest), false);
+
+    $topic->update(['name_en' => 'Updated Safety']);
+    $this->get(route('frontend.sub_section', $subSection))
+        ->assertOk()
+        ->assertSee('Updated Safety')
+        ->assertDontSee('Safety Margins');
+});
+
 test('theory menu reflects subsection additions renames and deletions', function () {
     $section = Section::create(['name' => 'Theory Test']);
     $subSection = $section->subSections()->create(['name' => 'Original subsection']);

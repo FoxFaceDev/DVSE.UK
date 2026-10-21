@@ -1,4 +1,7 @@
 <x-layouts.admin title="Dashboard">
+    @if(session('error'))
+        <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700" role="alert">{{ session('error') }}</div>
+    @endif
     <section class="mb-10">
         <div class="mb-5">
             <h2 class="text-xl font-heading font-bold text-slate-900">User statistics</h2>
@@ -100,7 +103,13 @@
             
             <a href="{{ route('admin.sections.show', $section) }}" class="flex items-center justify-between flex-1">
                 <div>
-                    <h3 class="font-bold text-gray-800 group-hover:text-primary transition-colors">{{ $section->name }}</h3>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h3 class="font-bold text-gray-800 group-hover:text-primary transition-colors">{{ $section->name }}</h3>
+                        @if($section->isHomeSection())
+                            <span class="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700">Home card</span>
+                        @endif
+                    </div>
+                    @if($section->description)<p class="mt-1 max-w-52 text-xs text-gray-500">{{ $section->description }}</p>@endif
                     <span class="text-sm text-gray-500">{{ $section->sub_sections_count ?? 0 }} Sub-sections</span>
                 </div>
                 <div class="p-3 rounded-lg" style="background-color: {{ ($section->color ?? '#3b82f6') }}20; color: {{ $section->color ?? '#3b82f6' }}">
@@ -118,6 +127,7 @@
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                     Edit
                 </button>
+                @if(!$section->isHomeSection())
                 <form action="{{ route('admin.sections.destroy', $section) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this section? All its sub-sections and categories will be lost.');">
                     @csrf
                     @method('DELETE')
@@ -126,6 +136,9 @@
                         Delete
                     </button>
                 </form>
+                @else
+                    <span class="px-2 py-1 text-xs font-medium text-gray-400" title="Fixed home-page section">Fixed</span>
+                @endif
             </div>
         </div>
 

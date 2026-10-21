@@ -124,7 +124,7 @@
         </section>
 
         <div class="grid grid-cols-2 gap-3">
-            <a href="{{ route('home') }}" class="rounded-xl bg-gray-100 px-4 py-4 text-center font-bold text-gray-800 hover:bg-gray-200">Back to home</a>
+            <a data-back href="{{ route('home') }}" class="rounded-xl bg-gray-100 px-4 py-4 text-center font-bold text-gray-800 hover:bg-gray-200">Back</a>
             <a href="{{ route('theory.hazard_mock_info') }}" class="rounded-xl bg-primary px-4 py-4 text-center font-bold text-white hover:bg-primary-dark">Try again</a>
         </div>
     </div>

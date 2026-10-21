@@ -1,5 +1,8 @@
 import './bootstrap';
 import './learner-v2';
+import { handleBackNavigation } from './back-navigation';
+
+document.addEventListener('click', handleBackNavigation);
 
 import Alpine from 'alpinejs';
 import {

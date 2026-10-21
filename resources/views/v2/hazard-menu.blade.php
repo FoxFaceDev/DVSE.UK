@@ -6,15 +6,17 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#0452bc">
-  <title>Hazard Perception – RIVEX.UK</title>
+  <title>{{ $hazardSettings['title'] }} – RIVEX.UK</title>
   <meta name="description" content="Hazard perception: help videos, practice clips, mock test, progress and advice. Find a driving instructor near you.">
   <link rel="icon" href="{{ asset('design-v2/Find_a_Driving_Instructor/img/logo.png') }}" type="image/png">
   <link rel="preload" href="{{ asset('design-v2/Find_a_Driving_Instructor/fonts/inter-tight-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="{{ asset('design-v2/Find_a_Driving_Instructor/fonts/plus-jakarta-sans-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ asset('design-v2/Find_a_Driving_Instructor/css/find-instructor.css') }}">
+  @if($bannerLanguage === 'ku')<link rel="stylesheet" href="{{ asset('design-v2/Find_a_Driving_Instructor/css/find-instructor-ku.css') }}">@endif
   <meta name="csrf-token" content="{{ csrf_token() }}">
   @vite('resources/js/app.js')
   <link rel="stylesheet" href="{{ asset('design-v2/ui.css') }}">
+  <link rel="stylesheet" href="{{ asset('design-v2/hazard-menu.css') }}">
 </head>
 <body>
 <!--
@@ -48,16 +50,17 @@
     <div class="appbar">
       <span class="appbar__waves" aria-hidden="true"></span>
       <div class="appbar__row">
-      <a class="back" href="{{ route('home') }}" aria-label="Back">
+      <a class="back" data-back href="{{ $subSection ? route('v2.theory', ['section' => $subSection->section_id]) : route('v2.theory') }}" aria-label="Back">
         <svg class="back__icon" aria-hidden="true"><use href="#i-back"/></svg>
       </a>
-      <h1 class="appbar__title">Hazard Perception</h1>
+      <h1 class="appbar__title">{{ $hazardSettings['title'] }}</h1>
       </div>
     </div>
   </header>
 
   <main class="page">
     <!-- ===== Find an instructor banner ===== -->
+    @if($hazardSettings['banner_active'])
     <section class="promo" aria-labelledby="promo-title">
       <span class="promo__bg" aria-hidden="true"></span>
       <img class="promo__art" src="{{ asset('design-v2/Find_a_Driving_Instructor/img/find/girl-480.webp') }}" srcset="{{ asset('design-v2/Find_a_Driving_Instructor/img/find/girl-480.webp') }} 480w, {{ asset('design-v2/Find_a_Driving_Instructor/img/find/girl-960.webp') }} 960w" sizes="(min-width: 900px) 280px, 46vw" alt="" width="480" height="471" decoding="async" fetchpriority="high">
@@ -65,54 +68,29 @@
       <svg class="promo__pin" aria-hidden="true"><use href="#i-pin"/></svg>
       <svg class="promo__car" aria-hidden="true"><use href="#i-car"/></svg>
 
-      <div class="promo__body">
-        <h2 class="promo__title" id="promo-title"><span data-i18n="promo.title.before">Find a Driving</span> <span class="promo__hl" data-i18n="promo.title.highlight">Instructor</span> <span class="promo__nb" data-i18n="promo.title.after">Near You</span></h2>
-        <a class="promo__cta" href="{{ route('instructors.index') }}">
-          <span data-i18n="promo.cta">Find an Instructor</span>
+      <div class="promo__body" @if($bannerLanguage === 'ku') lang="ckb" dir="rtl" @endif>
+        <h2 class="promo__title" id="promo-title"><span data-i18n="promo.title.before">{{ $banner['before'] }}</span> <span class="promo__hl" data-i18n="promo.title.highlight">{{ $banner['highlight'] }}</span> <span class="promo__nb" data-i18n="promo.title.after">{{ $banner['after'] }}</span></h2>
+        <a class="promo__cta" href="{{ $bannerUrl }}">
+          <span data-i18n="promo.cta">{{ $banner['button'] }}</span>
           <span class="promo__go" aria-hidden="true"><svg><use href="#i-arrow"/></svg></span>
         </a>
       </div>
     </section>
+    @endif
 
     <!-- ===== Hazard perception menu ===== -->
     <ul class="menu" aria-label="Hazard perception">
+      @foreach($hazardCards as $key => $card)
       <li>
-        <a class="menu__item" href="{{ route('v2.guarantee') }}">
-          <span class="menu__icon" aria-hidden="true"><svg><use href="#m-guarantee"/></svg></span>
-          <span class="menu__label">Pass Guarantee</span>
-          <span class="menu__tag">FREE</span>
+        <a class="menu__item" href="{{ $card['url'] }}">
+          <span class="menu__icon" style="background-color: {{ $card['color'] }}" aria-hidden="true"><svg><use href="#m-{{ $card['icon'] }}"/></svg></span>
+          <span class="menu__label">{{ $card['label'] }}</span>
+          @if($card['badge'])<span class="menu__tag">{{ $card['badge'] }}</span>@endif
+          @if($card['destination'] === 'mock')<span class="sr-only">Official Mock Test · Hazard Mock Test</span>@endif
         </a>
       </li>
-      <li>
-        <a class="menu__item" href="{{ route('v2.hazards', ['clips'=>1]) }}">
-          <span class="menu__icon" aria-hidden="true"><svg><use href="#m-videos"/></svg></span>
-          <span class="menu__label">Help Videos</span>
-        </a>
-      </li>
-      <li>
-        <a class="menu__item" href="{{ route('v2.hazards', ['clips'=>1]) }}">
-          <span class="menu__icon" aria-hidden="true"><svg><use href="#m-clips"/></svg></span>
-          <span class="menu__label">Practise Video Clips</span>
-        </a>
-      </li>
-      <li>
-        <a class="menu__item" href="{{ route('theory.hazard_mock_info') }}">
-          <span class="menu__icon" aria-hidden="true"><svg><use href="#m-stopwatch"/></svg></span>
-          <span class="menu__label">Mock Test</span>
-        </a>
-      </li>
-      <li>
-        <a class="menu__item" href="{{ route('v2.progress') }}">
-          <span class="menu__icon" aria-hidden="true"><svg><use href="#m-progress"/></svg></span>
-          <span class="menu__label">Progress Monitor</span>
-        </a>
-      </li>
-      <li>
-        <a class="menu__item" href="{{ route('v2.guidance') }}">
-          <span class="menu__icon" aria-hidden="true"><svg><use href="#m-info"/></svg></span>
-          <span class="menu__label">Advice and Information</span>
-        </a>
-      </li>
+      @endforeach
+      @if($hazardCards->isEmpty())<li class="v2-empty">No items are available right now.</li>@endif
     </ul>
   </main>
 

@@ -259,7 +259,7 @@ body {
   height: clamp(3px, calc(var(--ch) * .04), 4px);
   margin: calc(var(--ch) * .055) 0 calc(var(--ch) * .06);
   border-radius: 4px;
-  background: var(--gold);
+  background: var(--home-card-color, var(--gold));
 }
 .card__text {
   display: block;

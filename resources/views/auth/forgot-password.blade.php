@@ -25,7 +25,7 @@
                 <button type="submit" class="w-full min-h-12 mt-6 py-3.5 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold transition-colors">Email reset link</button>
             </form>
 
-            <a href="{{ route('login') }}" class="block mt-6 text-center text-sm font-semibold text-primary hover:text-primary-dark">Back to sign in</a>
+            <a data-back href="{{ route('login') }}" class="block mt-6 text-center text-sm font-semibold text-primary hover:text-primary-dark">Back</a>
         </div>
     </div>
 </x-layouts.app>

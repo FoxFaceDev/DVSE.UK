@@ -50,7 +50,7 @@
         <span class="appbar__art" aria-hidden="true">
 </span>
         <div class="appbar__row">
-        <a class="back" href="{{ $backUrl ?? route('home') }}" aria-label="Back">
+        <a class="back" data-back href="{{ $backUrl ?? route('home') }}" aria-label="Back">
           <svg class="back__icon" aria-hidden="true">
 <use href="#i-back"/>
 </svg>

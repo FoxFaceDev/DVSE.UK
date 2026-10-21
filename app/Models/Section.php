@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Section extends Model
 {
-    protected $fillable = ['name', 'description', 'color', 'icon_path'];
+    public const HOME_KEYS = ['theory', 'find_instructor', 'join_rivex', 'become_instructor'];
+
+    protected $fillable = ['home_key', 'name', 'description', 'color', 'icon_path'];
 
     public function getIconPathAttribute($value)
     {
@@ -16,6 +18,9 @@ class Section extends Model
         }
         if (str_starts_with($value, 'http')) {
             return $value;
+        }
+        if (self::isBundledIcon($value)) {
+            return asset(ltrim($value, '/'));
         }
 
         if (! MediaStorage::isLocal()) {
@@ -27,6 +32,21 @@ class Section extends Model
             'id' => $this->getKey(),
             'v' => $this->updated_at?->timestamp,
         ]);
+    }
+
+    public static function isBundledIcon(?string $path): bool
+    {
+        return is_string($path) && str_starts_with(ltrim($path, '/'), 'design-v2/');
+    }
+
+    public function isHomeSection(): bool
+    {
+        return in_array($this->home_key, self::HOME_KEYS, true);
+    }
+
+    public function scopeHomeSections($query)
+    {
+        return $query->whereIn('home_key', self::HOME_KEYS);
     }
 
     public function subSections()

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; media-src 'self'; style-src 'self'; font-src 'self'; script-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#014cc1">
+  <title>Questions 2/50 – RIVEX.UK</title>
+  <meta name="description" content="Theory test question 2 of 50.">
+  <link rel="icon" href="img/logo.png" type="image/png">
+  <link rel="preload" href="fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/open-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/questions.css?v=20261037">
+</head>
+<body class="page--text">
+
+  <!-- UI glyphs (inline sprite, no scripts) -->
+  <svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M20 12H5M11.5 5.5 5 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-audio" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9.3h3.6L11.4 5c.7-.6 1.6-.1 1.6.8v12.4c0 .9-.9 1.4-1.6.8l-4.8-4.3H3a1 1 0 0 1-1-1v-3.4a1 1 0 0 1 1-1z"/><path d="M16 8.8a4.6 4.6 0 0 1 0 6.4M18.9 6a8.6 8.6 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 6.8V12h4.2"/></g></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M14.5 5 7.5 12l7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="m9.5 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M6 21V4M6 5h11.5l-3 4.2 3 4.3H6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </svg>
+
+  <!-- ===== Fixed header: back · "Questions 2/50" · audio, then progress bar + timer (header of theory.html, without the road) ===== -->
+  <header class="top">
+    <div class="appbar">
+      <div class="appbar__inner">
+        <div class="appbar__row">
+        <a class="back" href="mock_test.html" aria-label="Back">
+          <svg class="back__icon" aria-hidden="true"><use href="#i-back"/></svg>
+        </a>
+        <h1 class="appbar__title">Questions <span class="appbar__count">2/50</span></h1>
+        <button class="back hdr-audio" type="button" aria-label="Read the question aloud">
+          <svg class="back__icon" aria-hidden="true"><use href="#i-audio"/></svg>
+        </button>
+        </div>
+        <div class="appbar__bar">
+          <progress class="meter" max="50" value="2" aria-label="Question 2 of 50">2/50</progress>
+          <span class="timer" aria-label="Time remaining 56:55"><svg aria-hidden="true"><use href="#i-clock"/></svg><span>56:55</span></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Question · (media) · answers ===== -->
+  <main class="stage">
+    <section class="panel card" aria-labelledby="q-text">
+      <h2 class="q" id="q-text">When should you leave a two-second gap between your vehicle and the one in front?</h2>
+      <p class="hint" id="q-hint">Select one answer</p>
+      <fieldset class="opts" aria-labelledby="q-text" aria-describedby="q-hint">
+        <label class="opt">
+          <input class="opt__input" type="radio" name="answer" value="1">
+          <span class="opt__box" aria-hidden="true"></span>
+          <span class="opt__text">When it&#x27;s dry</span>
+        </label>
+        <label class="opt">
+          <input class="opt__input" type="radio" name="answer" value="2">
+          <span class="opt__box" aria-hidden="true"></span>
+          <span class="opt__text">When it&#x27;s icy</span>
+        </label>
+        <label class="opt">
+          <input class="opt__input" type="radio" name="answer" value="3">
+          <span class="opt__box" aria-hidden="true"></span>
+          <span class="opt__text">When it&#x27;s raining</span>
+        </label>
+        <label class="opt">
+          <input class="opt__input" type="radio" name="answer" value="4">
+          <span class="opt__box" aria-hidden="true"></span>
+          <span class="opt__text">When it&#x27;s foggy</span>
+        </label>
+      </fieldset>
+    </section>
+  </main>
+
+  <!-- ===== Fixed footer (as quiz-en.html): Previous · Flag · Next ===== -->
+  <footer class="dock">
+    <nav class="actions" aria-label="Question actions">
+      <a class="act" href="#previous">
+        <span class="act__btn"><svg class="act__icon" aria-hidden="true"><use href="#i-prev"/></svg></span>
+        <span class="act__label">Previous</span>
+      </a>
+      <label class="act">
+        <input class="act__toggle" type="checkbox" name="flag" aria-label="Flag this question">
+        <span class="act__btn"><svg class="act__icon" aria-hidden="true"><use href="#i-flag"/></svg></span>
+        <span class="act__label">Flag</span>
+      </label>
+      <a class="act" href="#next">
+        <span class="act__btn"><svg class="act__icon" aria-hidden="true"><use href="#i-next"/></svg></span>
+        <span class="act__label">Next</span>
+      </a>
+    </nav>
+  </footer>
+
+</body>
+</html>

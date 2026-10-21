@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#0452bc">
+  <title>Practice Question – RIVEX.UK</title>
+  <meta name="description" content="Practice question in English and Kurdish (Sorani).">
+  <link rel="icon" href="img/logo.png" type="image/png">
+  <link rel="preload" href="fonts/open-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/adobe-arabic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/quiz.css?v=20261011">
+</head>
+<body class="mode-ku">
+
+  <svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M20 12H5M11.5 5.5 5 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24"><path d="M7.5 4 3.5 8l4 4M3.5 8H18M16.5 20l4-4-4-4M20.5 16H6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-audio" viewBox="0 0 24 24"><path d="M3.5 9.6h3.4L12 5.4v13.2l-5.1-4.2H3.5z" fill="currentColor"/><path d="M15.4 9.2a4 4 0 0 1 0 5.6M18.2 6.6a8 8 0 0 1 0 10.8" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M14.5 5 7.5 12l7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="m9.5 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M6 21V4M6 5h11.5l-3 4.2 3 4.3H6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20.2 5 16 16.6 4.4a2.1 2.1 0 0 1 3 0 2.1 2.1 0 0 1 0 3L8 19zM14.4 6.6l3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9.2 18.2h5.6M10.2 21h3.6M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.2 1.1 2v.4h5v-.4c0-.8.4-1.5 1.1-2A6 6 0 0 0 12 3Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5.5 12.8 4.3 4.3 8.7-9.2" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cross" viewBox="0 0 24 24"><path d="m6.8 6.8 10.4 10.4M17.2 6.8 6.8 17.2" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M10.5 3.5 12.3 9l5.5 1.8-5.5 1.8-1.8 5.5-1.8-5.5-5.5-1.8L8.7 9zM18.6 14.2l.9 2.3 2.3.9-2.3.9-.9 2.3-.9-2.3-2.3-.9 2.3-.9z" fill="currentColor"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.8 19.4 6v5.6c0 4.5-3 8.2-7.4 9.6-4.4-1.4-7.4-5.1-7.4-9.6V6z" fill="currentColor"/><path d="m8.8 12.2 2.3 2.3 4.2-4.6" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </svg>
+
+  <!-- ===== Fixed top: back + tools, question counter, progress ===== -->
+  <header class="top">
+    <div class="appbar">
+      <div class="appbar__inner">
+        <div class="appbar__row">
+          <a class="back" href="practice.html" aria-label="Back to categories">
+            <svg class="back__icon" aria-hidden="true"><use href="#i-back"/></svg>
+          </a>
+          <div class="tools">
+            <a class="tool" href="quiz-en.html" title="English only">
+              <span class="tool__btn"><svg class="tool__icon" aria-hidden="true"><use href="#i-swap"/></svg></span>
+              <span class="tool__label">Language</span>
+            </a>
+            <button class="tool" type="button">
+              <span class="tool__btn"><svg class="tool__icon" aria-hidden="true"><use href="#i-audio"/></svg></span>
+              <span class="tool__label">Audio</span>
+            </button>
+          </div>
+        </div>
+        <h1 class="appbar__title">Question 5/760</h1>
+        <div class="appbar__bar">
+          <progress class="meter" max="760" value="5" aria-label="Questions answered">5 of 760</progress>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Question ===== -->
+  <main class="quiz" id="question">
+    <div class="quiz__head">
+      <h2 class="q">
+        <span class="q__en">Which is the most vulnerable road user?</span>
+        <span class="q__ku ku" lang="ckb" dir="rtl">کام یەک لە بەکارهێنەرانی ڕێگا زیاتر لە مەترسیدایە؟</span>
+      </h2>
+    </div>
+
+    <div class="quiz__answers">
+      <p class="meta">
+        <span class="meta__hint">Select one answer</span>
+        <span class="meta__src"><svg class="meta__icon" aria-hidden="true"><use href="#i-spark"/></svg>RIVEX AI Generated (1/3)</span>
+      </p>
+
+      <fieldset class="opts">
+        <legend class="sr-only">Choose one answer</legend>
+        <label class="opt opt--correct">
+          <input class="opt__input" type="radio" name="answer" value="1">
+          <span class="opt__text">
+            <span class="opt__en">Motorcyclist</span>
+            <span class="opt__ku ku" lang="ckb" dir="rtl">مۆتۆڕسوار</span>
+          </span>
+          <span class="opt__mark" aria-hidden="true">
+            <svg class="mark mark--ok"><use href="#i-check"/></svg>
+            <svg class="mark mark--no"><use href="#i-cross"/></svg>
+          </span>
+        </label>
+        <label class="opt">
+          <input class="opt__input" type="radio" name="answer" value="2">
+          <span class="opt__text">
+            <span class="opt__en">Car driver</span>
+            <span class="opt__ku ku" lang="ckb" dir="rtl">شۆفێری ئۆتۆمبێل</span>
+          </span>
+          <span class="opt__mark" aria-hidden="true">
+            <svg class="mark mark--ok"><use href="#i-check"/></svg>
+            <svg class="mark mark--no"><use href="#i-cross"/></svg>
+          </span>
+        </label>
+        <label class="opt">
+          <input class="opt__input" type="radio" name="answer" value="3">
+          <span class="opt__text">
+            <span class="opt__en">Lorry driver</span>
+            <span class="opt__ku ku" lang="ckb" dir="rtl">شۆفێری لۆری</span>
+          </span>
+          <span class="opt__mark" aria-hidden="true">
+            <svg class="mark mark--ok"><use href="#i-check"/></svg>
+            <svg class="mark mark--no"><use href="#i-cross"/></svg>
+          </span>
+        </label>
+        <label class="opt">
+          <input class="opt__input" type="radio" name="answer" value="4">
+          <span class="opt__text">
+            <span class="opt__en">Tractor driver</span>
+            <span class="opt__ku ku" lang="ckb" dir="rtl">شۆفێری تراکتۆر</span>
+          </span>
+          <span class="opt__mark" aria-hidden="true">
+            <svg class="mark mark--ok"><use href="#i-check"/></svg>
+            <svg class="mark mark--no"><use href="#i-cross"/></svg>
+          </span>
+        </label>
+      </fieldset>
+    </div>
+  </main>
+
+  <!-- ===== Fixed bottom: actions ===== -->
+  <footer class="dock">
+    <nav class="actions" aria-label="Question actions">
+      <a class="act" href="#previous">
+        <span class="act__btn"><svg class="act__icon" aria-hidden="true"><use href="#i-prev"/></svg></span>
+        <span class="act__label">Previous</span>
+      </a>
+      <label class="act">
+        <input class="act__toggle" type="checkbox">
+        <span class="act__btn"><svg class="act__icon" aria-hidden="true"><use href="#i-flag"/></svg></span>
+        <span class="act__label">Flag</span>
+      </label>
+      <button class="act" type="button">
+        <span class="act__btn"><svg class="act__icon" aria-hidden="true"><use href="#i-pencil"/></svg></span>
+        <span class="act__label">AI Word</span>
+      </button>
+      <button class="act" type="button">
+        <span class="act__btn"><svg class="act__icon" aria-hidden="true"><use href="#i-bulb"/></svg></span>
+        <span class="act__label">Explain</span>
+      </button>
+      <a class="act" href="quiz-ku-image.html">
+        <span class="act__btn"><svg class="act__icon" aria-hidden="true"><use href="#i-next"/></svg></span>
+        <span class="act__label">Next</span>
+      </a>
+    </nav>
+  </footer>
+
+</body>
+</html>

@@ -29,7 +29,7 @@
   <div class="top">
     <header class="appbar">
       <div class="appbar__inner">
-        <a class="back" href="{{ route('home') }}" aria-label="Back">
+        <a class="back" data-back href="{{ route('home') }}" aria-label="Back">
           <svg class="back__icon" aria-hidden="true"><use href="#i-back"/></svg>
         </a>
         <h1 class="appbar__title">Practice Revision Questions</h1>

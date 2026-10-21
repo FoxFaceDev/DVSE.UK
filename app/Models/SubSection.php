@@ -8,7 +8,14 @@ use Illuminate\Support\Str;
 
 class SubSection extends Model
 {
-    protected $fillable = ['section_id', 'name', 'description', 'color', 'icon_path'];
+    protected $fillable = ['section_id', 'name', 'description', 'color', 'icon_path', 'page_type'];
+
+    public function isHazardPerception(): bool
+    {
+        return $this->page_type !== null
+            ? $this->page_type === 'hazard'
+            : Str::contains(Str::lower($this->name), 'hazard perception');
+    }
 
     public function isRevisionPractice(): bool
     {

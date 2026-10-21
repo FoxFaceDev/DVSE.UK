@@ -16,6 +16,7 @@ class SubSectionController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:180',
+            'page_type' => 'nullable|in:hazard,standard',
             'color' => 'nullable|string|max:50',
             'icon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp,svg', 'max:2048', new SafeIconFile],
         ]);
@@ -23,6 +24,7 @@ class SubSectionController extends Controller
         $subSection = new SubSection;
         $subSection->section_id = $section->id;
         $subSection->name = $validated['name'];
+        $subSection->page_type = $validated['page_type'] ?? ($subSection->isHazardPerception() ? 'hazard' : null);
         $subSection->description = $validated['description'] ?? null;
         $subSection->color = $validated['color'] ?? '#3b82f6';
 
@@ -50,11 +52,17 @@ class SubSectionController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:180',
+            'page_type' => 'nullable|in:hazard,standard',
             'color' => 'nullable|string|max:50',
             'icon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp,svg', 'max:2048', new SafeIconFile],
         ]);
 
         $subSection->name = $validated['name'];
+        if ($request->exists('page_type')) {
+            $subSection->page_type = $validated['page_type'];
+        } elseif ($subSection->isHazardPerception()) {
+            $subSection->page_type = 'hazard';
+        }
         if ($request->exists('description')) {
             $subSection->description = $validated['description'] ?? null;
         }

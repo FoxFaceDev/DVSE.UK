@@ -37,7 +37,7 @@
     <div class="appbar">
       <div class="appbar__inner">
         <div class="appbar__row">
-          <a class="back" href="{{ route('v2.revision') }}" aria-label="Back to categories">
+          <a class="back" data-back href="{{ route('v2.revision') }}" aria-label="Back">
             <svg class="back__icon" aria-hidden="true"><use href="#i-back"/></svg>
           </a>
           <div class="tools">

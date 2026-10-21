@@ -62,7 +62,7 @@ class SectionController extends Controller
 
         if ($request->hasFile('icon')) {
             // Delete old icon if exists
-            if ($section->getRawOriginal('icon_path')) {
+            if ($section->getRawOriginal('icon_path') && ! Section::isBundledIcon($section->getRawOriginal('icon_path'))) {
                 MediaStorage::delete($section->getRawOriginal('icon_path'));
             }
             $section->icon_path = MediaStorage::store($request->file('icon'), 'icons');
@@ -75,6 +75,10 @@ class SectionController extends Controller
 
     public function destroy(Section $section)
     {
+        if ($section->isHomeSection()) {
+            return back()->with('error', 'The four home-page sections are fixed and cannot be deleted. You can edit their text, color, and icon instead.');
+        }
+
         if ($section->getRawOriginal('icon_path')) {
             MediaStorage::delete($section->getRawOriginal('icon_path'));
         }

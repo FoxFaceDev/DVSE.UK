@@ -49,39 +49,43 @@
     @include('v2.site-ad')
     <div class="stage">
     <ul class="cards">
+      @php($card = $homeCards[0])
       <li>
-        <a class="card card--blue" href="{{ route('v2.theory', $theorySection ? ['section' => $theorySection->id] : []) }}">
-          <img class="card__icon" src="{{ $theorySection?->icon_path ?: asset('design-v2/Home/img/icon-theory.webp') }}" alt="" width="800" height="722">
+        <a class="card card--blue" href="{{ $card['href'] }}" style="--home-card-color: {{ $card['section']->color ?: '#1664f5' }}">
+          <img class="card__icon" src="{{ $card['section']->icon_path ?: asset('design-v2/Home/img/icon-theory.webp') }}" alt="" width="800" height="722">
           <span class="card__body">
-            <span class="card__title">Theory Test</span>
-            <span class="card__text">{{ $theorySection?->description ?: 'Practise official-style questions and track your progress.' }}</span>
+            <span class="card__title">{{ $card['section']->name }}</span>
+            <span class="card__text">{{ $card['description'] }}</span>
           </span>
         </a>
       </li>
+      @php($card = $homeCards[1])
       <li>
-        <a class="card card--gold" href="{{ route('instructors.index') }}">
-          <img class="card__icon" src="{{ asset('design-v2/Home/img/icon-find.webp') }}" alt="" width="800" height="646">
+        <a class="card card--gold" href="{{ $card['href'] }}" style="--home-card-color: {{ $card['section']->color ?: '#f7b500' }}">
+          <img class="card__icon" src="{{ $card['section']->icon_path ?: asset('design-v2/Home/img/icon-find.webp') }}" alt="" width="800" height="646">
           <span class="card__body">
-            <span class="card__title">Find an Instructor</span>
-            <span class="card__text">Search approved driving instructors near you.</span>
+            <span class="card__title">{{ $card['section']->name }}</span>
+            <span class="card__text">{{ $card['description'] }}</span>
           </span>
         </a>
       </li>
+      @php($card = $homeCards[2])
       <li>
-        <a class="card card--gold" href="{{ route('register', ['instructor'=>1]) }}">
-          <img class="card__icon" src="{{ asset('design-v2/Home/img/icon-join.webp') }}" alt="" width="800" height="647">
+        <a class="card card--gold" href="{{ $card['href'] }}" style="--home-card-color: {{ $card['section']->color ?: '#f7b500' }}">
+          <img class="card__icon" src="{{ $card['section']->icon_path ?: asset('design-v2/Home/img/icon-join.webp') }}" alt="" width="800" height="647">
           <span class="card__body">
-            <span class="card__title">Instructors — Join RIVEX</span>
-            <span class="card__text">Get More Students. Earn More Money.</span>
+            <span class="card__title">{{ $card['section']->name }}</span>
+            <span class="card__text">{{ $card['description'] }}</span>
           </span>
         </a>
       </li>
+      @php($card = $homeCards[3])
       <li>
-        <a class="card card--blue card--plain" href="{{ route('v2.guidance') }}">
-          <img class="card__icon" src="{{ asset('design-v2/Home/img/icon-become.webp') }}" alt="" width="800" height="696">
+        <a class="card card--blue card--plain" href="{{ $card['href'] }}" style="--home-card-color: {{ $card['section']->color ?: '#1664f5' }}">
+          <img class="card__icon" src="{{ $card['section']->icon_path ?: asset('design-v2/Home/img/icon-become.webp') }}" alt="" width="800" height="696">
           <span class="card__body">
-            <span class="card__title">Become an Instructor</span>
-            <span class="card__text">Start your journey to become a driving instructor.</span>
+            <span class="card__title">{{ $card['section']->name }}</span>
+            <span class="card__text">{{ $card['description'] }}</span>
           </span>
         </a>
       </li>

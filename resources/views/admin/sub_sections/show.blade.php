@@ -7,6 +7,9 @@
             <h2 class="text-xl font-heading font-bold text-gray-800" style="color: {{ $subSection->color ?? $section->color }}">{{ $subSection->name }}</h2>
         </div>
         <div class="flex gap-2">
+            @if($subSection->isHazardPerception())
+                <a href="{{ route('admin.hazard-page.edit') }}" class="rounded-lg bg-amber-100 px-4 py-2 font-medium text-amber-900">Edit Hazard page design</a>
+            @endif
             <a href="{{ route('admin.topics.create', ['topicable_type' => 'App\Models\SubSection', 'topicable_id' => $subSection->id]) }}" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 Add Category

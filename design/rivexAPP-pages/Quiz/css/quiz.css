@@ -1,0 +1,385 @@
+/* ==========================================================================
+   RIVEX.UK – Practice question (mobile first, desktop adapted)
+   Fixed header (row 1: back + language / audio, row 2: "Question 5/760",
+   row 3: progress bar) and a fixed action bar; the question scrolls in between.
+   Three designs: English only · English + Kurdish (Sorani) · the same with a picture.
+   ========================================================================== */
+
+/* Self-hosted fonts
+   Open Sans (variable, SIL OFL – fonts/OFL-OpenSans.txt): English
+   Adobe Arabic (Adobe licence – the owner must hold a web-use licence): Kurdish (Sorani) */
+@font-face {
+  font-family: "Open Sans";
+  src: url("../fonts/open-sans-latin.woff2") format("woff2");
+  font-weight: 300 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Open Sans";
+  src: url("../fonts/open-sans-latin-ext.woff2") format("woff2");
+  font-weight: 300 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Adobe Arabic";
+  src: url("../fonts/adobe-arabic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  size-adjust: 145%;                            /* alef = Open Sans cap height, so Kurdish and English read at the same size */
+  unicode-range: U+0600-06FF, U+0750-077F, U+200C-200F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+:root {
+  --blue: #1664f5;
+  --link: #1a56c8;
+  --navy: #0c1b4d;
+  --ink: #17203a;
+  --muted: #8892a6;
+  --line: #d9e0ec;
+  --bg: #fafbfd;
+  --ok: #43a047;
+  --ok-bg: #d8ebd3;
+  --ok-line: #b9d8b1;
+  --no: #e53935;
+  --no-bg: #fbe4e2;                             /* tint of a wrongly picked answer (set to var(--ok-bg) for the all-green look of the mock-up) */
+  --no-line: #f1bdb8;
+  --font: "Open Sans", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-ku: "Adobe Arabic", "Geeza Pro", "Segoe UI", Tahoma, system-ui, sans-serif;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --u: 1vh;                                     /* 1% of the small viewport height */
+  --gutter: clamp(14px, 4.4vw, 22px);
+
+  /* fixed chrome: explicit heights */
+  --hdr-core: clamp(112px, calc(var(--u) * 15.8), 176px);
+  --status: max(var(--safe-top), calc(var(--u) * 3));          /* room above the arrow row (phone status bar area) */
+  --hdr: calc(var(--hdr-core) + var(--status));
+  --btn: clamp(44px, calc(var(--u) * 6.2), 54px);              /* round action buttons */
+  --act-gap: 4px;
+  --act-label: clamp(16px, calc(var(--u) * 2.4), 20px);
+  --dock-pt: clamp(8px, calc(var(--u) * 1.3), 12px);
+  --dock-pb: max(8px, var(--safe-bottom));
+  --dock-h: calc(var(--dock-pt) + var(--btn) + var(--act-gap) + var(--act-label) + var(--dock-pb));
+}
+@supports (height: 1svh) { :root { --u: 1svh; } }
+
+/* ---------- Reset ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body, h1, h2, p, ul, fieldset, figure { margin: 0; padding: 0; }
+fieldset { border: 0; min-width: 0; }
+img, svg { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+a, button, label { touch-action: manipulation; }
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+body {
+  padding-top: var(--hdr);
+  padding-bottom: var(--dock-h);
+  min-height: 100vh;
+  min-height: 100svh;
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+:focus-visible { outline: 3px solid #f7b500; outline-offset: 2px; border-radius: 12px; }
+
+/* Kurdish (Sorani): right-to-left, Adobe Arabic */
+.ku {
+  display: block;
+  font-family: var(--font-ku);
+  font-weight: 400;
+  font-synthesis: none;
+  direction: rtl;
+  text-align: right;
+  unicode-bidi: isolate;
+}
+
+/* ---------- Fixed header ---------- */
+.top { position: fixed; inset: 0 0 auto 0; z-index: 30; height: var(--hdr); }
+.appbar {
+  height: 100%;
+  padding: var(--status) var(--gutter) 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0 0 min(4.6vw, 28px) min(4.6vw, 28px);
+  background:
+    radial-gradient(120% 100% at 88% -10%, rgba(40, 150, 255, .55), rgba(40, 150, 255, 0) 58%),
+    linear-gradient(172deg, #0764d8 0%, #0554c0 36%, #03419b 72%, #012c76 100%);
+  box-shadow: 0 8px 20px rgba(2, 50, 140, .16);
+  overflow: hidden;
+}
+.appbar__inner {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 44fr 20fr 36fr;           /* arrow row · title · bar – proportions of the reference header */
+  align-items: center;
+}
+.appbar__row {
+  display: flex;
+  align-items: center;                          /* back button and tools share one centre line */
+  justify-content: space-between;
+  gap: 12px;
+}
+.back {
+  --d: clamp(36px, calc(var(--hdr-core) * .3), 46px);
+  flex: 0 0 auto;
+  width: var(--d);
+  height: var(--d);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #2f8bf0, #0a55c6 75%);
+  border: 1px solid rgba(255, 255, 255, .22);
+  box-shadow: 0 4px 10px rgba(0, 30, 100, .3), inset 0 1px 0 rgba(255, 255, 255, .25);
+  transition: transform .15s ease;
+}
+.back:active { transform: scale(.92); }
+.back__icon { width: 56%; height: 56%; }
+
+.appbar__title {
+  font-size: clamp(1.05rem, 5.1vw, 1.45rem);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: 0;
+  white-space: nowrap;
+  color: #fff;
+}
+
+.tools { flex: 0 0 auto; display: flex; gap: clamp(12px, 3.6vw, 18px); }
+.tool {
+  --d: clamp(36px, calc(var(--hdr-core) * .3), 46px);
+  position: relative;
+  display: block;
+  width: var(--d);
+  height: var(--d);
+  color: #fff;
+  cursor: pointer;
+}
+.tool__btn {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 28%, #3b97ff, #0c5fe0 78%);
+  border: 1px solid rgba(255, 255, 255, .24);
+  box-shadow: 0 5px 12px rgba(0, 30, 110, .32), inset 0 1px 0 rgba(255, 255, 255, .3);
+  transition: transform .15s ease;
+}
+.tool:active .tool__btn { transform: scale(.92); }
+.tool__icon { width: 52%; height: 52%; }
+.tool__label {                                  /* hangs below the circle, so the circles stay centred on the arrow */
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 50%;
+  translate: -50% 0;
+  font-size: clamp(.58rem, 2.7vw, .7rem);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, .9);
+}
+
+/* progress: grows with the number of answered questions */
+.meter {
+  display: block;
+  width: 100%;
+  height: clamp(6px, calc(var(--u) * 1), 10px);
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, .2);
+  color: #27b8ff;
+}
+.meter::-webkit-progress-bar { background: rgba(255, 255, 255, .2); border-radius: 999px; }
+.meter::-webkit-progress-value {
+  min-width: 10px;                              /* stays visible while only a few questions are done */
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4fd2ff, #1aa4ff);
+  transition: width .4s ease;
+}
+.meter::-moz-progress-bar { min-width: 10px; border-radius: 999px; background: linear-gradient(90deg, #4fd2ff, #1aa4ff); }
+
+/* ---------- Question ---------- */
+.quiz {
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: calc(100 * var(--u) - var(--hdr) - var(--dock-h));
+  padding: 0 var(--gutter) clamp(18px, calc(var(--u) * 3), 32px);
+  display: flex;
+  flex-direction: column;
+}
+.quiz__head {                                   /* the question sits in the middle of the free space, answers at the bottom */
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(14px, calc(var(--u) * 3), 34px) 0;
+}
+.quiz__answers { flex: 0 0 auto; }
+
+.media {
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  place-items: center;
+  height: clamp(110px, calc(var(--u) * 17), 210px);
+  margin-bottom: clamp(14px, calc(var(--u) * 2.2), 24px);
+  padding: clamp(10px, calc(var(--u) * 1.6), 18px);
+  flex: 0 0 auto;
+  background: #eaeff6;
+  border-radius: 16px;
+}
+.media__img { width: 100%; height: 100%; object-fit: contain; }
+
+.q__en, .q__ku { font-size: clamp(1.12rem, 5.4vw, 1.6rem); color: var(--navy); }   /* English and Kurdish question: same size and colour */
+.q__en {
+  display: block;
+  font-weight: 400;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+.q__ku {
+  margin-top: clamp(6px, calc(var(--u) * 1), 10px);
+  line-height: 1.5;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 clamp(8px, calc(var(--u) * 1.2), 12px);
+  font-size: clamp(.74rem, 3.4vw, .9rem);
+  color: var(--muted);
+}
+.meta__src { display: inline-flex; align-items: center; gap: 6px; text-align: right; }
+.meta__icon { flex: 0 0 auto; width: 1.25em; height: 1.25em; }
+
+/* ---------- Answers ---------- */
+.opts { display: grid; gap: clamp(8px, calc(var(--u) * 1.3), 14px); }
+.opt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: clamp(56px, calc(var(--u) * 9), 84px);
+  padding: clamp(9px, calc(var(--u) * 1.5), 15px) clamp(14px, 4vw, 20px);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+.opt__input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.opt__text { flex: 1 1 auto; min-width: 0; display: grid; gap: 2px; }
+.opt__en, .opt__ku { font-size: clamp(.98rem, 4.4vw, 1.2rem); color: var(--ink); }   /* English and Kurdish answer: same size and colour */
+.opt__en { line-height: 1.3; }
+.opt__ku { line-height: 1.45; }
+@media (hover: hover) { .opts:not(:has(.opt__input:checked)) .opt:hover { border-color: #aebbd6; } }
+.opt:has(.opt__input:focus-visible) { outline: 3px solid #f7b500; outline-offset: 2px; }
+
+/* answer marks */
+.opt__mark { flex: 0 0 auto; display: none; }
+.mark { display: none; width: clamp(32px, 9.6vw, 40px); height: clamp(32px, 9.6vw, 40px); padding: 22%; color: #fff; border-radius: 50%; }
+.mark--ok { background: var(--ok); }
+.mark--no { background: var(--no); }
+
+/* States – driven by the picked radio (demo, CSS only) or by classes set by the app:
+   .opts.is-answered on the group, .is-picked on the chosen option, .opt--correct on the right one */
+.opts:is(.is-answered, :has(.opt__input:checked)) { pointer-events: none; }
+.opt:is(.is-picked, :has(.opt__input:checked)) { background: var(--no-bg); border-color: var(--no-line); }
+.opt--correct:is(.is-picked, :has(.opt__input:checked)) { background: var(--ok-bg); border-color: var(--ok-line); }
+
+.opts:is(.is-answered, :has(.opt__input:checked)) .opt--correct .opt__mark,
+.opt:not(.opt--correct):is(.is-picked, :has(.opt__input:checked)) .opt__mark { display: block; }
+.opts:is(.is-answered, :has(.opt__input:checked)) .opt--correct .mark--ok { display: block; }
+.opt:not(.opt--correct):is(.is-picked, :has(.opt__input:checked)) .mark--no { display: block; }
+
+/* ---------- Fixed action bar ---------- */
+.dock {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 30;
+  height: var(--dock-h);
+  padding: var(--dock-pt) var(--gutter) var(--dock-pb);
+  background: #fff;
+  border-top: 1px solid #dde5f2;
+}
+.actions {
+  max-width: 560px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.act {
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(58px, 18vw, 76px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--act-gap);
+  color: var(--link);
+}
+.act__btn {
+  width: var(--btn);
+  height: var(--btn);
+  display: grid;
+  place-items: center;
+  color: var(--navy);
+  background: #fff;
+  border: 1.5px solid #cfd7e6;
+  border-radius: 50%;
+  transition: transform .15s ease, background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+.act:active .act__btn { transform: scale(.92); }
+.act__icon { width: 46%; height: 46%; }
+.act__label {
+  height: var(--act-label);
+  font-size: clamp(.72rem, 3.3vw, .9rem);
+  font-weight: 500;
+  line-height: var(--act-label);
+  white-space: nowrap;
+}
+.act__toggle { position: absolute; inset: 0 0 auto 0; height: var(--btn); margin: 0; opacity: 0; cursor: pointer; }
+.act__toggle:checked + .act__btn { color: #fff; background: var(--blue); border-color: var(--blue); }
+.act__toggle:focus-visible + .act__btn { outline: 3px solid #f7b500; outline-offset: 2px; }
+@media (hover: hover) { .act:hover .act__btn { border-color: #9fb3d9; } }
+
+/* ---------- Short screens / landscape ---------- */
+@media (max-height: 520px) {
+  :root { --hdr-core: 96px; --btn: 40px; }
+}
+
+/* ---------- Preferences ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}

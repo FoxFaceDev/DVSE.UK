@@ -10,6 +10,7 @@ use App\Models\Question;
 use App\Models\Section;
 use App\Models\SubSection;
 use App\Models\Topic;
+use App\Support\HazardPage;
 use Illuminate\Http\Request;
 
 class LearnerController extends Controller
@@ -19,7 +20,9 @@ class LearnerController extends Controller
         $validated = $request->validate(['section' => ['nullable', 'integer', 'exists:sections,id']]);
         $section = isset($validated['section'])
             ? Section::findOrFail($validated['section'])
-            : Section::whereRaw('lower(name) like ?', ['%theory%'])->first();
+            : (Section::whereNull('home_key')->whereRaw('lower(name) like ?', ['%theory%'])->latest('id')->first()
+                ?? Section::where('home_key', 'theory')->first()
+                ?? Section::whereRaw('lower(name) like ?', ['%theory%'])->first());
 
         $section?->load(['subSections', 'topics' => fn ($query) => $query->with('questions:id,topic_id')->withCount([
             'contentPages as cgi_content_pages_count' => fn ($pages) => $pages->where('type', 'cgi_clips'),
@@ -91,12 +94,30 @@ class LearnerController extends Controller
 
     public function hazards(Request $request)
     {
-        $topics = Topic::whereHas('contentPages', fn ($q) => $q->where('type', 'cgi_clips'))->withCount('contentPages')->ordered()->get();
+        $validated = $request->validate(['subsection' => ['nullable', 'integer', 'exists:sub_sections,id']]);
+        $subSection = isset($validated['subsection']) ? SubSection::findOrFail($validated['subsection']) : SubSection::where('page_type', 'hazard')->first();
+        if ($subSection) {
+            abort_unless($subSection->isHazardPerception(), 404);
+        }
         if ($request->boolean('clips')) {
-            return view('v2.information', ['heading' => 'Hazard Perception Clips', 'description' => 'Choose a topic to practise recognising developing hazards.', 'topics' => $topics]);
+            $topics = Topic::whereHas('contentPages', fn ($q) => $q->where('type', 'cgi_clips'))
+                ->when($subSection, fn ($query) => $query->where(fn ($parent) => $parent
+                    ->where(fn ($direct) => $direct->where('topicable_type', SubSection::class)->where('topicable_id', $subSection->id))
+                    ->orWhere(fn ($group) => $group->where('topicable_type', Category::class)->whereIn('topicable_id', $subSection->categories()->select('id')))))
+                ->withCount('contentPages')->ordered()->get();
+
+            return view('v2.information', ['heading' => $request->query('mode') === 'help' ? 'Hazard Perception Help Videos' : 'Hazard Perception Clips', 'description' => 'Choose a topic to practise recognising developing hazards.', 'topics' => $topics]);
         }
 
-        return view($request->query('language') === 'ku' ? 'v2.hazard-menu-ku' : 'v2.hazard-menu');
+        return $this->hazardPage($request, $subSection);
+    }
+
+    public function hazardPage(Request $request, ?SubSection $subSection = null)
+    {
+        $language = $request->query('language', auth('web')->user()?->preferredLanguage?->code ?? 'en');
+        $language = in_array($language, ['ku', 'ckb'], true) ? 'ku' : 'en';
+
+        return view('v2.hazard-menu', HazardPage::viewData($subSection, $language));
     }
 
     public function search(Request $request)

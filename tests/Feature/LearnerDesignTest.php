@@ -27,6 +27,46 @@ test('learn navigation opens a dedicated page with current admin managed section
     $this->get(route('v2.more'))->assertOk()->assertSee('Renamed learning')->assertSee('#7c3aed');
 });
 
+test('the four fixed home cards are managed by their matching admin sections', function () {
+    $cards = Section::homeSections()->get()->keyBy('home_key');
+
+    expect($cards->keys()->sort()->values()->all())->toBe(collect(Section::HOME_KEYS)->sort()->values()->all());
+
+    $home = $this->get(route('home'))->assertOk();
+    $home->assertSeeInOrder([
+        'Theory Test',
+        'Find an Instructor',
+        'Instructors — Join RIVEX',
+        'Become an Instructor',
+    ])->assertSee(route('v2.theory', ['section' => $cards['theory']->id]), false)
+        ->assertSee(route('instructors.index'), false)
+        ->assertSee(route('register', ['instructor' => 1]), false)
+        ->assertSee(route('v2.guidance'), false);
+
+    $admin = Admin::create(['name' => 'Home Admin', 'email' => 'home-admin@example.com', 'password' => bcrypt('password')]);
+    $this->actingAs($admin, 'admin')->get(route('admin.home'))
+        ->assertOk()
+        ->assertSeeInOrder(['Theory Test', 'Find an Instructor', 'Instructors — Join RIVEX', 'Become an Instructor'])
+        ->assertSee('Home card');
+
+    $theory = $cards['theory'];
+    $this->actingAs($admin, 'admin')->put(route('admin.sections.update', $theory), [
+        'name' => 'Updated Theory Test',
+        'description' => 'Updated from the admin panel.',
+        'color' => '#123456',
+    ])->assertRedirect(route('admin.home'));
+
+    $this->get(route('home'))->assertOk()
+        ->assertSee('Updated Theory Test')
+        ->assertSee('Updated from the admin panel.')
+        ->assertSee('--home-card-color: #123456', false);
+
+    $this->actingAs($admin, 'admin')->delete(route('admin.sections.destroy', $theory))
+        ->assertRedirect()
+        ->assertSessionHas('error');
+    expect($theory->fresh())->not->toBeNull();
+});
+
 test('category group and category cards retain translations counts routes and inherited colours', function () {
     $section = Section::create(['name' => 'Learning', 'color' => '#b45309']);
     $subSection = SubSection::create(['section_id' => $section->id, 'name' => 'Practice', 'color' => '#047857']);

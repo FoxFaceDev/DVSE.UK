@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 700" width="820" height="700">
+<defs><radialGradient id="b" cx="50%" cy="50%" r="70%"><stop offset="0" stop-color="#e3f6fc"/><stop offset="1" stop-color="#edf9fd"/></radialGradient>
+<linearGradient id="pl" x1="0" y1="0" x2="1" y2="0.2"><stop offset="0" stop-color="#3a86f3"/><stop offset=".55" stop-color="#1a63e3"/><stop offset="1" stop-color="#0b49cf"/></linearGradient>
+<linearGradient id="pr" x1="0" y1="0" x2="1" y2="0.3"><stop offset="0" stop-color="#1558dc"/><stop offset="1" stop-color="#0b49cf"/></linearGradient>
+<linearGradient id="bk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fcc92e"/><stop offset="1" stop-color="#f4a60e"/></linearGradient></defs>
+<rect x="55" y="55" width="715" height="575" rx="240" fill="url(#b)"/>
+<path d="M150 196 Q150 176 172 176 L190 176 L190 506 Q300 474 405 500 L 418 500 Q 520 474 628 506 L 628 176 L 648 176 Q668 176 668 196 L 668 520 Q668 546 640 541 Q 520 522 446 560 Q 410 582 374 560 Q 300 522 180 541 Q150 546 150 520 Z" fill="#1a63e3"/>
+<path d="M180 132 Q180 120 196 118 Q 318 100 405 154 L 405 524 Q 300 496 180 530 Z" fill="#dbe8fb"/>
+<path d="M418 154 Q 506 100 630 118 Q 646 120 646 132 L 646 530 Q 536 496 418 524 Z" fill="#dbe8fb"/>
+<path d="M192 138 Q192 128 204 126 Q 318 108 405 162 L 405 484 Q 300 458 192 488 Z" fill="url(#pl)"/>
+<path d="M418 162 Q 506 108 624 126 Q 634 128 634 138 L 634 488 Q 530 458 418 484 Z" fill="url(#pr)"/>
+<rect x="405" y="158" width="13" height="330" fill="#cfe1fa"/>
+<path d="M512 108 L590 108 L590 224 L551 198 L512 224 Z" fill="url(#bk)"/>
+</svg>

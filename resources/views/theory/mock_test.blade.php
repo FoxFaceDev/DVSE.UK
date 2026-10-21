@@ -71,6 +71,6 @@
     </nav>
   </footer>
 
-<div class="v2-overlay" x-cloak x-show="exitOpen" @click.self="exitOpen=false"><section class="v2-dialog" role="dialog" aria-modal="true" aria-labelledby="exit-title"><h2 id="exit-title">Leave this test?</h2><p>Your current answers will be lost.</p><button class="v2-button" @click="exitOpen=false">Keep going</button><a class="v2-button v2-button--secondary" :href="back">Leave test</a></section></div><div class="v2-error" x-cloak x-show="error" role="alert"><p x-text="error"></p><button class="v2-button" @click="finish()" :disabled="submitting">Retry submission</button></div>
+<div class="v2-overlay" x-cloak x-show="exitOpen" @click.self="exitOpen=false"><section class="v2-dialog" role="dialog" aria-modal="true" aria-labelledby="exit-title"><h2 id="exit-title">Leave this test?</h2><p>Your current answers will be lost.</p><button class="v2-button" @click="exitOpen=false">Keep going</button><a data-back class="v2-button v2-button--secondary" :href="back">Leave test</a></section></div><div class="v2-error" x-cloak x-show="error" role="alert"><p x-text="error"></p><button class="v2-button" @click="finish()" :disabled="submitting">Retry submission</button></div>
 </body>
 </html>

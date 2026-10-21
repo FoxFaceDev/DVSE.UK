@@ -10,7 +10,10 @@ class AdminController extends Controller
 {
     public function index()
     {
-        $sections = Section::withCount('subSections')->get();
+        $sections = Section::withCount('subSections')
+            ->orderByRaw("CASE home_key WHEN 'theory' THEN 1 WHEN 'find_instructor' THEN 2 WHEN 'join_rivex' THEN 3 WHEN 'become_instructor' THEN 4 ELSE 5 END")
+            ->orderBy('id')
+            ->get();
         $userStats = [
             'total' => User::count(),
             'users' => User::where('account_type', User::ACCOUNT_TYPE_USER)->count(),

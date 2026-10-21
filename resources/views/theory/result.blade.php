@@ -71,7 +71,7 @@
         </div>
 
         <div class="pt-8 w-full max-w-xs mx-auto">
-            <a href="{{ route('home') }}" class="block w-full py-4 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition shadow shadow-primary/20">Back to Home</a>
+            <a data-back href="{{ route('home') }}" class="block w-full py-4 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition shadow shadow-primary/20">Back</a>
         </div>
     </div>
 </x-layouts.app>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 160" preserveAspectRatio="none">
+  <!-- two soft 3D ribbons, decoration only -->
+  <defs>
+    <linearGradient id="a" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset=".45" stop-color="#9fd0ff" stop-opacity=".16"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity=".22"/>
+    </linearGradient>
+    <linearGradient id="b" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#0a2f86" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="c" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset=".6" stop-color="#ffffff" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#ffd76a" stop-opacity=".55"/>
+    </linearGradient>
+  </defs>
+  <!-- back ribbon -->
+  <path d="M0 118C150 78 290 70 430 92S690 140 800 70V160H0Z" fill="url(#b)"/>
+  <path d="M0 118C150 78 290 70 430 92S690 140 800 70" fill="none" stroke="url(#a)" stroke-width="2"/>
+  <!-- front ribbon: a twisted band (top edge + lower edge) -->
+  <path d="M0 140C170 112 320 104 470 120S700 150 800 104V124C700 162 600 150 470 136S170 128 0 156Z" fill="url(#a)"/>
+  <path d="M0 140C170 112 320 104 470 120S700 150 800 104" fill="none" stroke="url(#c)" stroke-width="1.6"/>
+</svg>
