@@ -18,6 +18,14 @@ class InstructorProfile extends Model
 
     public function getPhotoUrlAttribute(): ?string
     {
+        if (in_array($this->photo_path, [
+            'design-v2/Instructors/img/instructors/sara.webp',
+            'design-v2/Instructors/img/instructors/daniel.svg',
+            'design-v2/Instructors/img/instructors/lana.svg',
+        ], true)) {
+            return asset($this->photo_path);
+        }
+
         return MediaStorage::url($this->photo_path);
     }
 }

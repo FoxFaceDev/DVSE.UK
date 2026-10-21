@@ -26,7 +26,24 @@ Authentication, account, browsing, learning, hazard and admin pages share the up
 - Superadmin controls for verified approval badges, premium status and directory visibility in the existing user editor. Ratings remain empty until real rating data exists.
 - Existing advertising, account, media and hazard functionality remains available.
 
-The directory uses real published profiles from verified instructor accounts. The local database initially contained no instructors; production data was not replaced with the example people in the design. Pass Guarantee has an information page; commercial guarantee terms are not invented.
+The directory uses published profiles from verified instructor accounts. The optional instructor seeder below adds clearly marked demo profiles; production data is not automatically replaced with the example people in the design. Pass Guarantee has an information page; commercial guarantee terms are not invented.
+
+## Demo instructors
+
+Run `php artisan db:seed --class=InstructorSeeder --force` to add Sarah Ahmed, James Wilson
+and Dilan Karim as three published **Demo** profiles. Each has different lesson content,
+location, price, languages, transmission options and availability, plus bundled artwork.
+They are editable under **Admin → Instructors**. No approval badge or invented reviews
+are added. Names and bios identify the listings as examples; phone numbers use the
+[Ofcom fictional mobile range](https://www.ofcom.org.uk/phones-and-broadband/phone-numbers/numbers-for-drama)
+and emails use the reserved `.test` domain. Passwords are random and no emails are sent.
+Replace the example contact details and content with genuine instructor information before
+using them as real listings, or unpublish/delete the demo accounts in the admin panel.
+
+Run this command locally or on the live server after deploying the code; GitHub deployment
+alone does not copy local database rows. Re-running it skips existing demo email addresses
+and preserves admin edits, publication settings and passwords. This seeder is deliberately
+not included in the default database seeder or production migrations.
 
 ## Deployment
 

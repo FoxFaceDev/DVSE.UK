@@ -2,16 +2,18 @@
 
 namespace Database\Seeders;
 
-use App\Models\InstructorProfile;
 use App\Models\Language;
 use App\Models\User;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class InstructorSeeder extends Seeder
 {
-    /**
-     * Seed three complete instructor accounts for the public directory.
-     */
+    use WithoutModelEvents;
+
+    /** Add preview profiles without overwriting subsequent admin edits. */
     public function run(): void
     {
         $englishLanguageId = Language::query()->where('code', 'en')->value('id');
@@ -19,118 +21,102 @@ class InstructorSeeder extends Seeder
         $instructors = [
             [
                 'user' => [
-                    'name' => 'Sarah Ahmed',
+                    'name' => 'Sarah Ahmed (Demo)',
                     'email' => 'sarah.ahmed@rivex.test',
                     'phone_number' => '+447700900101',
                     'country' => 'United Kingdom',
                     'city' => 'Wolverhampton',
-                    'address' => 'Wolverhampton City Centre',
+                    'address' => 'Wolverhampton',
                 ],
                 'profile' => [
-                    'postcode' => 'WV1 1AA',
-                    'latitude' => 52.5862,
-                    'longitude' => -2.1287,
+                    'postcode' => 'WV4 4NP',
+                    'latitude' => 52.561576,
+                    'longitude' => -2.173988,
                     'hourly_rate' => 34,
-                    'gearboxes' => ['manual', 'automatic'],
-                    'languages' => ['en', 'ar'],
-                    'available_days' => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                    'gearboxes' => ['automatic'],
+                    'languages' => ['en', 'ku'],
+                    'available_days' => ['Mon', 'Tue', 'Wed', 'Fri', 'Sat'],
                     'gender' => 'female',
-                    'bio' => 'Patient driving instructor helping new and nervous learners build confidence for safe, independent driving.',
-                    'contact_method' => 'whatsapp',
-                    'is_premium' => true,
-                    'rating' => 4.90,
-                    'review_count' => 128,
+                    'bio' => 'Demo profile for preview purposes, not a real instructor listing. Calm, step-by-step automatic lessons for beginners and nervous learners. Practise junctions and roundabouts at your own pace, with English or Kurdish support.',
+                    'photo_path' => 'design-v2/Instructors/img/instructors/sara.webp',
+                    'contact_method' => 'call',
                 ],
             ],
             [
                 'user' => [
-                    'name' => 'James Wilson',
+                    'name' => 'James Wilson (Demo)',
                     'email' => 'james.wilson@rivex.test',
                     'phone_number' => '+447700900102',
                     'country' => 'United Kingdom',
-                    'city' => 'Birmingham',
-                    'address' => 'Birmingham City Centre',
+                    'city' => 'Walsall',
+                    'address' => 'Walsall',
                 ],
                 'profile' => [
-                    'postcode' => 'B1 1AA',
-                    'latitude' => 52.4795,
-                    'longitude' => -1.9027,
+                    'postcode' => 'WS1 1TP',
+                    'latitude' => 52.586012,
+                    'longitude' => -1.981281,
                     'hourly_rate' => 32,
                     'gearboxes' => ['manual'],
                     'languages' => ['en'],
-                    'available_days' => ['Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    'available_days' => ['Mon', 'Tue', 'Thu', 'Fri', 'Sun'],
                     'gender' => 'male',
-                    'bio' => 'Experienced manual driving instructor offering structured lessons, mock tests, and practical test preparation.',
+                    'bio' => 'Demo profile for preview purposes, not a real instructor listing. Structured manual lessons focused on clutch control, parking and busy urban routes. Build independent driving skills with practical test preparation and Sunday lesson options.',
+                    'photo_path' => 'design-v2/Instructors/img/instructors/daniel.svg',
                     'contact_method' => 'call',
-                    'is_premium' => false,
-                    'rating' => 4.75,
-                    'review_count' => 84,
                 ],
             ],
             [
                 'user' => [
-                    'name' => 'Dilan Karim',
+                    'name' => 'Dilan Karim (Demo)',
                     'email' => 'dilan.karim@rivex.test',
                     'phone_number' => '+447700900103',
                     'country' => 'United Kingdom',
-                    'city' => 'Coventry',
-                    'address' => 'Coventry City Centre',
+                    'city' => 'Birmingham',
+                    'address' => 'Birmingham',
                 ],
                 'profile' => [
-                    'postcode' => 'CV1 1AH',
-                    'latitude' => 52.4081,
-                    'longitude' => -1.5106,
-                    'hourly_rate' => 36,
-                    'gearboxes' => ['automatic'],
-                    'languages' => ['en', 'ku', 'tr'],
-                    'available_days' => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sun'],
+                    'postcode' => 'B1 1BB',
+                    'latitude' => 52.480144,
+                    'longitude' => -1.902890,
+                    'hourly_rate' => 38,
+                    'gearboxes' => ['manual', 'automatic'],
+                    'languages' => ['en', 'ar', 'tr'],
+                    'available_days' => ['Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                     'gender' => 'female',
-                    'bio' => 'Friendly automatic driving instructor providing multilingual lessons tailored to each learner’s pace.',
-                    'contact_method' => 'whatsapp',
-                    'is_premium' => true,
-                    'rating' => 4.95,
-                    'review_count' => 97,
+                    'bio' => 'Demo profile for preview purposes, not a real instructor listing. Flexible manual and automatic lessons for returning drivers and test preparation. Refresh city-driving confidence and practise at weekends, with English, Arabic or Turkish support.',
+                    'photo_path' => 'design-v2/Instructors/img/instructors/lana.svg',
+                    'contact_method' => 'call',
                 ],
             ],
         ];
 
-        foreach ($instructors as $instructor) {
-            $user = User::query()->updateOrCreate(
-                ['email' => $instructor['user']['email']],
-                [
+        $created = DB::transaction(function () use ($instructors, $englishLanguageId): int {
+            $created = 0;
+
+            foreach ($instructors as $instructor) {
+                // Existing accounts and their admin-managed settings belong to the admin.
+                if (User::query()->where('email', $instructor['user']['email'])->exists()) {
+                    continue;
+                }
+
+                $user = new User([
                     ...$instructor['user'],
                     'account_type' => User::ACCOUNT_TYPE_INSTRUCTOR,
                     'preferred_language_id' => $englishLanguageId,
-                    'privacy_accepted_at' => now(),
-                    'password' => 'Password123!',
-                ],
-            );
-
-            $user->forceFill(['email_verified_at' => now()])->save();
-
-            $profileDetails = $instructor['profile'];
-            $administrativeDetails = [
-                'is_approved' => true,
-                'is_premium' => $profileDetails['is_premium'],
-                'rating' => $profileDetails['rating'],
-                'review_count' => $profileDetails['review_count'],
-            ];
-
-            unset(
-                $profileDetails['is_premium'],
-                $profileDetails['rating'],
-                $profileDetails['review_count'],
-            );
-
-            $profile = InstructorProfile::query()->updateOrCreate(
-                ['user_id' => $user->id],
-                [
-                    ...$profileDetails,
+                    'password' => Str::random(64),
+                ]);
+                // Required for preview publication; no email or notification is sent.
+                $user->forceFill(['email_verified_at' => now()])->save();
+                $user->instructorProfile()->create([
+                    ...$instructor['profile'],
                     'is_published' => true,
-                ],
-            );
+                ]);
+                $created++;
+            }
 
-            $profile->forceFill($administrativeDetails)->save();
-        }
+            return $created;
+        });
+
+        $this->command?->info("Created {$created} demo instructors; existing accounts were left unchanged.");
     }
 }
