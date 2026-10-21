@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 700" width="820" height="700">
+<defs><radialGradient id="b" cx="50%" cy="50%" r="70%"><stop offset="0" stop-color="#e6f1fe"/><stop offset="1" stop-color="#eef5fd"/></radialGradient>
+<linearGradient id="cap" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f7bf0"/><stop offset="1" stop-color="#0b47cc"/></linearGradient>
+<linearGradient id="band" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f9c52d"/><stop offset="1" stop-color="#f0a40f"/></linearGradient>
+<linearGradient id="bar" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1a5fe0"/><stop offset="1" stop-color="#1450d2"/></linearGradient>
+<filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#2a62b8" flood-opacity=".18"/></filter></defs>
+<rect x="55" y="80" width="700" height="560" rx="230" fill="url(#b)"/>
+<rect x="565" y="300" width="48" height="250" rx="24" fill="#dbe9fb"/>
+<circle cx="602" cy="548" r="58" fill="#e4eefc"/><circle cx="602" cy="548" r="34" fill="#f4f8fe" stroke="#d3e3fa" stroke-width="6"/><circle cx="604" cy="552" r="12" fill="#6aa6f2"/>
+<rect x="190" y="214" width="348" height="386" rx="36" fill="#1f7af0"/>
+<rect x="168" y="172" width="348" height="404" rx="36" fill="#fbfdff" filter="url(#sh)"/>
+<rect x="216" y="244" width="184" height="38" rx="19" fill="url(#bar)"/>
+<circle cx="242" cy="369" r="25" fill="#2f80f2"/><rect x="290" y="354" width="177" height="30" rx="15" fill="#72a8f5"/>
+<circle cx="242" cy="473" r="25" fill="#2f80f2"/><rect x="290" y="458" width="177" height="30" rx="15" fill="#72a8f5"/>
+<path d="M428 232 L428 268 Q428 312 528 318 Q628 312 628 268 L628 232 Z" fill="url(#band)"/>
+<path d="M428 238 L428 262 Q428 276 470 282 L 586 282 Q628 276 628 262 L628 238 Z" fill="#8a8fc0" opacity=".2"/>
+<polygon points="362,160 528,84 690,156 540,240" fill="url(#cap)" stroke="#1b5be0" stroke-width="14" stroke-linejoin="round"/>
+<path d="M534 166 Q592 168 650 192" fill="none" stroke="#c9a46a" stroke-width="5" stroke-linecap="round"/>
+<path d="M645 188 L663 188 L665 262 L671 304 L648 304 L655 262 Z" fill="#f6b819"/>
+</svg>
