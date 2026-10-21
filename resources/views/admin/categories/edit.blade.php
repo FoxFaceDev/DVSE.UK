@@ -13,6 +13,10 @@
                 <input type="text" name="name_ku" value="{{ $category->name_ku }}" dir="rtl" class="w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
             </div>
 
+            <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Page layout</label>
+                <select name="page_type" class="w-full rounded-md border border-gray-300 px-3 py-2"><option value="standard">Standard category group</option><option value="revision" @selected($category->isRevisionPractice())>Practice Revision Questions</option></select>
+            </div>
             <div class="pt-4 flex justify-end gap-3 border-t border-gray-100">
                 <a href="{{ route('admin.sections.sub_sections.show', [$section, $subSection]) }}" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition">Cancel</a>
                 <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-primary-dark transition">Save Changes</button>

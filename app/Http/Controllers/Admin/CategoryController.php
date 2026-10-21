@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
 use App\Models\Category;
 use App\Models\Section;
 use App\Models\SubSection;
+use App\Support\RevisionCatalog;
+use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
@@ -26,17 +26,22 @@ class CategoryController extends Controller
     public function show(Section $section, SubSection $subSection, Category $category)
     {
         $category->load('topics');
+
         return view('admin.categories.show', compact('section', 'subSection', 'category'));
     }
 
     public function store(Request $request, Section $section, SubSection $subSection)
     {
-        $request->validate(['name_en' => 'required|string', 'name_ku' => 'nullable|string']);
-        
-        $subSection->categories()->create($request->all());
-        
+        $validated = $request->validate(['name_en' => 'required|string|max:255', 'name_ku' => 'nullable|string|max:255', 'page_type' => 'nullable|in:revision,standard']);
+
+        $category = $subSection->categories()->create($validated);
+        if ($category->isRevisionPractice()) {
+            $category->update(['page_type' => 'revision']);
+            RevisionCatalog::populate($category);
+        }
+
         return redirect()->route('admin.sections.sub_sections.show', [$section, $subSection])
-                         ->with('success', 'Category added');
+            ->with('success', 'Category added');
     }
 
     public function edit(Section $section, SubSection $subSection, Category $category)
@@ -46,19 +51,26 @@ class CategoryController extends Controller
 
     public function update(Request $request, Section $section, SubSection $subSection, Category $category)
     {
-        $request->validate(['name_en' => 'required|string', 'name_ku' => 'nullable|string']);
-        
-        $category->update($request->all());
-        
+        $wasRevision = $category->isRevisionPractice();
+        $validated = $request->validate(['name_en' => 'required|string|max:255', 'name_ku' => 'nullable|string|max:255', 'page_type' => 'nullable|in:revision,standard']);
+        if (! $request->exists('page_type') && $wasRevision) {
+            $validated['page_type'] = 'revision';
+        }
+        $category->update($validated);
+        if (! $wasRevision && $category->isRevisionPractice()) {
+            $category->update(['page_type' => 'revision']);
+            RevisionCatalog::populate($category);
+        }
+
         return redirect()->route('admin.sections.sub_sections.show', [$section, $subSection])
-                         ->with('success', 'Category updated');
+            ->with('success', 'Category updated');
     }
 
     public function destroy(Section $section, SubSection $subSection, Category $category)
     {
         $category->delete();
-        
+
         return redirect()->route('admin.sections.sub_sections.show', [$section, $subSection])
-                         ->with('success', 'Category deleted');
+            ->with('success', 'Category deleted');
     }
 }

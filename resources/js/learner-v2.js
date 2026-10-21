@@ -1,3 +1,5 @@
+import { initRevisionSelection } from './revision-selection';
+
 const read = (key, fallback = {}) => {
     try {
         return JSON.parse(localStorage.getItem(key)) ?? fallback;
@@ -389,58 +391,8 @@ document.addEventListener("DOMContentLoaded", () => {
         row.querySelector("[data-pct]").textContent = `${percent}%`;
         row.querySelector("progress").value = percent;
     });
-    document.querySelectorAll("[data-revision-tab]").forEach((tab) =>
-        tab.addEventListener("click", (event) => {
-            event.preventDefault();
-            document.querySelectorAll("[data-revision-tab]").forEach((t) => {
-                t.classList.toggle("tab--active", t === tab);
-                t.removeAttribute("aria-current");
-            });
-            tab.setAttribute("aria-current", "page");
-            document
-                .querySelectorAll("[data-topic]")
-                .forEach(
-                    (row) =>
-                        (row.hidden =
-                            tab.dataset.revisionTab === "selected" &&
-                            !row.querySelector("input").checked),
-                );
-            if (tab.dataset.revisionTab === "progress")
-                [...document.querySelectorAll("[data-topic]")]
-                    .sort(
-                        (a, b) =>
-                            Number(b.querySelector("progress").value) -
-                            Number(a.querySelector("progress").value),
-                    )
-                    .forEach((row) => row.parentNode.append(row));
-        }),
-    );
     const selection = document.querySelector("#revision-selection");
-    if (selection) {
-        const selected = read("rivex.selected", []);
-        const all = selection.querySelector("[data-select-all]");
-        const inputs = [
-            ...selection.querySelectorAll('input[name="categories[]"], input[name="topics[]"]'),
-        ];
-        const persist = () => {
-            save(
-                "rivex.selected",
-                inputs.filter((i) => i.checked).map((i) => i.value),
-            );
-            if (all)
-                all.checked =
-                    inputs.length > 0 && inputs.every((i) => i.checked);
-        };
-        inputs.forEach((input) => {
-            input.checked = selected.includes(input.value);
-            input.addEventListener("change", persist);
-        });
-        persist();
-        all?.addEventListener("change", () => {
-            inputs.forEach((i) => (i.checked = all.checked));
-            persist();
-        });
-    }
+    if (selection) initRevisionSelection(selection, { read, save });
     document.querySelectorAll(".tabbar .tab").forEach((tab) => {
         if (tab.hasAttribute("data-share")) return;
         const pathname = new URL(tab.href, location.origin).pathname;

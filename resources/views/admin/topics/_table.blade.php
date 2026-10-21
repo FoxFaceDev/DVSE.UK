@@ -18,7 +18,7 @@
                 <tr data-category-id="{{ $topic->id }}" class="hover:bg-gray-50/50 transition-colors">
                     <td class="px-4 py-4"><button type="button" draggable="true" data-drag-handle class="cursor-grab rounded p-2 text-gray-400 hover:bg-blue-50 hover:text-primary active:cursor-grabbing" aria-label="Drag {{ $topic->name_en }} to reorder" title="Drag to reorder. Alt + arrow keys also move this category."><svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><circle cx="6" cy="5" r="1.4"/><circle cx="14" cy="5" r="1.4"/><circle cx="6" cy="10" r="1.4"/><circle cx="14" cy="10" r="1.4"/><circle cx="6" cy="15" r="1.4"/><circle cx="14" cy="15" r="1.4"/></svg></button></td>
                     <td class="px-4 py-4 text-gray-500">#{{ $topic->id }}</td>
-                    <td class="px-6 py-4 font-medium text-gray-900">{{ $topic->name_en }}</td>
+                    <td class="px-6 py-4 font-medium text-gray-900"><span class="flex items-center gap-3">@if($topic->icon_path)<img src="{{ $topic->icon_path }}" alt="" class="h-10 w-10 object-contain">@endif{{ $topic->name_en }}</span></td>
                     <td class="px-6 py-4 text-gray-600" dir="rtl">{{ $topic->name_ku ?? '-' }}</td>
                     <td class="flex items-center justify-end gap-2 whitespace-nowrap px-6 py-4 text-right">
                         @if($topic->isQuestionCategory())

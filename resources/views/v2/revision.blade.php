@@ -14,6 +14,7 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   @vite('resources/js/app.js')
   <link rel="stylesheet" href="{{ asset('design-v2/ui.css') }}">
+  <link rel="stylesheet" href="{{ asset('design-v2/revision.css') }}">
 </head>
 <body>
 
@@ -29,7 +30,7 @@
   <div class="top">
     <header class="appbar">
       <div class="appbar__inner">
-        <a class="back" data-back href="{{ route('home') }}" aria-label="Back">
+        <a class="back" data-back href="{{ $revisionGroup ? route('frontend.sub_section', $revisionGroup->sub_section_id) : route('v2.theory') }}" aria-label="Back">
           <svg class="back__icon" aria-hidden="true"><use href="#i-back"/></svg>
         </a>
         <h1 class="appbar__title">Practice Revision Questions</h1>
@@ -58,23 +59,26 @@
   </div>
 
   <!-- ===== Categories (6 and a half fit on screen, the rest scroll) ===== -->
-  <form id="revision-selection" action="{{ route('v2.revise') }}" method="get"><main class="stage" id="category">
+  <form id="revision-selection" action="{{ route('v2.revise') }}" method="get">
+  @if($revisionGroup)<input type="hidden" name="group" value="{{ $revisionGroup->id }}">@endif
+  <main class="stage" id="category">
     <ul class="cats">
 @if($categories->isNotEmpty())
 <li class="cat" data-topic="all" data-total="{{ $categories->sum('questions_count') }}" data-questions='@json($categories->flatMap(fn ($category) => $category->questions->pluck("id"))->values())'>
 <img class="cat__icon" src="{{ asset('design-v2/Practice/img/practice/all-categories.svg') }}" alt="" width="120" height="120">
-<div class="cat__body"><div class="cat__head"><h2 class="cat__title"><a class="cat__link" href="{{ route('v2.revise') }}">All categories</a></h2><span class="cat__pct" data-pct>0%</span></div><progress class="cat__bar" max="100" value="0" aria-label="All categories progress"></progress><p class="cat__stats"><span class="cat__stat">Answered: <b data-answered>0</b></span><i class="cat__sep" aria-hidden="true"></i><span class="cat__stat">Correct: <b data-correct>0</b></span><i class="cat__sep" aria-hidden="true"></i><span class="cat__stat">Total: <b>{{ $categories->sum('questions_count') }}</b></span></p></div>
+<div class="cat__body"><div class="cat__head"><h2 class="cat__title"><a class="cat__link" href="{{ route('v2.revise', $revisionGroup ? ['group' => $revisionGroup->id] : []) }}">All categories</a></h2><span class="cat__pct" data-pct>0%</span></div><progress class="cat__bar" max="100" value="0" aria-label="All categories progress"></progress><p class="cat__stats"><span class="cat__stat">Answered: <b data-answered>0</b></span><i class="cat__sep" aria-hidden="true"></i><span class="cat__stat">Correct: <b data-correct>0</b></span><i class="cat__sep" aria-hidden="true"></i><span class="cat__stat">Total: <b>{{ $categories->sum('questions_count') }}</b></span></p></div>
 <label class="pick"><input class="pick__input" type="checkbox" data-select-all aria-label="Select All categories"></label></li>
 @endif
 @foreach($categories as $category)
-<li class="cat" style="border-inline-start: 5px solid {{ $category->color ?: '#0452bc' }}" data-topic="{{ $category->id }}" data-total="{{ $category->questions_count }}" data-questions='@json($category->questions->pluck("id"))'>
+<li class="cat" style="--revision-color: {{ $category->color ?: '#1a68e8' }}" data-topic="{{ $category->id }}" data-total="{{ $category->questions_count }}" data-questions='@json($category->questions->pluck("id"))'>
 <img class="cat__icon" src="{{ $category->icon_path ?: asset('design-v2/Practice/img/practice/all-categories.svg') }}" alt="" width="120" height="120">
-<div class="cat__body"><div class="cat__head"><h2 class="cat__title"><a class="cat__link" href="{{ route('theory.practice', $category) }}">{{ $category->name_en }}</a></h2><span class="cat__pct" style="color: {{ $category->color ?: '#0452bc' }}" data-pct>0%</span></div>
+<div class="cat__body"><div class="cat__head"><h2 class="cat__title {{ mb_strlen($category->name_en) > 30 ? 'cat__title--long' : '' }}"><a class="cat__link" href="{{ route('theory.practice', $category) }}">{{ $category->name_en }}</a></h2><span class="cat__pct" data-pct>0%</span></div>
 <progress class="cat__bar" max="100" value="0" aria-label="{{ $category->name_en }} progress"></progress>
 <p class="cat__stats"><span class="cat__stat">Answered: <b data-answered>0</b></span><i class="cat__sep" aria-hidden="true"></i><span class="cat__stat">Correct: <b data-correct>0</b></span><i class="cat__sep" aria-hidden="true"></i><span class="cat__stat">Total: <b>{{ $category->questions_count }}</b></span></p></div>
 <label class="pick"><input class="pick__input" type="checkbox" name="categories[]" value="{{ $category->id }}" aria-label="Select {{ $category->name_en }}"></label></li>
 @endforeach
 @if($categories->isEmpty())<li class="v2-empty">No revision questions are available yet.</li>@endif</ul>
+    <p class="v2-empty revision-empty" data-revision-empty hidden role="status">Select categories in the Category tab to see them here.</p>
   </main>
 
   <!-- ===== Fixed bottom: hint + continue ===== -->

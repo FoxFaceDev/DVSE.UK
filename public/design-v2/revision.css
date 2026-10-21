@@ -1,0 +1,9 @@
+/* Keep the functional form aligned with the supplied Practice design. */
+.cta { width: 100%; border: 0; padding: 0; font: inherit; cursor: pointer; }
+.cat__icon { object-fit: contain; }
+.cat__title { overflow-wrap: anywhere; }
+.cat__pct, .cat__stat b { color: var(--revision-color, var(--blue-text)); }
+.cat__bar { color: var(--revision-color, var(--blue)); }
+.cat[style] .cat__bar::-webkit-progress-value { background: var(--revision-color, var(--blue)); }
+.cat[style] .cat__bar::-moz-progress-bar { background: var(--revision-color, var(--blue)); }
+.revision-empty { max-width: 520px; margin: 0 auto; padding-bottom: calc(var(--dock-h) + 24px); }

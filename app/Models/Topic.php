@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\MediaStorage;
+use App\Support\RevisionCatalog;
 use Illuminate\Database\Eloquent\Model;
 
 class Topic extends Model
@@ -11,7 +12,7 @@ class Topic extends Model
 
     public const TYPE_LEARNING_PAGES = 'learning_pages';
 
-    protected $fillable = ['topicable_type', 'topicable_id', 'name_en', 'name_ku', 'content_type', 'color', 'icon_path', 'position'];
+    protected $fillable = ['topicable_type', 'topicable_id', 'name_en', 'name_ku', 'content_type', 'color', 'icon_path', 'icon_preset', 'position'];
 
     protected static function booted(): void
     {
@@ -35,7 +36,8 @@ class Topic extends Model
     public function getIconPathAttribute($value)
     {
         if (! $value) {
-            return null;
+            return array_key_exists($this->icon_preset ?? '', RevisionCatalog::icons())
+                ? asset('design-v2/Practice/img/practice/'.$this->icon_preset.'.svg') : null;
         }
         if (str_starts_with($value, 'http')) {
             return $value;

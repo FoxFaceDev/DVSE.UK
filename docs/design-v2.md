@@ -30,13 +30,22 @@ The directory uses real published profiles from verified instructor accounts. Th
 
 ## Deployment
 
-Run the normal dependency installation and build, then apply the two new instructor migrations:
+The Practice Revision Questions category group now uses the `Practice` reference layout.
+Run `php artisan migrate --force` for the new group layout and card-icon metadata. Existing
+revision groups receive the fifteen reference categories and SVG presets without replacing
+their existing questions or categories. Counts and percentages use real learner activity.
+Admins can manage these cards under **Revision Cards**, or within the revision category group.
+New groups can select the **Practice Revision Questions** page layout to receive the same
+starter cards; names, icons (preset or upload), colors, questions, and order remain editable.
+
+Run the dependency installation and build, apply all pending migrations, then rebuild Laravel's caches:
 
 ```sh
 npm ci
 npm run build
 php artisan migrate --force
 php artisan optimize:clear
+php artisan optimize
 ```
 
 The migrations have already been applied to the local development database.

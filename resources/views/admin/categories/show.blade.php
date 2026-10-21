@@ -18,6 +18,10 @@
         </div>
     @endif
 
+    @if($category->isRevisionPractice())
+        <p class="mb-5 rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm text-blue-900">Each question category below is a card on the Practice Revision Questions page. Edit its name, color, or icon; add questions; or drag the cards into order. <a href="{{ route('frontend.category', $category) }}" target="_blank" rel="noopener" class="font-bold underline">Preview learner page</a></p>
+    @endif
+
     @if($category->topics->isNotEmpty())
         @include('admin.topics._table', ['topics' => $category->topics])
     @else

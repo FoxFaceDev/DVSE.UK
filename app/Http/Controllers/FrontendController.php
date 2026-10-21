@@ -47,8 +47,12 @@ class FrontendController extends Controller
         return view('frontend.subsection', compact('subSection'));
     }
 
-    public function showCategory(Category $category)
+    public function showCategory(Category $category, Request $request)
     {
+        if ($category->isRevisionPractice()) {
+            return app(LearnerController::class)->revision($request, $category);
+        }
+
         $category->load(['subSection.section', 'topics' => function ($query) {
             $query->with('questions:id,topic_id')->withCount(['questions', 'contentPages', 'contentPages as cgi_content_pages_count' => fn ($q) => $q->where('type', 'cgi_clips')]);
         }]);

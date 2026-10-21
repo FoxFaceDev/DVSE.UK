@@ -42,6 +42,8 @@
                     <div><label class="block text-sm font-medium text-gray-700 mb-1">Card Icon</label>@if($topic->icon_path)<img src="{{ $topic->icon_path }}" alt="" class="mb-2 h-14 w-14 rounded object-contain">@endif<input type="file" name="icon" accept=".svg,image/svg+xml,image/jpeg,image/png,image/webp,image/gif" class="w-full text-sm text-gray-500"></div>
                 </div>
 
+                @include('admin.topics._icon_picker', ['topic' => $topic])
+
                 <div class="pt-4 flex justify-end gap-3">
                     <a href="{{ route('admin.topics.index') }}" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">Cancel</a>
                     <button type="submit" class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors">Save Changes</button>

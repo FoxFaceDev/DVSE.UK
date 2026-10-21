@@ -31,15 +31,21 @@ class LearnerController extends Controller
         return view('v2.theory', compact('section'));
     }
 
-    public function revision(Request $request)
+    public function revision(Request $request, ?Category $revisionGroup = null)
     {
-        $categories = Topic::questionCategories()->withCount('questions')->with('questions:id,topic_id')->ordered()->get();
+        $validated = $request->validate(['group' => ['nullable', 'integer', 'exists:categories,id']]);
+        $revisionGroup ??= isset($validated['group']) ? Category::findOrFail($validated['group'])
+            : Category::where('page_type', 'revision')->orderBy('id')->first();
+        $categories = Topic::questionCategories()
+            ->when($revisionGroup, fn ($query) => $query->where('topicable_type', Category::class)->where('topicable_id', $revisionGroup->id))
+            ->withCount('questions')->with('questions:id,topic_id')->ordered()->get();
 
-        return view('v2.revision', compact('categories'));
+        return view('v2.revision', compact('categories', 'revisionGroup'));
     }
 
     public function revise(Request $request)
     {
+        $groupData = $request->validate(['group' => ['nullable', 'integer', 'exists:categories,id']]);
         if ($request->has('categories')) {
             $validated = $request->validate([
                 'categories' => ['nullable', 'array', 'max:200'],
@@ -53,8 +59,13 @@ class LearnerController extends Controller
             ]);
             $selectedCategoryIds = $validated['topics'] ?? [];
         }
-        $categoryIds = Topic::questionCategories()->whereIn('id', $selectedCategoryIds)->pluck('id');
-        $questions = Question::with('choices')->when($categoryIds->isNotEmpty(), fn ($query) => $query->whereIn('topic_id', $categoryIds))->get();
+        $categoryQuery = Topic::questionCategories()
+            ->when(isset($groupData['group']), fn ($query) => $query->where('topicable_type', Category::class)->where('topicable_id', $groupData['group']));
+        if ($request->has('categories') || $request->has('topics')) {
+            $categoryQuery->whereIn('id', $selectedCategoryIds);
+        }
+        $categoryIds = $categoryQuery->pluck('id');
+        $questions = Question::with('choices')->whereIn('topic_id', $categoryIds)->get();
         $questions->each(fn ($question) => $question->setRelation('choices', $question->choices->shuffle()->values()));
 
         return $this->quiz($questions, $request->routeIs('v2.flagged'));

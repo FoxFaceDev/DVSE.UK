@@ -9,6 +9,7 @@ use App\Models\SubSection;
 use App\Models\Topic;
 use App\Rules\SafeIconFile;
 use App\Support\MediaStorage;
+use App\Support\RevisionCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -17,11 +18,16 @@ use Illuminate\Validation\ValidationException;
 
 class TopicController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $topics = Topic::with('topicable')->orderBy('topicable_type')->orderBy('topicable_id')->ordered()->get();
+        $revisionMode = $request->boolean('revision');
+        $revisionGroup = $revisionMode ? Category::where('page_type', 'revision')->orderBy('id')->first() : null;
+        $topics = Topic::with('topicable')
+            ->when($revisionMode, fn ($query) => $query->questionCategories())
+            ->when($revisionGroup, fn ($query) => $query->where('topicable_type', Category::class)->where('topicable_id', $revisionGroup->id))
+            ->orderBy('topicable_type')->orderBy('topicable_id')->ordered()->get();
 
-        return view('admin.topics.index', compact('topics'));
+        return view('admin.topics.index', compact('topics', 'revisionMode', 'revisionGroup'));
     }
 
     public function create(Request $request)
@@ -73,6 +79,9 @@ class TopicController extends Controller
         if ($request->hasFile('icon')) {
             MediaStorage::delete($topic->getRawOriginal('icon_path'));
             $validated['icon_path'] = MediaStorage::store($request->file('icon'), 'icons/categories');
+        } elseif ($request->boolean('remove_icon')) {
+            MediaStorage::delete($topic->getRawOriginal('icon_path'));
+            $validated['icon_path'] = null;
         }
 
         $topic->update($validated);
@@ -137,9 +146,11 @@ class TopicController extends Controller
             'content_type' => ['required', Rule::in([Topic::TYPE_QUESTIONS, Topic::TYPE_LEARNING_PAGES])],
             'color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'icon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp,svg', 'max:2048', new SafeIconFile],
+            'icon_preset' => ['nullable', Rule::in(array_keys(RevisionCatalog::icons()))],
+            'remove_icon' => ['nullable', 'boolean'],
         ]);
         $validated = $validator->validate();
-        unset($validated['icon']);
+        unset($validated['icon'], $validated['remove_icon']);
         $parentModel = $validated['topicable_type'];
 
         if (! $parentModel::query()->whereKey($validated['topicable_id'])->exists()) {

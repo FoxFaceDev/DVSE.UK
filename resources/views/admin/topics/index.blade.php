@@ -1,7 +1,7 @@
 <x-layouts.admin title="Manage Categories">
     <div class="mb-6 flex items-center justify-between">
-        <div><h2 class="text-xl font-heading font-bold text-gray-800">All Categories</h2><p class="mt-1 text-sm text-gray-500">Categories are grouped and ordered inside their placement.</p></div>
-        <a href="{{ route('admin.topics.create') }}" class="rounded-lg bg-primary px-4 py-2 font-medium text-white hover:bg-primary-dark">Add Category</a>
+        <div><h2 class="text-xl font-heading font-bold text-gray-800">{{ $revisionMode ? 'Revision Cards' : 'All Categories' }}</h2><p class="mt-1 text-sm text-gray-500">{{ $revisionMode ? 'Edit the Practice screen cards, add questions, or drag to reorder.' : 'Categories are grouped and ordered inside their placement.' }}</p></div>
+        <a href="{{ route('admin.topics.create', $revisionGroup ? ['topicable_type' => \App\Models\Category::class, 'topicable_id' => $revisionGroup->id] : []) }}" class="rounded-lg bg-primary px-4 py-2 font-medium text-white hover:bg-primary-dark">{{ $revisionMode ? 'Add Revision Card' : 'Add Category' }}</a>
     </div>
 
     @if(session('success'))
