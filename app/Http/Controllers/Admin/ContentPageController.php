@@ -15,12 +15,12 @@ class ContentPageController extends Controller
 {
     public function index(Request $request)
     {
-        $topics = Topic::with('topicable')->orderBy('name_en')->get();
+        $topics = Topic::learningCategories()->with('topicable')->ordered()->get();
         $search = trim((string) $request->input('q'));
         $sort = $request->input('sort', 'newest');
 
         $contentPages = ContentPage::with(['topic', 'clips'])
-            ->when($request->topic_id, fn ($query, $topicId) => $query->where('topic_id', $topicId))
+            ->when($request->input('category_id', $request->input('topic_id')), fn ($query, $topicId) => $query->where('topic_id', $topicId))
             ->when($request->type, fn ($query, $type) => $query->where('type', $type))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($searchQuery) use ($search) {
@@ -52,9 +52,9 @@ class ContentPageController extends Controller
 
     public function create(Request $request)
     {
-        $topics = Topic::with('topicable')->orderBy('name_en')->get();
+        $topics = Topic::learningCategories()->with('topicable')->ordered()->get();
         $hazardCategories = $this->hazardCategories();
-        $selectedTopicId = $request->query('topic_id');
+        $selectedTopicId = $request->query('category_id', $request->query('topic_id'));
         $selectedType = $request->query('type', ContentPage::TYPE_CGI_CLIPS);
 
         $languages = Language::active()->get();
@@ -79,7 +79,7 @@ class ContentPageController extends Controller
 
     public function edit(ContentPage $contentPage)
     {
-        $topics = Topic::with('topicable')->orderBy('name_en')->get();
+        $topics = Topic::learningCategories()->with('topicable')->ordered()->get();
         $hazardCategories = $this->hazardCategories();
         $contentPage->load('clips');
         $languages = Language::active()->get();
@@ -157,7 +157,7 @@ class ContentPageController extends Controller
         $translations = array_replace($existingTranslations, $translations);
 
         return [
-            'topic_id' => $request->integer('topic_id'),
+            'topic_id' => $request->integer('category_id'),
             'admin_title' => $request->input('admin_title'),
             'library_category' => $isCgiClips ? $request->input('library_category') : null,
             'type' => $request->input('type'),

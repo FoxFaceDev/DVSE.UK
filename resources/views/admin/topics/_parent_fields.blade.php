@@ -22,7 +22,7 @@
         <select id="topicable_type" name="topicable_type" x-model="parentType" @change="parentTypeChanged()" required class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-primary focus:ring-primary">
             <option value="App\Models\Section">Section</option>
             <option value="App\Models\SubSection">Sub-Section</option>
-            <option value="App\Models\Category">Category</option>
+            <option value="App\Models\Category">Category group</option>
         </select>
         @error('topicable_type')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
     </div>

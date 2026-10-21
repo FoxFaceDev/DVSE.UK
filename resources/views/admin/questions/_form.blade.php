@@ -8,7 +8,7 @@
 
     <div class="rounded-lg border bg-white p-6 shadow-sm">
         <div class="grid gap-5 md:grid-cols-2">
-            <div><label class="mb-1 block text-sm font-medium">Topic *</label><select name="topic_id" required class="w-full rounded-md border-gray-300"><option value="">Select a topic</option>@foreach($topics as $topic)<option value="{{ $topic->id }}" @selected((string) old('topic_id', $editing ? $question->topic_id : $selectedTopicId ?? '') === (string) $topic->id)>{{ $topic->name_en }}</option>@endforeach</select></div>
+            <div><label class="mb-1 block text-sm font-medium">Category *</label><select name="category_id" required class="w-full rounded-md border-gray-300"><option value="">Select a question category</option>@foreach($topics as $topic)<option value="{{ $topic->id }}" @selected((string) old('category_id', $editing ? $question->topic_id : $selectedTopicId ?? '') === (string) $topic->id)>{{ $topic->name_en }}</option>@endforeach</select></div>
             <div><label class="mb-1 block text-sm font-medium">Answer type *</label><select name="question_type" x-model="type" class="w-full rounded-md border-gray-300"><option value="text">Four text answers</option><option value="image_answers">Four image answers</option></select></div>
         </div>
     </div>

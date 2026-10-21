@@ -6,7 +6,7 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#014cc1">
-  <title>Theory Test – RIVEX.UK</title>
+  <title>{{ $section?->name ?? 'Theory Test' }} – RIVEX.UK</title>
   <meta name="description" content="Theory test practice: revision questions, mock tests, progress tracking and driving guidance.">
   <link rel="icon" href="{{ asset('design-v2/Theory/img/logo.png') }}" type="image/png">
   <link rel="preload" href="{{ asset('design-v2/Theory/fonts/plus-jakarta-sans-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
@@ -37,7 +37,7 @@
         <a class="back" href="{{ route('home') }}" aria-label="Back">
           <svg class="back__icon" aria-hidden="true"><use href="#i-back"/></svg>
         </a>
-        <h1 class="appbar__title">Theory Test</h1>
+        <h1 class="appbar__title">{{ $section?->name ?? 'Theory Test' }}</h1>
         </div>
       </div>
     </div>
@@ -45,55 +45,39 @@
 
   <!-- ===== Menu ===== -->
   <main class="menu">
-    <ul class="cards">
-      <li>
-        <a class="card card--gold" href="{{ route('v2.guarantee') }}">
-          <img class="card__icon" src="{{ asset('design-v2/Theory/img/theory/pass.svg') }}" alt="" width="120" height="100">
-          <span class="card__title">Pass Guarantee</span>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="{{ route('v2.revision') }}">
-          <img class="card__icon" src="{{ asset('design-v2/Theory/img/theory/book.svg') }}" alt="" width="120" height="100">
-          <span class="card__title">Practise Revision Questions</span>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="{{ route('v2.mock') }}">
-          <img class="card__icon" src="{{ asset('design-v2/Theory/img/theory/mock.svg') }}" alt="" width="120" height="100">
-          <span class="card__title">Mock Test</span>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="{{ route('v2.search') }}">
-          <img class="card__icon" src="{{ asset('design-v2/Theory/img/theory/search.svg') }}" alt="" width="120" height="100">
-          <span class="card__title">Search Questions</span>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="{{ route('v2.flagged') }}">
-          <img class="card__icon" src="{{ asset('design-v2/Theory/img/theory/flag.svg') }}" alt="" width="120" height="100">
-          <span class="card__title">Flagged Questions</span>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="{{ route('v2.progress') }}">
-          <img class="card__icon" src="{{ asset('design-v2/Theory/img/theory/progress.svg') }}" alt="" width="120" height="100">
-          <span class="card__title">Learning Progress</span>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="{{ route('instructors.index') }}">
-          <img class="card__icon" src="{{ asset('design-v2/Theory/img/theory/partners.svg') }}" alt="" width="120" height="100">
-          <span class="card__title">RIVEX Partners</span>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="{{ route('v2.guidance') }}">
-          <img class="card__icon" src="{{ asset('design-v2/Theory/img/theory/info.svg') }}" alt="" width="120" height="100">
-          <span class="card__title">Driving Guidance</span>
-        </a>
-      </li>
+    <ul class="cards cards--managed">
+      @foreach($section?->subSections ?? [] as $subSection)
+        @php
+          $name = Str::lower($subSection->name);
+          $fallbackIcon = match (true) {
+              Str::contains($name, 'guarantee') => asset('design-v2/Theory/img/theory/pass.svg'),
+              Str::contains($name, 'hazard') => asset('images/rivex/icon-hazard.svg'),
+              Str::contains($name, 'sign') => asset('images/rivex/icon-signs.svg'),
+              Str::contains($name, 'mock') => asset('design-v2/Theory/img/theory/mock.svg'),
+              Str::contains($name, 'search') => asset('design-v2/Theory/img/theory/search.svg'),
+              Str::contains($name, 'flag') => asset('design-v2/Theory/img/theory/flag.svg'),
+              Str::contains($name, 'progress') => asset('design-v2/Theory/img/theory/progress.svg'),
+              Str::contains($name, 'partner') => asset('design-v2/Theory/img/theory/partners.svg'),
+              Str::contains($name, ['guidance', 'information']) => asset('design-v2/Theory/img/theory/info.svg'),
+              default => asset('design-v2/Theory/img/theory/book.svg'),
+          };
+        @endphp
+        <li>
+          <a class="card {{ Str::contains($name, 'guarantee') ? 'card--gold' : '' }}" href="{{ $subSection->isRevisionPractice() ? route('v2.revision') : route('frontend.sub_section', $subSection) }}">
+            <img class="card__icon" src="{{ $subSection->icon_path ?: $fallbackIcon }}" alt="" width="120" height="100">
+            <span class="card__title">{{ $subSection->name }}</span>
+            @if($subSection->description)<span class="sr-only">{{ $subSection->description }}</span>@endif
+          </a>
+        </li>
+      @endforeach
+      @foreach($section?->topics ?? [] as $topic)
+        <li>
+          <x-category-card :category="$topic" :href="$topic->isLearningCategory() && $topic->cgi_content_pages_count ? route('theory.hazard_library', $topic) : route('theory.practice', $topic)" :color="$section->color" />
+        </li>
+      @endforeach
+      @if(!$section || ($section->subSections->isEmpty() && $section->topics->isEmpty()))
+        <li class="v2-empty">No items are available in this section yet.</li>
+      @endif
     </ul>
   </main>
 

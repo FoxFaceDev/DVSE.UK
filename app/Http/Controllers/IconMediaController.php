@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Section;
 use App\Models\SubSection;
+use App\Models\Topic;
 use App\Support\MediaStorage;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -16,6 +17,7 @@ class IconMediaController extends Controller
         $model = match ($type) {
             'section' => Section::findOrFail($id),
             'sub-section' => SubSection::findOrFail($id),
+            'category' => Topic::findOrFail($id),
             default => abort(404),
         };
 

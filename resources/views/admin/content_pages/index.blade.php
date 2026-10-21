@@ -18,10 +18,10 @@
             <svg class="pointer-events-none absolute left-3 top-3.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/></svg>
             <input id="learning-page-search" name="q" type="search" value="{{ request('q') }}" placeholder="Search title, content, category or ID" class="w-full rounded-lg border-slate-400 bg-white pl-10 text-sm shadow-sm placeholder:text-slate-500 focus:border-primary focus:ring-primary">
         </div>
-        <select name="topic_id" aria-label="Filter by topic" class="rounded-md border-gray-300 text-sm focus:border-primary focus:ring-primary">
-            <option value="">All topics</option>
+        <select name="category_id" aria-label="Filter by category" class="rounded-md border-gray-300 text-sm focus:border-primary focus:ring-primary">
+            <option value="">All categories</option>
             @foreach($topics as $topic)
-                <option value="{{ $topic->id }}" @selected((string) request('topic_id') === (string) $topic->id)>{{ $topic->name_en }} ({{ class_basename($topic->topicable_type) }})</option>
+                <option value="{{ $topic->id }}" @selected((string) request('category_id', request('topic_id')) === (string) $topic->id)>{{ $topic->name_en }} ({{ class_basename($topic->topicable_type) }})</option>
             @endforeach
         </select>
         <select name="type" aria-label="Filter by page type" class="rounded-md border-gray-300 text-sm focus:border-primary focus:ring-primary">
@@ -36,7 +36,7 @@
         </select>
         <button class="rounded-md bg-gray-800 px-5 py-2 text-sm font-medium text-white hover:bg-gray-900">Search</button>
         </div>
-        @if(request()->hasAny(['q', 'topic_id', 'type', 'sort']))
+        @if(request()->hasAny(['q', 'category_id', 'topic_id', 'type', 'sort']))
             <div class="mt-3 flex items-center justify-between border-t border-gray-100 pt-3 text-sm">
                 <span class="text-gray-500">{{ $contentPages->total() }} {{ Str::plural('page', $contentPages->total()) }} found</span>
                 <a href="{{ route('admin.content-pages.index') }}" class="font-medium text-primary hover:underline">Clear search and filters</a>
@@ -49,7 +49,7 @@
             <thead class="border-b border-gray-200 bg-gray-50 text-gray-600">
                 <tr>
                     <th class="px-6 py-3">Page</th>
-                    <th class="px-6 py-3">Topic</th>
+                    <th class="px-6 py-3">Category</th>
                     <th class="px-6 py-3">Type</th>
                     <th class="px-6 py-3">Preview</th>
                     <th class="px-6 py-3 text-right">Actions</th>

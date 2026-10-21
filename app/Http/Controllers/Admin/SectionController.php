@@ -37,7 +37,7 @@ class SectionController extends Controller
     {
         $section->load([
             'subSections',
-            'topics' => fn ($query) => $query->orderBy('name_en'),
+            'topics',
         ]);
 
         return view('admin.sections.show', compact('section'));

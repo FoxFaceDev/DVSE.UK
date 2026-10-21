@@ -39,7 +39,7 @@ class SubSectionController extends Controller
     {
         $subSection->load([
             'categories',
-            'topics' => fn ($query) => $query->orderBy('name_en'),
+            'topics',
         ]);
 
         return view('admin.sub_sections.show', compact('section', 'subSection'));

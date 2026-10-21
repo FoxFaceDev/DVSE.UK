@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ContentPageController;
 use App\Http\Controllers\Admin\EmailAdvertisementController;
 use App\Http\Controllers\Admin\LanguageController;
+use App\Http\Controllers\Admin\InstructorController as AdminInstructorController;
 use App\Http\Controllers\Admin\LoginController as AdminLoginController;
 use App\Http\Controllers\Admin\MockTestController as AdminMockTestController;
 use App\Http\Controllers\Admin\QuestionController;
@@ -58,7 +59,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about-us', [PageController::class, 'about'])->name('about');
 Route::get('/contact-us', [PageController::class, 'contact'])->name('contact');
 Route::get('/media/icons/{type}/{id}', IconMediaController::class)
-    ->whereIn('type', ['section', 'sub-section'])
+    ->whereIn('type', ['section', 'sub-section', 'category'])
     ->whereNumber('id')
     ->name('media.icons');
 Route::get('/email/unsubscribe/{user}', [MarketingEmailPreferenceController::class, 'show'])
@@ -160,6 +161,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('sections.sub_sections.categories', CategoryController::class)->except(['index']);
 
         // Topics (flat route to handle polymorphic creation/editing)
+        Route::patch('topics/reorder', [TopicController::class, 'reorder'])->name('topics.reorder');
         Route::resource('topics', TopicController::class)->except(['show']);
         Route::resource('questions', QuestionController::class);
         Route::resource('content-pages', ContentPageController::class)->except('show');
@@ -168,6 +170,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('site-settings', [SiteSettingController::class, 'edit'])->name('site-settings.edit');
         Route::put('site-settings', [SiteSettingController::class, 'update'])->name('site-settings.update');
         Route::resource('users', AdminUserController::class)->only(['index', 'edit', 'update', 'destroy']);
+        Route::resource('instructors', AdminInstructorController::class)->only(['index', 'create', 'store', 'edit', 'update']);
         Route::put('users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.reset-password');
         Route::put('users/{user}/instructor-profile', [AdminUserController::class, 'updateInstructorProfile'])->name('users.instructor-profile.update');
         Route::get('csrf-token', fn () => response()->json(['token' => csrf_token()]))->name('csrf-token');

@@ -9,11 +9,11 @@
         <div class="flex gap-2">
             <a href="{{ route('admin.topics.create', ['topicable_type' => 'App\Models\SubSection', 'topicable_id' => $subSection->id]) }}" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Add Topic
+                Add Category
             </a>
             <a href="{{ route('admin.sections.sub_sections.categories.create', [$section, $subSection]) }}" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Add Category
+                Add Category Group
             </a>
         </div>
     </div>
@@ -45,7 +45,7 @@
                     </td>
                     <td class="px-6 py-4 text-gray-600" dir="rtl">{{ $category->name_ku ?? '-' }}</td>
                     <td class="px-6 py-4 text-right flex justify-end gap-2 items-center h-full">
-                        <a href="{{ route('admin.topics.create', ['topicable_type' => 'App\Models\Category', 'topicable_id' => $category->id]) }}" class="text-sm font-medium text-primary hover:underline">Add Topic</a>
+                        <a href="{{ route('admin.topics.create', ['topicable_type' => 'App\Models\Category', 'topicable_id' => $category->id]) }}" class="text-sm font-medium text-primary hover:underline">Add Category</a>
                         <span class="text-gray-300">|</span>
                         <a href="{{ route('admin.sections.sub_sections.categories.edit', [$section, $subSection, $category]) }}" class="text-sm text-gray-500 hover:text-primary transition-colors">Edit</a>
                         <span class="text-gray-300">|</span>
@@ -67,7 +67,7 @@
 
     @if($subSection->topics->isNotEmpty())
         <section class="mt-8">
-            <h3 class="mb-4 font-heading text-lg font-bold text-gray-800">Topics in {{ $subSection->name }}</h3>
+            <h3 class="mb-4 font-heading text-lg font-bold text-gray-800">Categories in {{ $subSection->name }}</h3>
             @include('admin.topics._table', ['topics' => $subSection->topics])
         </section>
     @endif

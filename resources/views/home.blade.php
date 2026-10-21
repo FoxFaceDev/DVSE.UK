@@ -50,7 +50,7 @@
     <div class="stage">
     <ul class="cards">
       <li>
-        <a class="card card--blue" href="{{ route('v2.theory') }}">
+        <a class="card card--blue" href="{{ route('v2.theory', $theorySection ? ['section' => $theorySection->id] : []) }}">
           <img class="card__icon" src="{{ $theorySection?->icon_path ?: asset('design-v2/Home/img/icon-theory.webp') }}" alt="" width="800" height="722">
           <span class="card__body">
             <span class="card__title">Theory Test</span>

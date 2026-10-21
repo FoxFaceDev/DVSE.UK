@@ -7,28 +7,51 @@ use App\Models\Category;
 use App\Models\Language;
 use App\Models\MockTest;
 use App\Models\Question;
+use App\Models\Section;
 use App\Models\SubSection;
 use App\Models\Topic;
 use Illuminate\Http\Request;
 
 class LearnerController extends Controller
 {
-    public function theory()
+    public function theory(Request $request)
     {
-        return view('v2.theory');
+        $validated = $request->validate(['section' => ['nullable', 'integer', 'exists:sections,id']]);
+        $section = isset($validated['section'])
+            ? Section::findOrFail($validated['section'])
+            : Section::whereRaw('lower(name) like ?', ['%theory%'])->first();
+
+        $section?->load(['subSections', 'topics' => fn ($query) => $query->with('questions:id,topic_id')->withCount([
+            'contentPages as cgi_content_pages_count' => fn ($pages) => $pages->where('type', 'cgi_clips'),
+        ])]);
+
+        return view('v2.theory', compact('section'));
     }
 
     public function revision(Request $request)
     {
-        $topics = Topic::withCount('questions')->with('questions:id,topic_id')->has('questions')->get();
+        $categories = Topic::questionCategories()->withCount('questions')->with('questions:id,topic_id')->ordered()->get();
 
-        return view('v2.revision', compact('topics'));
+        return view('v2.revision', compact('categories'));
     }
 
     public function revise(Request $request)
     {
-        $validated = $request->validate(['topics' => ['nullable', 'array', 'max:200'], 'topics.*' => ['integer', 'exists:topics,id']]);
-        $questions = Question::with('choices')->when($validated['topics'] ?? [], fn ($query, $ids) => $query->whereIn('topic_id', $ids))->get();
+        if ($request->has('categories')) {
+            $validated = $request->validate([
+                'categories' => ['nullable', 'array', 'max:200'],
+                'categories.*' => ['integer', 'exists:topics,id'],
+            ]);
+            $selectedCategoryIds = $validated['categories'] ?? [];
+        } else {
+            $validated = $request->validate([
+                'topics' => ['nullable', 'array', 'max:200'],
+                'topics.*' => ['integer', 'exists:topics,id'],
+            ]);
+            $selectedCategoryIds = $validated['topics'] ?? [];
+        }
+        $categoryIds = Topic::questionCategories()->whereIn('id', $selectedCategoryIds)->pluck('id');
+        $questions = Question::with('choices')->when($categoryIds->isNotEmpty(), fn ($query) => $query->whereIn('topic_id', $categoryIds))->get();
         $questions->each(fn ($question) => $question->setRelation('choices', $question->choices->shuffle()->values()));
 
         return $this->quiz($questions, $request->routeIs('v2.flagged'));
@@ -68,7 +91,7 @@ class LearnerController extends Controller
 
     public function hazards(Request $request)
     {
-        $topics = Topic::whereHas('contentPages', fn ($q) => $q->where('type', 'cgi_clips'))->withCount('contentPages')->get();
+        $topics = Topic::whereHas('contentPages', fn ($q) => $q->where('type', 'cgi_clips'))->withCount('contentPages')->ordered()->get();
         if ($request->boolean('clips')) {
             return view('v2.information', ['heading' => 'Hazard Perception Clips', 'description' => 'Choose a topic to practise recognising developing hazards.', 'topics' => $topics]);
         }

@@ -3,10 +3,10 @@
         <div class="page-intro"><p class="eyebrow">YOUR NEXT STEP</p><h1 class="font-heading text-2xl font-bold">{{ $subSection->name }}</h1><p class="text-sm text-secondary mt-2">A little learning today. More confidence tomorrow.</p></div>
         @if($subSection->categories->isNotEmpty())
             <section>
-                <h2 class="mb-4 font-heading text-xl font-bold" style="color: {{ $subSection->color ?? '#1e293b' }}">Categories</h2>
+                <h2 class="mb-4 font-heading text-xl font-bold" style="color: {{ $subSection->color ?? '#1e293b' }}">Category groups</h2>
                 <div class="learning-card-grid">
                     @foreach($subSection->categories as $category)
-                        <x-learning-card :href="route('frontend.category', $category)" :name="$category->name_en" :translation="$category->name_ku" :color="$subSection->color ?? $subSection->section->color" kind="Category" :meta="$category->topics_count.' '.Str::plural('topic', $category->topics_count)" />
+                        <x-learning-card :href="route('frontend.category', $category)" :name="$category->name_en" :translation="$category->name_ku" :color="$subSection->color ?? $subSection->section->color" kind="Category group" :meta="$category->topics_count.' '.Str::plural('category', $category->topics_count)" />
                     @endforeach
                 </div>
             </section>
@@ -14,7 +14,7 @@
 
         @if($subSection->topics->isNotEmpty())
             <section class="pt-2">
-                <h2 class="mb-4 font-heading text-xl font-bold text-gray-700">Topics</h2>
+                <h2 class="mb-4 font-heading text-xl font-bold text-gray-700">Categories</h2>
                 <div class="learning-card-grid">
                     @foreach($subSection->topics as $topic)
                         <x-topic-card :topic="$topic" :color="$subSection->color ?? $subSection->section->color" />

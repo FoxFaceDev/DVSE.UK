@@ -21,11 +21,12 @@
         <nav class="flex-1 px-4 py-4 space-y-2">
             <a href="{{ route('admin.home') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.home', 'admin.sections.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Dashboard</a>
             <a href="{{ route('admin.questions.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.questions.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Questions</a>
-            <a href="{{ route('admin.topics.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.topics.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Topics</a>
+            <a href="{{ route('admin.topics.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.topics.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Categories</a>
             <a href="{{ route('admin.content-pages.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.content-pages.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Learning Pages</a>
             <a href="{{ route('admin.mock-tests.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.mock-tests.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Mock Tests</a>
             <a href="{{ route('admin.languages.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.languages.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Languages</a>
             <a href="{{ route('admin.site-settings.edit') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.site-settings.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Website Settings</a>
+            <a href="{{ route('admin.instructors.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.instructors.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Instructors</a>
             @if(auth('admin')->user()->is_superadmin)<a href="{{ route('admin.users.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.users.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">User Accounts</a>@endif
             <a href="{{ route('admin.ads.index') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.ads.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Advertisements</a>
             <a href="{{ route('admin.email-advertisements.create') }}" class="block rounded-md px-4 py-3 font-medium transition-colors {{ request()->routeIs('admin.email-advertisements.*') ? 'bg-primary shadow-sm' : 'hover:bg-primary' }}">Email Campaigns</a>
@@ -62,6 +63,73 @@
 
 </body>
 <script>
+    document.querySelectorAll('[data-category-sort]').forEach((list) => {
+        let draggedRow = null;
+        let originalOrder = [];
+        const status = list.closest('div')?.querySelector('[data-sort-status]');
+        const rows = () => [...list.querySelectorAll('[data-category-id]')];
+        const save = async () => {
+            if (status) status.textContent = 'Saving order…';
+            try {
+                const response = await fetch(list.dataset.reorderUrl, {
+                    method: 'PATCH',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({ category_ids: rows().map(row => Number(row.dataset.categoryId)) }),
+                });
+                if (!response.ok) throw new Error('save');
+                if (status) status.textContent = 'Order saved';
+                setTimeout(() => { if (status?.textContent === 'Order saved') status.textContent = ''; }, 2200);
+            } catch (error) {
+                originalOrder.forEach(id => list.append(list.querySelector(`[data-category-id="${id}"]`)));
+                if (status) status.textContent = 'Could not save. Order restored.';
+            }
+        };
+
+        list.querySelectorAll('[data-drag-handle]').forEach((handle) => {
+            handle.addEventListener('dragstart', (event) => {
+                draggedRow = handle.closest('[data-category-id]');
+                originalOrder = rows().map(row => row.dataset.categoryId);
+                draggedRow.classList.add('opacity-40', 'bg-blue-50');
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', draggedRow.dataset.categoryId);
+            });
+            handle.addEventListener('dragend', () => {
+                draggedRow?.classList.remove('opacity-40', 'bg-blue-50');
+                draggedRow = null;
+            });
+            handle.addEventListener('keydown', async (event) => {
+                if (!event.altKey || !['ArrowUp', 'ArrowDown'].includes(event.key)) return;
+                event.preventDefault();
+                originalOrder = rows().map(row => row.dataset.categoryId);
+                const row = handle.closest('[data-category-id]');
+                if (event.key === 'ArrowUp' && row.previousElementSibling) list.insertBefore(row, row.previousElementSibling);
+                if (event.key === 'ArrowDown' && row.nextElementSibling) list.insertBefore(row.nextElementSibling, row);
+                handle.focus();
+                await save();
+            });
+        });
+        list.addEventListener('dragover', (event) => {
+            if (!draggedRow) return;
+            event.preventDefault();
+            const target = event.target.closest('[data-category-id]');
+            if (!target || target === draggedRow) return;
+            const box = target.getBoundingClientRect();
+            list.insertBefore(draggedRow, event.clientY < box.top + box.height / 2 ? target : target.nextElementSibling);
+        });
+        list.addEventListener('drop', async (event) => {
+            if (!draggedRow) return;
+            event.preventDefault();
+            draggedRow.classList.remove('opacity-40', 'bg-blue-50');
+            await save();
+            draggedRow = null;
+        });
+    });
+
     // Keep long editing/upload sessions alive and refresh every form's CSRF token.
     setInterval(async () => {
         try {

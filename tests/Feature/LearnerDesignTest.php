@@ -27,19 +27,19 @@ test('learn navigation opens a dedicated page with current admin managed section
     $this->get(route('v2.more'))->assertOk()->assertSee('Renamed learning')->assertSee('#7c3aed');
 });
 
-test('category and topic cards retain translations counts routes and inherited colours', function () {
+test('category group and category cards retain translations counts routes and inherited colours', function () {
     $section = Section::create(['name' => 'Learning', 'color' => '#b45309']);
     $subSection = SubSection::create(['section_id' => $section->id, 'name' => 'Practice', 'color' => '#047857']);
     $category = Category::create(['sub_section_id' => $subSection->id, 'name_en' => 'Road awareness', 'name_ku' => 'ئاگاداری']);
     $topic = $category->topics()->create(['name_en' => 'Junctions', 'name_ku' => 'چوارڕێیان']);
 
     $this->get(route('frontend.sub_section', $subSection))->assertOk()->assertSee('Road awareness')->assertSee('ئاگاداری')
-        ->assertSee('1 topic')->assertSee('#047857')->assertSee(route('frontend.category', $category), false);
+        ->assertSee('1 category')->assertSee('#047857')->assertSee(route('frontend.category', $category), false);
     $this->get(route('frontend.category', $category))->assertOk()->assertSee('Junctions')->assertSee('چوارڕێیان')
-        ->assertSee('0 questions')->assertSee('#047857')->assertSee(route('theory.practice', $topic), false);
+        ->assertSee('Total:')->assertSee('#047857')->assertSee(route('theory.practice', $topic), false);
 
     $subSection->update(['color' => null]);
-    $this->get(route('frontend.category', $category))->assertOk()->assertSee('--learning-color: #b45309', false);
+    $this->get(route('frontend.category', $category))->assertOk()->assertSee('--category-color: #b45309', false);
 });
 
 test('admin icon replacements are immediately served to admin and learner cards', function () {
@@ -119,7 +119,7 @@ test('unsafe SVG icons are rejected', function () {
     expect($section->refresh()->getRawOriginal('icon_path'))->toBeNull();
 });
 
-test('mock tests appear after categories and topics', function () {
+test('mock tests appear after category groups and categories', function () {
     $section = Section::create(['name' => 'Theory']);
     $subSection = SubSection::create(['section_id' => $section->id, 'name' => 'Practice']);
     Category::create(['sub_section_id' => $subSection->id, 'name_en' => 'Rules']);
@@ -131,7 +131,7 @@ test('mock tests appear after categories and topics', function () {
 
     $this->get(route('frontend.sub_section', $subSection))
         ->assertOk()
-        ->assertSeeInOrder(['Categories', 'Topics', 'Mock tests', 'Final Mock']);
+        ->assertSeeInOrder(['Category groups', 'Categories', 'Mock tests', 'Final Mock']);
 });
 
 test('admins can edit section and subsection card descriptions', function () {

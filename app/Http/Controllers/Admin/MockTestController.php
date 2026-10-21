@@ -18,7 +18,7 @@ class MockTestController extends Controller
 
     public function create()
     {
-        return view('admin.mock_tests.form', ['mockTest' => new MockTest(['type' => 'theory', 'question_count' => 50, 'video_question_count' => 3, 'duration_minutes' => 57, 'pass_mark' => 43, 'is_active' => true]), 'subSections' => SubSection::with('section')->get(), 'topics' => Topic::orderBy('name_en')->get()]);
+        return view('admin.mock_tests.form', ['mockTest' => new MockTest(['type' => 'theory', 'question_count' => 50, 'video_question_count' => 3, 'duration_minutes' => 57, 'pass_mark' => 43, 'is_active' => true]), 'subSections' => SubSection::with('section')->get(), 'topics' => Topic::questionCategories()->ordered()->get()]);
     }
 
     public function store(Request $request)
@@ -33,7 +33,7 @@ class MockTestController extends Controller
     {
         $mockTest->load('topics');
 
-        return view('admin.mock_tests.form', ['mockTest' => $mockTest, 'subSections' => SubSection::with('section')->get(), 'topics' => Topic::orderBy('name_en')->get()]);
+        return view('admin.mock_tests.form', ['mockTest' => $mockTest, 'subSections' => SubSection::with('section')->get(), 'topics' => Topic::questionCategories()->ordered()->get()]);
     }
 
     public function update(Request $request, MockTest $mockTest)

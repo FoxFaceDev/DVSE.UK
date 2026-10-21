@@ -6,7 +6,7 @@ use App\Models\Section;
 use App\Models\SubSection;
 use App\Models\Topic;
 
-test('the public subsection only displays non-empty category and topic groups', function () {
+test('the public subsection only displays non-empty category groups and direct categories', function () {
     $section = Section::create(['name' => 'Theory']);
     $topicsOnly = SubSection::create([
         'section_id' => $section->id,
@@ -20,9 +20,9 @@ test('the public subsection only displays non-empty category and topic groups', 
 
     $this->get(route('frontend.sub_section', $topicsOnly))
         ->assertOk()
-        ->assertSee('Topics')
+        ->assertSee('Categories')
         ->assertSee('Visible direct topic')
-        ->assertDontSee('Categories')
+        ->assertDontSee('Category groups')
         ->assertDontSee('No categories available');
 
     $categoriesOnly = SubSection::create([
@@ -36,9 +36,9 @@ test('the public subsection only displays non-empty category and topic groups', 
 
     $this->get(route('frontend.sub_section', $categoriesOnly))
         ->assertOk()
-        ->assertSee('Categories')
+        ->assertSee('Category groups')
         ->assertSee('Visible category')
-        ->assertDontSee('Topics')
+        ->assertDontSee('<h2 class="mb-4 font-heading text-xl font-bold text-gray-700">Categories</h2>', false)
         ->assertDontSee('No categories available');
 
     $empty = SubSection::create([
@@ -48,12 +48,12 @@ test('the public subsection only displays non-empty category and topic groups', 
 
     $this->get(route('frontend.sub_section', $empty))
         ->assertOk()
-        ->assertDontSee('Categories')
-        ->assertDontSee('Topics')
+        ->assertDontSee('Category groups')
+        ->assertDontSee('<h2 class="mb-4 font-heading text-xl font-bold text-gray-700">Categories</h2>', false)
         ->assertDontSee('No categories available');
 });
 
-test('admin parent pages display topics attached directly to them', function () {
+test('admin parent pages display categories attached directly to them', function () {
     $admin = Admin::create([
         'name' => 'Topic Admin',
         'email' => 'topic-admin@example.com',
@@ -87,13 +87,13 @@ test('admin parent pages display topics attached directly to them', function () 
     $this->actingAs($admin, 'admin')
         ->get(route('admin.sections.show', $section))
         ->assertOk()
-        ->assertSee('Topics in Theory')
+        ->assertSee('Categories in Theory')
         ->assertSee('Section level topic');
 
     $this->actingAs($admin, 'admin')
         ->get(route('admin.sections.sub_sections.show', [$section, $subSection]))
         ->assertOk()
-        ->assertSee('Topics in Practice')
+        ->assertSee('Categories in Practice')
         ->assertSee('Subsection level topic');
 
     $this->actingAs($admin, 'admin')
@@ -102,7 +102,7 @@ test('admin parent pages display topics attached directly to them', function () 
         ->assertSee('Category level topic');
 });
 
-test('topic creation selects a parent by name and validates the selected parent', function () {
+test('category creation selects a parent by name and validates the selected parent', function () {
     $admin = Admin::create([
         'name' => 'Topic Admin',
         'email' => 'topic-create@example.com',
@@ -133,8 +133,10 @@ test('topic creation selects a parent by name and validates the selected parent'
             'topicable_type' => Category::class,
             'topicable_id' => $category->id,
             'name_en' => 'New named-parent topic',
+            'content_type' => Topic::TYPE_QUESTIONS,
+            'color' => '#0452bc',
         ])
-        ->assertRedirect(route('admin.topics.index'));
+        ->assertRedirect(route('admin.sections.sub_sections.categories.show', [$section, $subSection, $category]));
 
     $this->assertDatabaseHas('topics', [
         'topicable_type' => Category::class,
@@ -147,6 +149,8 @@ test('topic creation selects a parent by name and validates the selected parent'
             'topicable_type' => Category::class,
             'topicable_id' => 999999,
             'name_en' => 'Invalid parent topic',
+            'content_type' => Topic::TYPE_QUESTIONS,
+            'color' => '#0452bc',
         ])
         ->assertSessionHasErrors('topicable_id');
 });

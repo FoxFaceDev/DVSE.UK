@@ -420,7 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const selected = read("rivex.selected", []);
         const all = selection.querySelector("[data-select-all]");
         const inputs = [
-            ...selection.querySelectorAll('input[name="topics[]"]'),
+            ...selection.querySelectorAll('input[name="categories[]"], input[name="topics[]"]'),
         ];
         const persist = () => {
             save(

@@ -3,13 +3,13 @@
         <h3 class="text-lg font-medium text-gray-800">Bank of Questions</h3>
         
         <div class="flex items-center gap-3 flex-wrap">
-            <!-- Topic Filter -->
+            <!-- Category Filter -->
             <form method="GET" action="{{ route('admin.questions.index') }}" id="filterForm">
-                <select name="topic_id" onchange="document.getElementById('filterForm').submit()"
+                <select name="category_id" onchange="document.getElementById('filterForm').submit()"
                     class="border-gray-300 rounded-md shadow-sm text-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 min-w-[200px]">
-                    <option value="">All Topics</option>
+                    <option value="">All Categories</option>
                     @foreach($topics as $topic)
-                        <option value="{{ $topic->id }}" @selected((string) request('topic_id') === (string) $topic->id)>
+                        <option value="{{ $topic->id }}" @selected((string) request('category_id', request('topic_id')) === (string) $topic->id)>
                             {{ $topic->name_en }} ({{ $topic->questions_count }})
                         </option>
                     @endforeach
@@ -31,7 +31,7 @@
             <thead class="bg-gray-50 border-b border-gray-200 text-gray-600 font-medium">
                 <tr>
                     <th class="px-6 py-3">ID</th>
-                    <th class="px-6 py-3">Topic</th>
+                    <th class="px-6 py-3">Category</th>
                     <th class="px-6 py-3">Media</th>
                     <th class="px-6 py-3 w-1/3">Question</th>
                     <th class="px-6 py-3 text-right">Actions</th>
@@ -42,7 +42,7 @@
                 <tr class="hover:bg-gray-50/50">
                     <td class="px-6 py-4 text-gray-500 whitespace-nowrap">#{{ $question->id }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="bg-surface-container text-primary px-2 py-1 rounded text-xs">{{ $question->topic?->name_en ?? 'No topic' }}</span>
+                        <span class="bg-surface-container text-primary px-2 py-1 rounded text-xs">{{ $question->topic?->name_en ?? 'No category' }}</span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         @if($question->media_type)

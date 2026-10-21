@@ -37,7 +37,7 @@ class AdController extends Controller
 
     public function create()
     {
-        $topics = Topic::with('topicable')->orderBy('name_en')->get();
+        $topics = Topic::questionCategories()->with('topicable')->ordered()->get();
         $languages = Language::orderBy('sort_order')->orderBy('name')->get();
 
         return view('admin.ads.create', compact('topics', 'languages') + ['placementOptions' => $this->placementOptions()]);
@@ -100,7 +100,7 @@ class AdController extends Controller
 
     public function edit(Ad $ad)
     {
-        $topics = Topic::with('topicable')->orderBy('name_en')->get();
+        $topics = Topic::questionCategories()->with('topicable')->ordered()->get();
         $languages = Language::orderBy('sort_order')->orderBy('name')->get();
         $ad->load(['topics', 'languages', 'categories']);
 

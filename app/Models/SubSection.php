@@ -4,10 +4,18 @@ namespace App\Models;
 
 use App\Support\MediaStorage;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class SubSection extends Model
 {
     protected $fillable = ['section_id', 'name', 'description', 'color', 'icon_path'];
+
+    public function isRevisionPractice(): bool
+    {
+        $name = Str::lower($this->name);
+
+        return Str::contains($name, 'revision') && Str::contains($name, 'question');
+    }
 
     public function getIconPathAttribute($value)
     {
@@ -41,7 +49,7 @@ class SubSection extends Model
 
     public function topics()
     {
-        return $this->morphMany(Topic::class, 'topicable');
+        return $this->morphMany(Topic::class, 'topicable')->orderBy('position')->orderBy('id');
     }
 
     public function mockTests()

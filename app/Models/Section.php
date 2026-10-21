@@ -36,6 +36,6 @@ class Section extends Model
 
     public function topics()
     {
-        return $this->morphMany(Topic::class, 'topicable');
+        return $this->morphMany(Topic::class, 'topicable')->orderBy('position')->orderBy('id');
     }
 }

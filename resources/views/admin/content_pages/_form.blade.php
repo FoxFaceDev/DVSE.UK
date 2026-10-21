@@ -1,7 +1,7 @@
 @php
     $isEditing = isset($contentPage) && $contentPage;
     $currentType = old('type', $isEditing ? $contentPage->type : ($selectedType ?? 'cgi_clips'));
-    $currentTopicId = old('topic_id', $isEditing ? $contentPage->topic_id : ($selectedTopicId ?? null));
+    $currentTopicId = old('category_id', $isEditing ? $contentPage->topic_id : ($selectedTopicId ?? null));
     $currentHazardCategory = old('library_category', $isEditing ? $contentPage->library_category : '');
     $savedHazardCategories = collect($hazardCategories ?? []);
     $hazardCategoryMode = $savedHazardCategories->isEmpty() || ($currentHazardCategory !== '' && ! $savedHazardCategories->contains($currentHazardCategory)) ? 'new' : 'saved';
@@ -53,9 +53,9 @@
 
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Topic *</label>
-                <select name="topic_id" required class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">
-                    <option value="">Select a topic</option>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Category *</label>
+                <select name="category_id" required class="w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">
+                    <option value="">Select a learning-page category</option>
                     @foreach($topics as $topic)
                         <option value="{{ $topic->id }}" @selected((string) $currentTopicId === (string) $topic->id)>{{ $topic->name_en }} ({{ class_basename($topic->topicable_type) }})</option>
                     @endforeach

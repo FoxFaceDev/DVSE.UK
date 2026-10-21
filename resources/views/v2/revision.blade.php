@@ -60,21 +60,21 @@
   <!-- ===== Categories (6 and a half fit on screen, the rest scroll) ===== -->
   <form id="revision-selection" action="{{ route('v2.revise') }}" method="get"><main class="stage" id="category">
     <ul class="cats">
-@if($topics->isNotEmpty())
-<li class="cat" data-topic="all" data-total="{{ $topics->sum('questions_count') }}" data-questions='@json($topics->flatMap(fn ($topic) => $topic->questions->pluck("id"))->values())'>
+@if($categories->isNotEmpty())
+<li class="cat" data-topic="all" data-total="{{ $categories->sum('questions_count') }}" data-questions='@json($categories->flatMap(fn ($category) => $category->questions->pluck("id"))->values())'>
 <img class="cat__icon" src="{{ asset('design-v2/Practice/img/practice/all-categories.svg') }}" alt="" width="120" height="120">
-<div class="cat__body"><div class="cat__head"><h2 class="cat__title"><a class="cat__link" href="{{ route('v2.revise') }}">All categories</a></h2><span class="cat__pct" data-pct>0%</span></div><progress class="cat__bar" max="100" value="0" aria-label="All categories progress"></progress><p class="cat__stats"><span class="cat__stat">Answered: <b data-answered>0</b></span><i class="cat__sep" aria-hidden="true"></i><span class="cat__stat">Correct: <b data-correct>0</b></span><i class="cat__sep" aria-hidden="true"></i><span class="cat__stat">Total: <b>{{ $topics->sum('questions_count') }}</b></span></p></div>
+<div class="cat__body"><div class="cat__head"><h2 class="cat__title"><a class="cat__link" href="{{ route('v2.revise') }}">All categories</a></h2><span class="cat__pct" data-pct>0%</span></div><progress class="cat__bar" max="100" value="0" aria-label="All categories progress"></progress><p class="cat__stats"><span class="cat__stat">Answered: <b data-answered>0</b></span><i class="cat__sep" aria-hidden="true"></i><span class="cat__stat">Correct: <b data-correct>0</b></span><i class="cat__sep" aria-hidden="true"></i><span class="cat__stat">Total: <b>{{ $categories->sum('questions_count') }}</b></span></p></div>
 <label class="pick"><input class="pick__input" type="checkbox" data-select-all aria-label="Select All categories"></label></li>
 @endif
-@foreach($topics as $topic)
-<li class="cat" data-topic="{{ $topic->id }}" data-total="{{ $topic->questions_count }}" data-questions='@json($topic->questions->pluck("id"))'>
-<img class="cat__icon" src="{{ asset('design-v2/Practice/img/practice/'.(file_exists(public_path('design-v2/Practice/img/practice/'.Str::slug($topic->name_en).'.svg')) ? Str::slug($topic->name_en) : 'all-categories').'.svg') }}" alt="" width="120" height="120">
-<div class="cat__body"><div class="cat__head"><h2 class="cat__title"><a class="cat__link" href="{{ route('theory.practice', $topic) }}">{{ $topic->name_en }}</a></h2><span class="cat__pct" data-pct>0%</span></div>
-<progress class="cat__bar" max="100" value="0" aria-label="{{ $topic->name_en }} progress"></progress>
-<p class="cat__stats"><span class="cat__stat">Answered: <b data-answered>0</b></span><i class="cat__sep" aria-hidden="true"></i><span class="cat__stat">Correct: <b data-correct>0</b></span><i class="cat__sep" aria-hidden="true"></i><span class="cat__stat">Total: <b>{{ $topic->questions_count }}</b></span></p></div>
-<label class="pick"><input class="pick__input" type="checkbox" name="topics[]" value="{{ $topic->id }}" aria-label="Select {{ $topic->name_en }}"></label></li>
+@foreach($categories as $category)
+<li class="cat" style="border-inline-start: 5px solid {{ $category->color ?: '#0452bc' }}" data-topic="{{ $category->id }}" data-total="{{ $category->questions_count }}" data-questions='@json($category->questions->pluck("id"))'>
+<img class="cat__icon" src="{{ $category->icon_path ?: asset('design-v2/Practice/img/practice/all-categories.svg') }}" alt="" width="120" height="120">
+<div class="cat__body"><div class="cat__head"><h2 class="cat__title"><a class="cat__link" href="{{ route('theory.practice', $category) }}">{{ $category->name_en }}</a></h2><span class="cat__pct" style="color: {{ $category->color ?: '#0452bc' }}" data-pct>0%</span></div>
+<progress class="cat__bar" max="100" value="0" aria-label="{{ $category->name_en }} progress"></progress>
+<p class="cat__stats"><span class="cat__stat">Answered: <b data-answered>0</b></span><i class="cat__sep" aria-hidden="true"></i><span class="cat__stat">Correct: <b data-correct>0</b></span><i class="cat__sep" aria-hidden="true"></i><span class="cat__stat">Total: <b>{{ $category->questions_count }}</b></span></p></div>
+<label class="pick"><input class="pick__input" type="checkbox" name="categories[]" value="{{ $category->id }}" aria-label="Select {{ $category->name_en }}"></label></li>
 @endforeach
-@if($topics->isEmpty())<li class="v2-empty">No revision questions are available yet.</li>@endif</ul>
+@if($categories->isEmpty())<li class="v2-empty">No revision questions are available yet.</li>@endif</ul>
   </main>
 
   <!-- ===== Fixed bottom: hint + continue ===== -->

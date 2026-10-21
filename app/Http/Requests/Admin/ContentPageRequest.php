@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Models\ContentPage;
+use App\Models\Topic;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -21,6 +22,8 @@ class ContentPageRequest extends FormRequest
             }
         }
         $this->merge([
+            '_legacy_topic_field' => ! $this->has('category_id') && $this->has('topic_id'),
+            'category_id' => $this->input('category_id', $this->input('topic_id')),
             'translations' => $translations,
             'text_en' => data_get($translations, 'en.text', $this->input('text_en')),
             'text_ku' => data_get($translations, 'ku.text', $this->input('text_ku')),
@@ -42,7 +45,13 @@ class ContentPageRequest extends FormRequest
         $isCgiClips = $this->input('type') === ContentPage::TYPE_CGI_CLIPS;
 
         return [
-            'topic_id' => ['required', 'integer', 'exists:topics,id'],
+            'category_id' => [
+                'required',
+                'integer',
+                $this->boolean('_legacy_topic_field')
+                    ? Rule::exists('topics', 'id')
+                    : Rule::exists('topics', 'id')->where('content_type', Topic::TYPE_LEARNING_PAGES),
+            ],
             'admin_title' => ['required', 'string', 'max:150'],
             'library_category' => [$isCgiClips ? 'required' : 'nullable', 'string', 'max:100', 'not_in:__new'],
             'type' => ['required', Rule::in([
@@ -168,7 +177,7 @@ class ContentPageRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'topic_id' => 'topic',
+            'category_id' => 'category',
             'admin_title' => 'page title',
             'text_en' => 'English text',
             'text_ku' => 'Kurdish text',

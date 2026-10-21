@@ -15,9 +15,10 @@ class QuestionController extends Controller
 {
     public function index(Request $request)
     {
-        $topics = Topic::with('topicable')->withCount('questions')->orderBy('name_en')->get();
+        $topics = Topic::questionCategories()->with('topicable')->withCount('questions')->ordered()->get();
+        $categoryId = $request->input('category_id', $request->input('topic_id'));
         $questions = Question::with('topic.topicable')
-            ->when($request->filled('topic_id'), fn ($query) => $query->where('topic_id', $request->integer('topic_id')))
+            ->when($categoryId, fn ($query) => $query->where('topic_id', $categoryId))
             ->latest('id')->get();
 
         return view('admin.questions.index', compact('questions', 'topics'));
@@ -26,9 +27,9 @@ class QuestionController extends Controller
     public function create(Request $request)
     {
         return view('admin.questions.create', [
-            'topics' => Topic::with('topicable')->get(),
+            'topics' => Topic::questionCategories()->with('topicable')->ordered()->get(),
             'languages' => Language::active()->get(),
-            'selectedTopicId' => $request->query('topic_id'),
+            'selectedTopicId' => $request->query('category_id', $request->query('topic_id')),
         ]);
     }
 
@@ -47,7 +48,7 @@ class QuestionController extends Controller
     {
         return view('admin.questions.edit', [
             'question' => $question->load('choices'),
-            'topics' => Topic::with('topicable')->get(),
+            'topics' => Topic::questionCategories()->with('topicable')->ordered()->get(),
             'languages' => Language::active()->get(),
         ]);
     }
@@ -74,8 +75,12 @@ class QuestionController extends Controller
 
     private function validateQuestion(Request $request): array
     {
+        if (! $request->filled('category_id') && $request->filled('topic_id')) {
+            $request->merge(['category_id' => $request->input('topic_id')]);
+        }
+
         $validated = $request->validate([
-            'topic_id' => ['required', 'exists:topics,id'],
+            'category_id' => ['required', Rule::exists('topics', 'id')->where('content_type', Topic::TYPE_QUESTIONS)],
             'question_type' => ['required', Rule::in(['text', 'image_answers'])],
             'translations.en.text' => ['required', 'string'],
             'translations.*.text' => ['nullable', 'string'],
@@ -111,7 +116,7 @@ class QuestionController extends Controller
         $translations = array_replace($question?->translations ?? [], $translations);
 
         return [
-            'topic_id' => $validated['topic_id'],
+            'topic_id' => $validated['category_id'],
             'question_type' => $validated['question_type'],
             'translations' => $translations,
             'text_en' => data_get($translations, 'en.text'),
