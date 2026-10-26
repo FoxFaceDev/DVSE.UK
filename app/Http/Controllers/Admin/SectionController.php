@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Section;
 use App\Rules\SafeIconFile;
+use App\Rules\CardColor;
 use App\Support\MediaStorage;
 use Illuminate\Http\Request;
 
@@ -15,14 +16,14 @@ class SectionController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:180',
-            'color' => 'nullable|string|max:50',
+            'color' => ['nullable', new CardColor],
             'icon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp,svg', 'max:2048', new SafeIconFile],
         ]);
 
         $section = new Section;
         $section->name = $validated['name'];
         $section->description = $validated['description'] ?? null;
-        $section->color = $validated['color'] ?? '#3b82f6'; // default color
+        $section->color = CardColor::normalize($validated['color'] ?? null) ?? '#3b82f6';
 
         if ($request->hasFile('icon')) {
             $section->icon_path = MediaStorage::store($request->file('icon'), 'icons');
@@ -48,7 +49,7 @@ class SectionController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:180',
-            'color' => 'nullable|string|max:50',
+            'color' => ['nullable', new CardColor],
             'icon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp,svg', 'max:2048', new SafeIconFile],
         ]);
 
@@ -57,7 +58,7 @@ class SectionController extends Controller
             $section->description = $validated['description'] ?? null;
         }
         if (isset($validated['color'])) {
-            $section->color = $validated['color'];
+            $section->color = CardColor::normalize($validated['color']);
         }
 
         if ($request->hasFile('icon')) {

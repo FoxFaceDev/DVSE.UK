@@ -80,11 +80,7 @@
                         <p class="mt-1 text-xs text-gray-500">Shown below the sub-section name on learner cards. Maximum 180 characters.</p>
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Theme Color (Hex or RGB)</label>
-                        <div x-data="{ color: '{{ $subSection->color ?? $section->color ?? '#3b82f6' }}' }" class="flex items-center gap-3 w-full">
-                            <input type="color" x-model="color" class="h-10 w-10 p-1 border border-gray-300 rounded cursor-pointer flex-shrink-0 bg-white">
-                            <input type="text" name="color" x-model="color" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="e.g. #3b82f6 or rgb(59, 130, 246)">
-                        </div>
+                        <x-admin.color-field :value="old('color', $subSection->color ?? $section->color ?? '#3b82f6')" label="Theme Color" :required="false" />
                     </div>
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Icon Image</label>
@@ -134,11 +130,7 @@
                     <p class="mt-1 text-xs text-gray-500">Shown below the sub-section name on learner cards. Maximum 180 characters.</p>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Theme Color (Hex or RGB)</label>
-                    <div x-data="{ color: '{{ $section->color ?? '#3b82f6' }}' }" class="flex items-center gap-3 w-full">
-                        <input type="color" x-model="color" class="h-10 w-10 p-1 border border-gray-300 rounded cursor-pointer flex-shrink-0 bg-white">
-                        <input type="text" name="color" x-model="color" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="e.g. #3b82f6 or rgb(59, 130, 246)">
-                    </div>
+                    <x-admin.color-field :value="old('color', $section->color ?? '#3b82f6')" label="Theme Color" :required="false" />
                 </div>
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Icon Image</label>

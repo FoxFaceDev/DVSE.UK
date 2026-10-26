@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Section;
 use App\Models\SubSection;
 use App\Rules\SafeIconFile;
+use App\Rules\CardColor;
 use App\Support\MediaStorage;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,7 @@ class SubSectionController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:180',
             'page_type' => 'nullable|in:hazard,standard',
-            'color' => 'nullable|string|max:50',
+            'color' => ['nullable', new CardColor],
             'icon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp,svg', 'max:2048', new SafeIconFile],
         ]);
 
@@ -26,7 +27,7 @@ class SubSectionController extends Controller
         $subSection->name = $validated['name'];
         $subSection->page_type = $validated['page_type'] ?? ($subSection->isHazardPerception() ? 'hazard' : null);
         $subSection->description = $validated['description'] ?? null;
-        $subSection->color = $validated['color'] ?? '#3b82f6';
+        $subSection->color = CardColor::normalize($validated['color'] ?? null) ?? '#3b82f6';
 
         if ($request->hasFile('icon')) {
             $subSection->icon_path = MediaStorage::store($request->file('icon'), 'icons');
@@ -53,7 +54,7 @@ class SubSectionController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:180',
             'page_type' => 'nullable|in:hazard,standard',
-            'color' => 'nullable|string|max:50',
+            'color' => ['nullable', new CardColor],
             'icon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp,svg', 'max:2048', new SafeIconFile],
         ]);
 
@@ -67,7 +68,7 @@ class SubSectionController extends Controller
             $subSection->description = $validated['description'] ?? null;
         }
         if (isset($validated['color'])) {
-            $subSection->color = $validated['color'];
+            $subSection->color = CardColor::normalize($validated['color']);
         }
 
         if ($request->hasFile('icon')) {

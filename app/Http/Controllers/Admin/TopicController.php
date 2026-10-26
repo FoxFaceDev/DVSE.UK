@@ -8,6 +8,7 @@ use App\Models\Section;
 use App\Models\SubSection;
 use App\Models\Topic;
 use App\Rules\SafeIconFile;
+use App\Rules\CardColor;
 use App\Support\MediaStorage;
 use App\Support\RevisionCatalog;
 use Illuminate\Http\Request;
@@ -154,12 +155,13 @@ class TopicController extends Controller
             'name_en' => ['required', 'string', 'max:255'],
             'name_ku' => ['nullable', 'string', 'max:255'],
             'content_type' => ['required', Rule::in([Topic::TYPE_QUESTIONS, Topic::TYPE_LEARNING_PAGES])],
-            'color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'color' => ['required', new CardColor],
             'icon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp,svg', 'max:2048', new SafeIconFile],
             'icon_preset' => ['nullable', Rule::in(array_keys(RevisionCatalog::icons()))],
             'remove_icon' => ['nullable', 'boolean'],
         ]);
         $validated = $validator->validate();
+        $validated['color'] = CardColor::normalize($validated['color']);
         unset($validated['icon'], $validated['remove_icon']);
         $parentModel = $validated['topicable_type'];
 

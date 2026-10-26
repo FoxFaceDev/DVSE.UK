@@ -5,6 +5,7 @@ import { handleBackNavigation } from './back-navigation';
 document.addEventListener('click', handleBackNavigation);
 
 import Alpine from 'alpinejs';
+import { cardColorField } from './admin-color-field';
 import {
     getCitiesOfState,
     getCountries,
@@ -178,5 +179,6 @@ window.registrationForm = (savedCountry = '', savedCity = '') => ({
     },
 });
 
+window.cardColorField = cardColorField;
 window.Alpine = Alpine;
 Alpine.start();

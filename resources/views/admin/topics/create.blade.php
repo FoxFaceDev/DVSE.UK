@@ -36,7 +36,7 @@
                 </div>
 
                 <div class="grid gap-4 sm:grid-cols-2">
-                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Card Color *</label><input type="color" name="color" value="{{ old('color', '#0452bc') }}" required class="h-11 w-full rounded-lg border border-gray-300 p-1"></div>
+                    <x-admin.color-field :value="old('color', '#0452bc')" />
                     <div><label class="block text-sm font-medium text-gray-700 mb-1">Card Icon</label><input type="file" name="icon" accept=".svg,image/svg+xml,image/jpeg,image/png,image/webp,image/gif" class="w-full text-sm text-gray-500"><p class="mt-1 text-xs text-gray-500">SVG, JPG, PNG, WebP or GIF; maximum 2 MB.</p></div>
                 </div>
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SiteSetting;
+use App\Rules\CardColor;
 use App\Support\HazardPage;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -39,8 +40,13 @@ class HazardPageController extends Controller
             'cards.*.destination' => ['required', $destinationRule],
             'cards.*.position' => ['required', 'integer', 'min:1', 'max:99'],
             'cards.*.active' => ['required', 'boolean'],
-            'cards.*.color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'cards.*.color' => ['required', new CardColor],
         ]);
+
+        foreach ($validated['cards'] as &$card) {
+            $card['color'] = CardColor::normalize($card['color']);
+        }
+        unset($card);
 
         SiteSetting::put('hazard_page', $validated);
 
