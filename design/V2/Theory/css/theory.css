@@ -165,13 +165,41 @@ body {
   border-color: rgba(240, 200, 90, .45);
 }
 .cards--admin-menu .card {
-  border-color: var(--admin-card-color, #1a5fe0);
-  box-shadow: inset 5px 0 0 var(--admin-card-color, #1a5fe0), 0 8px 20px rgba(50, 100, 190, .08), 0 1px 3px rgba(50, 100, 190, .05);
+  isolation: isolate;
+  overflow: hidden;
+  background: #fff;
+  border-color: transparent;
+  box-shadow: none;
 }
+.cards--admin-menu .card:hover {
+  box-shadow: none;
+}
+.card__wave {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  width: auto;
+  max-width: none;
+  height: 100%;
+  aspect-ratio: 420 / 100;
+  color: var(--admin-card-color, #1a5fe0);
+  pointer-events: none;
+}
+.card__wave-back { fill: currentColor; opacity: .1; }
+.card__wave-front { fill: currentColor; opacity: .1; }
 @supports (color: color-mix(in srgb, #fff, #000)) {
   .cards--admin-menu .card {
-    background: url("../img/theory/wave.svg") right bottom / auto 100% no-repeat, linear-gradient(100deg, #fff 0 58%, color-mix(in srgb, var(--admin-card-color, #1a5fe0) 14%, #fff));
-    border-color: color-mix(in srgb, var(--admin-card-color, #1a5fe0) 35%, #fff);
+    background: linear-gradient(100deg, #fff, color-mix(in srgb, var(--admin-card-color, #1a5fe0) 3%, #fff) 60%, color-mix(in srgb, var(--admin-card-color, #1a5fe0) 8%, #fff));
+    border-color: color-mix(in srgb, var(--admin-card-color, #1a5fe0) 20%, #fff);
+  }
+  .card__wave-back {
+    fill: color-mix(in srgb, var(--admin-card-color, #1a5fe0) 10%, #fff);
+    opacity: 1;
+  }
+  .card__wave-front {
+    fill: color-mix(in srgb, var(--admin-card-color, #1a5fe0) 20%, #fff);
+    opacity: 1;
   }
 }
 .card:active { transform: scale(.985); }

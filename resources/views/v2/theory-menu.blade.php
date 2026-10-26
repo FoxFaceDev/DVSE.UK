@@ -48,6 +48,7 @@
       @foreach($subSection->categories->reject(fn ($group) => $subSection->topics->contains('revision_group_id', $group->id)) as $category)
         <li>
           <a class="card {{ $loop->first ? 'card--gold' : '' }}" href="{{ route('frontend.category', $category) }}" style="--admin-card-color: {{ $subSection->color ?: $subSection->section->color ?: '#1a5fe0' }}">
+            @include('v2._theory-card-wave')
             <img class="card__icon" src="{{ asset('design-v2/Theory/img/theory/book.svg') }}" alt="" width="120" height="100">
             <span class="card__title">{{ $category->name_en }}</span>
             @if($category->name_ku)<span class="sr-only" lang="ku" dir="rtl">{{ $category->name_ku }}</span>@endif
@@ -80,6 +81,7 @@
         @endphp
         <li>
           <a class="card {{ $subSection->categories->isEmpty() && $loop->first ? 'card--gold' : '' }}" href="{{ $topicHref }}" style="--admin-card-color: {{ $topic->color ?: $subSection->color ?: $subSection->section->color ?: '#1a5fe0' }}">
+            @include('v2._theory-card-wave')
             <img class="card__icon" src="{{ $topic->icon_path ?: $fallbackIcon }}" alt="" width="120" height="100">
             <span class="card__title">{{ $topic->name_en }}</span>
             @if($topic->name_ku)<span class="sr-only" lang="ku" dir="rtl">{{ $topic->name_ku }}</span>@endif
