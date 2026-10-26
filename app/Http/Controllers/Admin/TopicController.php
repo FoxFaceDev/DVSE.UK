@@ -57,11 +57,15 @@ class TopicController extends Controller
         return redirect()->to($this->parentAdminUrl($category))->with('success', 'Category created successfully. You can add another category here.');
     }
 
-    public function edit(Topic $topic)
+    public function edit(Request $request, Topic $topic)
     {
+        $returnTo = $this->safeAdminReturnUrl(url()->previous(), $request)
+            ?? $this->parentAdminUrl($topic);
+
         return view('admin.topics.edit', [
             'topic' => $topic,
             'parentOptions' => $this->parentOptions(),
+            'returnTo' => $returnTo,
         ]);
     }
 
@@ -89,7 +93,10 @@ class TopicController extends Controller
         $topic->update($validated);
         RevisionCatalog::connectEntry($topic);
 
-        return redirect()->route('admin.topics.index')->with('success', 'Category updated successfully.');
+        $returnTo = $this->safeAdminReturnUrl($request->input('return_to'), $request)
+            ?? $this->parentAdminUrl($topic);
+
+        return redirect()->to($returnTo)->with('success', 'Category updated successfully.');
     }
 
     public function reorder(Request $request)
@@ -223,5 +230,36 @@ class TopicController extends Controller
             ]),
             default => route('admin.topics.index'),
         };
+    }
+
+    private function safeAdminReturnUrl(mixed $url, Request $request): ?string
+    {
+        if (! is_string($url) || $url === '' || strlen($url) > 2048) {
+            return null;
+        }
+
+        $parts = parse_url($url);
+        if ($parts === false || isset($parts['user']) || isset($parts['pass'])) {
+            return null;
+        }
+
+        if (isset($parts['host']) && strcasecmp($parts['host'], $request->getHost()) !== 0) {
+            return null;
+        }
+
+        if (isset($parts['scheme']) && ! in_array(strtolower($parts['scheme']), ['http', 'https'], true)) {
+            return null;
+        }
+
+        if (isset($parts['port']) && $parts['port'] !== $request->getPort()) {
+            return null;
+        }
+
+        $path = $parts['path'] ?? '';
+        if ($path !== '/admin' && ! str_starts_with($path, '/admin/')) {
+            return null;
+        }
+
+        return $url;
     }
 }

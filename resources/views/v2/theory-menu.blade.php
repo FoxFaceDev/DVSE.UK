@@ -41,6 +41,10 @@
 
   <main class="menu">
     <ul class="cards cards--admin-menu">
+      @php
+        $menuCardCount = 0;
+        $mockTestsRendered = false;
+      @endphp
       @foreach($subSection->categories->reject(fn ($group) => $subSection->topics->contains('revision_group_id', $group->id)) as $category)
         <li>
           <a class="card {{ $loop->first ? 'card--gold' : '' }}" href="{{ route('frontend.category', $category) }}" style="--admin-card-color: {{ $subSection->color ?: $subSection->section->color ?: '#1a5fe0' }}">
@@ -50,6 +54,13 @@
             <span class="sr-only">Category group · {{ $category->topics_count }} {{ Str::plural('category', $category->topics_count) }}</span>
           </a>
         </li>
+        @php $menuCardCount++; @endphp
+        @if($menuCardCount === 2)
+          @foreach($subSection->mockTests as $mockTest)
+            @include('v2._theory-mock-card', ['mockTest' => $mockTest])
+          @endforeach
+          @php $mockTestsRendered = true; @endphp
+        @endif
       @endforeach
 
       @foreach($subSection->topics as $topic)
@@ -74,17 +85,20 @@
             @if($topic->name_ku)<span class="sr-only" lang="ku" dir="rtl">{{ $topic->name_ku }}</span>@endif
           </a>
         </li>
+        @php $menuCardCount++; @endphp
+        @if($menuCardCount === 2 && !$mockTestsRendered)
+          @foreach($subSection->mockTests as $mockTest)
+            @include('v2._theory-mock-card', ['mockTest' => $mockTest])
+          @endforeach
+          @php $mockTestsRendered = true; @endphp
+        @endif
       @endforeach
 
-      @foreach($subSection->mockTests as $mockTest)
-        <li>
-          <a class="card" href="{{ $mockTest->type === 'hazard' ? route('theory.hazard_mock_info') : route('theory.dynamic_mock_info', $mockTest) }}">
-            <img class="card__icon" src="{{ asset('design-v2/Theory/img/theory/mock.svg') }}" alt="" width="120" height="100">
-            <span class="card__title">{{ $mockTest->name }}</span>
-            <span class="sr-only">{{ $mockTest->type === 'hazard' ? 'Hazard perception' : 'English-only theory test' }} · {{ $mockTest->description ?: $mockTest->question_count.' questions · '.$mockTest->duration_minutes.' minutes' }}</span>
-          </a>
-        </li>
-      @endforeach
+      @if(!$mockTestsRendered)
+        @foreach($subSection->mockTests as $mockTest)
+          @include('v2._theory-mock-card', ['mockTest' => $mockTest])
+        @endforeach
+      @endif
 
       @if($subSection->categories->isEmpty() && $subSection->topics->isEmpty() && $subSection->mockTests->isEmpty())
         <li class="v2-empty">No items are available in this section yet.</li>

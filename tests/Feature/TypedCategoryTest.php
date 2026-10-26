@@ -92,3 +92,33 @@ test('revision displays empty question categories immediately in their admin ord
         ->assertSeeInOrder(['Video Clips', 'Rule of the Road'])
         ->assertSee('data-topic="'.$empty->id.'" data-total="0"', false);
 });
+
+test('editing a category returns the admin to the page they came from', function () {
+    $admin = Admin::create([
+        'name' => 'Returning Admin',
+        'email' => 'returning-admin@example.com',
+        'password' => bcrypt('password'),
+    ]);
+    $section = Section::create(['name' => 'Theory Test']);
+    $category = $section->topics()->create([
+        'name_en' => 'Original category',
+        'content_type' => Topic::TYPE_QUESTIONS,
+        'color' => '#1664f5',
+    ]);
+    $previousPage = route('admin.sections.show', $section);
+
+    $this->actingAs($admin, 'admin')
+        ->from($previousPage)
+        ->get(route('admin.topics.edit', $category))
+        ->assertOk()
+        ->assertSee('name="return_to" value="'.$previousPage.'"', false);
+
+    $this->actingAs($admin, 'admin')->put(route('admin.topics.update', $category), [
+        'topicable_type' => Section::class,
+        'topicable_id' => $section->id,
+        'name_en' => 'Updated category',
+        'content_type' => Topic::TYPE_QUESTIONS,
+        'color' => '#e11d48',
+        'return_to' => $previousPage,
+    ])->assertRedirect($previousPage)->assertSessionHasNoErrors();
+});

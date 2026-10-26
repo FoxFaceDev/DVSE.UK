@@ -164,6 +164,16 @@ body {
   background: url("../img/theory/wave-gold.svg") right bottom / auto 100% no-repeat, linear-gradient(100deg, #fff, #fffbee 60%, #fff3d2);
   border-color: rgba(240, 200, 90, .45);
 }
+.cards--admin-menu .card {
+  border-color: var(--admin-card-color, #1a5fe0);
+  box-shadow: inset 5px 0 0 var(--admin-card-color, #1a5fe0), 0 8px 20px rgba(50, 100, 190, .08), 0 1px 3px rgba(50, 100, 190, .05);
+}
+@supports (color: color-mix(in srgb, #fff, #000)) {
+  .cards--admin-menu .card {
+    background: url("../img/theory/wave.svg") right bottom / auto 100% no-repeat, linear-gradient(100deg, #fff 0 58%, color-mix(in srgb, var(--admin-card-color, #1a5fe0) 14%, #fff));
+    border-color: color-mix(in srgb, var(--admin-card-color, #1a5fe0) 35%, #fff);
+  }
+}
 .card:active { transform: scale(.985); }
 .card__icon { flex: 0 0 auto; width: auto; height: var(--th); aspect-ratio: 120 / 100; }
 .card__title {

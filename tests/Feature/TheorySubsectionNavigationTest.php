@@ -59,14 +59,16 @@ test('theory test uses the supplied two page designs with admin managed cards', 
         ->assertSee('Road Rules')
         ->assertSee('Safety Margins')
         ->assertSee('Admin Mock Test')
+        ->assertSeeInOrder(['Road Rules', 'Safety Margins', 'Admin Mock Test'])
         ->assertSee(route('frontend.category', $category), false)
         ->assertSee(route('theory.practice', $topic), false)
         ->assertSee(route('theory.dynamic_mock_info', $mockTest), false);
 
-    $topic->update(['name_en' => 'Updated Safety']);
+    $topic->update(['name_en' => 'Updated Safety', 'color' => '#e11d48']);
     $this->get(route('frontend.sub_section', $subSection))
         ->assertOk()
         ->assertSee('Updated Safety')
+        ->assertSee('--admin-card-color: #e11d48', false)
         ->assertDontSee('Safety Margins');
 });
 

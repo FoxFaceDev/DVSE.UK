@@ -10,6 +10,7 @@
         <form action="{{ route('admin.topics.update', $topic) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
+            <input type="hidden" name="return_to" value="{{ old('return_to', $returnTo) }}">
             
             <div class="space-y-4">
                 @include('admin.topics._parent_fields', [
@@ -45,7 +46,7 @@
                 @include('admin.topics._icon_picker', ['topic' => $topic])
 
                 <div class="pt-4 flex justify-end gap-3">
-                    <a href="{{ route('admin.topics.index') }}" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">Cancel</a>
+                    <a href="{{ $returnTo }}" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">Cancel</a>
                     <button type="submit" class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors">Save Changes</button>
                 </div>
             </div>
