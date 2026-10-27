@@ -295,12 +295,6 @@ window.v2Exam = (config) => ({
         if (config.auto && this.index < this.questions.length - 1)
             this.autoTimer = setTimeout(() => this.next(), 350);
     },
-    previous() {
-        if (this.submitting) return;
-        if (this.autoTimer) clearTimeout(this.autoTimer);
-        if (this.index > 0) this.index--;
-        this.changed();
-    },
     next() {
         if (this.submitting) return;
         if (this.autoTimer) clearTimeout(this.autoTimer);

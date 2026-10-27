@@ -42,7 +42,7 @@
       <div class="appbar__inner">
         <span class="appbar__art" aria-hidden="true"></span>
         <div class="appbar__row">
-        <a class="back" data-back href="{{ route('v2.mock') }}" aria-label="Back">
+        <a class="back" href="{{ route('home') }}" aria-label="Back to home">
           <svg class="back__icon" aria-hidden="true"><use href="#i-back"/></svg>
         </a>
         <h1 class="appbar__title">Mock Test Results</h1>
