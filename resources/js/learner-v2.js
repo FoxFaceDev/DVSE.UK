@@ -269,7 +269,6 @@ window.v2Exam = (config) => ({
     submitting: false,
     error: "",
     exitOpen: false,
-    back: config.back,
     init() {
         if (!this.questions.length) return;
         this.end = Date.now() + config.duration * 60000;

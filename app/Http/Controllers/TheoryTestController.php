@@ -163,12 +163,14 @@ class TheoryTestController extends Controller
     public function mockTestStart(SubSection $subSection)
     {
         $videoQuestions = Question::with('choices')
+            ->has('choices', '=', 4)
             ->where('media_type', 'video')
             ->inRandomOrder()
             ->limit(3)
             ->get();
 
         $nonVideoQuestions = Question::with('choices')
+            ->has('choices', '=', 4)
             ->where(function ($query) {
                 $query->whereNull('media_type')
                     ->orWhere('media_type', '!=', 'video');
@@ -203,7 +205,7 @@ class TheoryTestController extends Controller
     {
         abort_unless($mockTest->is_active && $mockTest->type === 'theory', 404);
         $topicIds = $mockTest->topics()->pluck('topics.id');
-        $base = Question::with('choices')->when($topicIds->isNotEmpty(), fn ($q) => $q->whereIn('topic_id', $topicIds));
+        $base = Question::with('choices')->has('choices', '=', 4)->when($topicIds->isNotEmpty(), fn ($q) => $q->whereIn('topic_id', $topicIds));
         $videoQuestions = (clone $base)->where('media_type', 'video')->inRandomOrder()->limit($mockTest->video_question_count)->get();
         $nonVideoQuestions = (clone $base)->where(fn ($q) => $q->whereNull('media_type')->orWhere('media_type', '!=', 'video'))->inRandomOrder()->limit(max(0, $mockTest->question_count - $videoQuestions->count()))->get();
         $questions = $nonVideoQuestions->concat($videoQuestions)->values();
