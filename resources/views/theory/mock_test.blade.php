@@ -23,6 +23,7 @@
     <symbol id="i-back" viewBox="0 0 24 24"><path d="M20 12H5M11.5 5.5 5 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-audio" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9.3h3.6L11.4 5c.7-.6 1.6-.1 1.6.8v12.4c0 .9-.9 1.4-1.6.8l-4.8-4.3H3a1 1 0 0 1-1-1v-3.4a1 1 0 0 1 1-1z"/><path d="M16 8.8a4.6 4.6 0 0 1 0 6.4M18.9 6a8.6 8.6 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
     <symbol id="i-clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 6.8V12h4.2"/></g></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M14.5 5 7.5 12l7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-next" viewBox="0 0 24 24"><path d="m9.5 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-flag" viewBox="0 0 24 24"><path d="M6 21V4M6 5h11.5l-3 4.2 3 4.3H6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   </svg>
@@ -54,6 +55,10 @@
   <!-- ===== Fixed footer: Flag · Next ===== -->
   <footer class="dock">
     <nav class="actions" aria-label="Question actions">
+      <a class="act" href="#previous" @click.prevent="previous()" :aria-disabled="index === 0">
+        <span class="act__btn"><svg class="act__icon" aria-hidden="true"><use href="#i-prev"/></svg></span>
+        <span class="act__label">Previous</span>
+      </a>
       <label class="act">
         <input class="act__toggle" type="checkbox" name="flag" aria-label="Flag this question" :checked="isFlagged" @change="toggleFlag()">
         <span class="act__btn"><svg class="act__icon" aria-hidden="true"><use href="#i-flag"/></svg></span>

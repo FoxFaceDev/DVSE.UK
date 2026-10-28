@@ -305,6 +305,12 @@ window.v2Exam = (config) => ({
         this.index++;
         this.changed();
     },
+    previous() {
+        if (this.submitting || this.index === 0) return;
+        if (this.autoTimer) clearTimeout(this.autoTimer);
+        this.index--;
+        this.changed();
+    },
     changed() {
         window.scrollTo(0, 0);
         if ("speechSynthesis" in window) speechSynthesis.cancel();
