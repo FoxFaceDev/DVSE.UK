@@ -1,10 +1,4 @@
-/* Keep administrator-edited labels readable within the supplied menu design. */
+/* Keep administrator-edited labels readable without changing the supplied layout. */
 .menu__label { overflow-wrap: anywhere; }
 .appbar__title { overflow-wrap: anywhere; }
 .menu .v2-empty { grid-column: 1 / -1; }
-@media (max-width: 899px) {
-  .menu__item { height: auto; min-height: calc(124 * var(--r)); padding-block: calc(10 * var(--r)); }
-}
-@media (min-width: 900px) {
-  .menu__item { height: auto; min-height: calc(110 * var(--d)); padding-block: calc(10 * var(--d)); }
-}

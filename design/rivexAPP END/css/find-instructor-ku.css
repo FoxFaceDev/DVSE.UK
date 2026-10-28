@@ -1,0 +1,30 @@
+/* Kurdish (Sorani) banner text for Find_a_Driving_Instructor_ku.html — loaded after find-instructor.css.
+   Only the banner title and button label change; everything else is the English page as-is. */
+@font-face {
+  font-family: "Rabar";
+  src: url("../fonts/rabar-021.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+.promo__body:lang(ckb) .promo__title,
+.promo__body:lang(ckb) .promo__cta { font-family: "Rabar", "Segoe UI", Tahoma, sans-serif; font-weight: 400; letter-spacing: 0; }
+.promo__body[dir="rtl"] .promo__cta { direction: rtl; }          /* label on the right, arrow circle on the left */
+.promo__body[dir="rtl"] .promo__go svg { transform: scaleX(-1); } /* arrow points left, the reading direction */
+
+/* phones: pin moves to the right edge, the Kurdish title starts right after it */
+@media (max-width: 899px) {
+  .promo__pin { left: auto; right: calc(20 * var(--rx)); }
+  .promo__body[dir="rtl"] { margin-left: calc(7 * var(--rx) + 255 * var(--r)); padding-right: calc(20 * var(--rx) + 56 * var(--r)); }
+  .promo__body[dir="rtl"] .promo__cta { padding-left: calc(9 * var(--r)); padding-right: calc(22 * var(--r)); }
+  .promo__body[dir="rtl"] .promo__cta > span:first-child { top: 0; }   /* mirrored: equal space on both sides of the label */
+}
+
+/* desktop: same mirrored pin and button as on phones */
+@media (min-width: 900px) {
+  .promo__pin { left: auto; right: auto; left: calc(864 * var(--d)); }
+  .promo__body[dir="rtl"] { width: calc(456 * var(--d)); margin-left: calc(396 * var(--d)); padding-right: 0; }
+  .promo__body[dir="rtl"] .promo__cta { padding-left: calc(10 * var(--d)); padding-right: calc(26 * var(--d)); }
+  .promo__body[dir="rtl"] .promo__cta > span:first-child { top: 0; }
+}
+.promo__body[dir="rtl"] .promo__title { margin-left: auto; }   /* the Kurdish title hugs the pin on the right */

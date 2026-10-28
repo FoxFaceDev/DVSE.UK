@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 853 908" preserveAspectRatio="none">
+  <!-- desktop banner background (decoration only) -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6effd"/><stop offset="1" stop-color="#f3f7ff"/></linearGradient>
+    <linearGradient id="blob" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6aa6ff"/><stop offset=".5" stop-color="#2f78f0"/><stop offset="1" stop-color="#1557e0"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f7c22a"/><stop offset="1" stop-color="#ffd34d"/></linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1a5fe3"/><stop offset="1" stop-color="#3b86f5"/></linearGradient>
+  </defs>
+  <rect width="853" height="908" fill="url(#sky)"/>
+  <path d="M853 330c-80 10-170 50-210 130-40 80-40 170-120 230-60 46-150 60-230 70h560z" fill="url(#blob)" opacity=".92"/>
+  <path d="M0 760c120-40 260-50 420-20 140 26 290 20 433-30v60c-140 50-290 60-440 36-150-24-280-16-413 20z" fill="url(#gold)"/>
+  <path d="M0 830c110-34 240-36 380-10 160 30 300 20 473-20v108H0z" fill="url(#sea)"/>
+</svg>

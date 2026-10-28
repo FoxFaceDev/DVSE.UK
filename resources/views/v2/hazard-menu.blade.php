@@ -11,8 +11,8 @@
   <link rel="icon" href="{{ asset('design-v2/Find_a_Driving_Instructor/img/logo.png') }}" type="image/png">
   <link rel="preload" href="{{ asset('design-v2/Find_a_Driving_Instructor/fonts/inter-tight-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="{{ asset('design-v2/Find_a_Driving_Instructor/fonts/plus-jakarta-sans-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="{{ asset('design-v2/Find_a_Driving_Instructor/css/find-instructor.css') }}">
-  @if($bannerLanguage === 'ku')<link rel="stylesheet" href="{{ asset('design-v2/Find_a_Driving_Instructor/css/find-instructor-ku.css') }}">@endif
+  <link rel="stylesheet" href="{{ asset('design-v2/Find_a_Driving_Instructor/css/find-instructor.css') }}?v=20261049">
+  @if($bannerLanguage === 'ku')<link rel="stylesheet" href="{{ asset('design-v2/Find_a_Driving_Instructor/css/find-instructor-ku.css') }}?v=7">@endif
   <meta name="csrf-token" content="{{ csrf_token() }}">
   @vite('resources/js/app.js')
   <link rel="stylesheet" href="{{ asset('design-v2/ui.css') }}">

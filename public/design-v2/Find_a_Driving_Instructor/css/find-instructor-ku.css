@@ -14,8 +14,8 @@
 
 /* phones: pin moves to the right edge, the Kurdish title starts right after it */
 @media (max-width: 899px) {
-  .promo__pin { left: auto; right: calc(20 * var(--r)); }
-  .promo__body[dir="rtl"] { margin-left: calc(262 * var(--r)); padding-right: calc(76 * var(--r)); }
+  .promo__pin { left: auto; right: calc(20 * var(--rx)); }
+  .promo__body[dir="rtl"] { margin-left: calc(7 * var(--rx) + 255 * var(--r)); padding-right: calc(20 * var(--rx) + 56 * var(--r)); }
   .promo__body[dir="rtl"] .promo__cta { padding-left: calc(9 * var(--r)); padding-right: calc(22 * var(--r)); }
   .promo__body[dir="rtl"] .promo__cta > span:first-child { top: 0; }   /* mirrored: equal space on both sides of the label */
 }
@@ -27,3 +27,4 @@
   .promo__body[dir="rtl"] .promo__cta { padding-left: calc(10 * var(--d)); padding-right: calc(26 * var(--d)); }
   .promo__body[dir="rtl"] .promo__cta > span:first-child { top: 0; }
 }
+.promo__body[dir="rtl"] .promo__title { margin-left: auto; }   /* the Kurdish title hugs the pin on the right */
